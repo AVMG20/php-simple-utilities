@@ -14,10 +14,6 @@ use ReflectionParameter;
  *
  * This class provides a base implementation for Data Transfer Objects (DTOs).
  * It includes a static factory method for creating new instances from an array of attributes,
- *
- *
- * @version 1.1.0
- * @author Arno
  */
 abstract class Data implements JsonSerializable
 {

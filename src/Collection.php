@@ -16,9 +16,6 @@ use UnexpectedValueException;
  * @template TKey of array-key
  * @template TValue
  * @implements ArrayAccess<TKey, TValue>
- *
- * @version 1.1.0
- * @author Arno
  */
 class Collection implements ArrayAccess
 {
