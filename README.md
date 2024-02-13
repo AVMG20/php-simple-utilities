@@ -25,9 +25,9 @@ To contribute or run tests, you'll need PHPUnit. The library already includes PH
 
 Run tests with:
 
-bashCopy code
-
-`composer test`
+```bash
+composer test
+```
 
 ### Documentation
 
