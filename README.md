@@ -5,7 +5,7 @@ This package, `avmg/php-simple-utilities`, provides a set of simple utility clas
 ### Features
 
 - **Collection Class**: Offers a fluent interface for array manipulation, providing methods for filtering, mapping, reducing, and more, all while maintaining type safety.
-- **Data Class**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
+- **[Data Class](docs/Data.md)**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
 
 ### Usage
 
@@ -32,11 +32,6 @@ Run tests with:
 ```bash
 composer test
 ```
-
-### Documentation
-
-- **[Data Class](docs/Data.md)**: Check out the documentation in `docs/Data.md` for details on how to use the Abstract Data class.
-- **Collection Class**: Documentation will be available soon.
 
 ### License
 
