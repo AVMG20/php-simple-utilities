@@ -2,9 +2,8 @@
     "name": "avmg/php-simple-utilities",
     "description": "Various simple Utilities classes like Collections and DTO's with Type safety in mind",
     "type": "library",
-    "version": "1.0.0",
     "require-dev": {
-        "phpunit/phpunit": "^11.0"
+        "phpunit/phpunit": "^10.5"
     },
     "license": "MIT",
     "autoload": {
