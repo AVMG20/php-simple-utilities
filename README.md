@@ -6,7 +6,7 @@ This package, `avmg/php-simple-utilities`, provides a set of simple utility clas
 
 - **Collection Class**: Offers a fluent interface for array manipulation, providing methods for filtering, mapping, reducing, and more, all while maintaining type safety.
 - **Data Class**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
-- 
+
 ### Usage
 
 You can use these utilities individually by copying the classes into your project or by importing the package through Composer. This package is aimed at developers looking for simple, type-safe utilities to enhance their PHP applications.
