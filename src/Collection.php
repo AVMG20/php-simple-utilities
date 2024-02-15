@@ -112,6 +112,34 @@ class Collection implements ArrayAccess
     }
 
     /**
+     * Retrieves the last item in the collection that passes a given truth test.
+     * If no callback is provided, returns the last item in the collection.
+     * Returns null if the collection is empty or no item passes the truth test.
+     *
+     * @param callable|null $callback The callback function to apply as a truth test.
+     *                                It should accept the item value and its key as arguments.
+     * @return TValue Returns the last item that passes the truth test, or the last item if no callback is provided,
+     *               or null if the collection is empty or no item passes the test.
+     */
+    public function last(?callable $callback = null): mixed
+    {
+        if ($callback === null) {
+            return count($this->items) > 0 ? end($this->items) : null;
+        }
+
+        $filteredItems = array_reverse($this->items, true);
+
+        foreach ($filteredItems as $key => $item) {
+            if ($callback($item, $key)) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
+
+    /**
      * Creates a new collection with a specified number of items from the start or end of the current collection.
      * If the number is positive, it takes from the start. If negative, it takes from the end.
      *

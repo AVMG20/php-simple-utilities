@@ -57,6 +57,27 @@ class CollectionTest extends TestCase
         $this->assertEquals(2, $first);
     }
 
+    public function testFirstWithoutCallback()
+    {
+        $collection = new Collection(['a', 'b', 'c']);
+        $this->assertEquals('a', $collection->first());
+    }
+
+    public function testLastWithCallback()
+    {
+        $collection = new Collection([1, 2, 3, 4]);
+        $lastEven = $collection->last(function ($item) {
+            return $item % 2 === 0;
+        });
+        $this->assertEquals(4, $lastEven);
+    }
+
+    public function testLastWithoutCallback()
+    {
+        $collection = new Collection(['a', 'b', 'c']);
+        $this->assertEquals('c', $collection->last());
+    }
+
     public function testPluckMethod()
     {
         $collection = Collection::collect([
