@@ -4,13 +4,20 @@ This package, `avmg/php-simple-utilities`, provides a set of simple utility clas
 
 ### Features
 
+This package includes the following utilities:
+
 - **[Collection Class](docs/Collection.md)**: Offers a fluent interface for array manipulation, providing methods for filtering, mapping, reducing, and more, all while maintaining type safety.
 - **[Data Class](docs/Data.md)**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
 - **[EventDispatcher Class](docs/EventDispatcher.md)**: A simple, yet powerful way to manage and dispatch events throughout your PHP application.
 
+### Dependencies
+
+This package has **no dependenci*e*s**. It is designed to be lightweight, self-contained, fast and easy to integrate into any PHP project.
+
 ### Usage
 
-You can use these utilities individually by copying the classes into your project or by importing the package through Composer. This package is aimed at developers looking for simple, type-safe utilities to enhance their PHP applications.
+All classes are single file based and self-contained, so you can easily copy them into your project if you prefer not to require another Composer package. <br />
+This package is aimed at developers looking for simple, type-safe utilities to enhance their PHP applications and workflows.
 
 ### Installation
 
