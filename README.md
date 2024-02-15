@@ -6,6 +6,7 @@ This package, `avmg/php-simple-utilities`, provides a set of simple utility clas
 
 - **[Collection Class](docs/Collection.md)**: Offers a fluent interface for array manipulation, providing methods for filtering, mapping, reducing, and more, all while maintaining type safety.
 - **[Data Class](docs/Data.md)**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
+- **[EventDispatcher Class](docs/EventDispatcher.md)**: A simple, yet powerful way to manage and dispatch events throughout your PHP application.
 
 ### Usage
 
