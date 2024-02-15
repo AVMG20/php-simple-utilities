@@ -2,8 +2,10 @@
 
 namespace Avmg\PhpSimpleUtilities\Unit;
 
+use ArrayObject;
 use PHPUnit\Framework\TestCase;
 use Avmg\PhpSimpleUtilities\Collection;
+use stdClass;
 use TypeError;
 use UnexpectedValueException;
 
@@ -130,6 +132,49 @@ class CollectionTest extends TestCase
         $this->assertEquals(['name' => 'John', 'age' => 30], $array);
     }
 
+    public function testToArrayWithSimpleArray()
+    {
+        $collection = new Collection(['a', 'b', 'c']);
+        $this->assertEquals(['a', 'b', 'c'], $collection->toArray());
+    }
+
+    public function testToArrayWithNestedCollections()
+    {
+        $nestedCollection = new Collection(['nested' => new Collection(['a', 'b'])]);
+        $expected = ['nested' => ['a', 'b']];
+        $this->assertEquals($expected, $nestedCollection->toArray());
+    }
+
+    public function testToArrayWithStdClass()
+    {
+        $object = new stdClass();
+        $object->a = 'value';
+        $collection = new Collection(['object' => $object]);
+        $expected = ['object' => ['a' => 'value']];
+        $this->assertEquals($expected, $collection->toArray());
+    }
+
+    public function testToArrayWithIterableObject()
+    {
+        $object = new ArrayObject(['a', 'b', 'c']);
+        $collection = new Collection(['iterable' => $object]);
+        $expected = ['iterable' => ['a', 'b', 'c']];
+        $this->assertEquals($expected, $collection->toArray());
+    }
+
+    public function testToArrayWithObjectHavingToArrayMethod()
+    {
+        $object = new class {
+            public function toArray()
+            {
+                return ['property' => 'value'];
+            }
+        };
+        $collection = new Collection(['object' => $object]);
+        $expected = ['object' => ['property' => 'value']];
+        $this->assertEquals($expected, $collection->toArray());
+    }
+
     public function testToJsonEncodesCollectionToJson()
     {
         $collection = Collection::collect(['name' => 'John', 'age' => 30]);
@@ -222,15 +267,6 @@ class CollectionTest extends TestCase
         $pluckedNames = $collection->pluck('product.name');
 
         $this->assertEquals(['Desk', 'Chair'], array_values($pluckedNames->all()));
-    }
-
-    public function testToArrayWithNestedCollections()
-    {
-        $nestedCollection = Collection::collect(['nested' => Collection::collect(['key' => 'value'])]);
-        $array = $nestedCollection->toArray();
-
-        $this->assertIsArray($array);
-        $this->assertEquals(['nested' => ['key' => 'value']], $array);
     }
 
     public function testToJsonEncodesWithCustomOptions()

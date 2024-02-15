@@ -5,6 +5,9 @@ namespace Avmg\PhpSimpleUtilities;
 
 use ArrayAccess;
 use Closure;
+use Iterator;
+use IteratorAggregate;
+use stdClass;
 use UnexpectedValueException;
 
 /**
@@ -438,17 +441,30 @@ class Collection implements ArrayAccess
      */
     public function toArray(): array
     {
-        return array_map(function ($value) {
-            if ($value instanceof Collection) {
-                return $value->toArray();
-            }
+        return $this->recursiveToArray($this->items);
+    }
 
-            if (is_object($value) && method_exists($value, 'toArray')) {
-                return $value->toArray();
-            }
+    /**
+     * Recursively convert items to an array.
+     *
+     * @param mixed $value The item to be converted.
+     * @return mixed The converted item.
+     */
+    protected function recursiveToArray($value)
+    {
+        if (is_array($value)) {
+            return array_map([$this, 'recursiveToArray'], $value);
+        } elseif ($value instanceof Collection) {
+            return $this->recursiveToArray($value->all());
+        } elseif ($value instanceof ArrayAccess || $value instanceof Iterator || $value instanceof IteratorAggregate) {
+            return $this->recursiveToArray(iterator_to_array($value));
+        } elseif ($value instanceof stdClass) {
+            return $this->recursiveToArray((array) $value);
+        } elseif (is_object($value) && method_exists($value, 'toArray')) {
+            return $this->recursiveToArray($value->toArray());
+        }
 
-            return $value;
-        }, $this->items);
+        return $value;
     }
 
     /**
