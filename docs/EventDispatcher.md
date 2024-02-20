@@ -1,4 +1,3 @@
-
 # EventDispatcher Documentation
 
 The `EventDispatcher` class provides a simple, yet powerful way to manage and dispatch events throughout your PHP application. It uses a singleton pattern to ensure that only one instance of the dispatcher exists, allowing for global access and event management.
