@@ -33,7 +33,7 @@ This document provides examples for each method in the `Collection` class, illus
 - [toJson()](#toJson) convert the collection into a JSON string.
 
 ## Creating Collections
-### Constructor
+### Constructor()
 
 Instantiates a new Collection object with an array of items.
 
@@ -57,7 +57,7 @@ $collection = Collection::collect(['car', 'bike', 'plane']);
 
 
 ## Working with Items
-### Each
+### Each()
 
 Iterates over each item in the collection, applying a callback function. If the callback returns `false`, iteration stops.
 
@@ -72,7 +72,7 @@ $collection->each(function ($item, $key) {
 ```
 
 
-### Count
+### Count()
 
 Returns the total number of items in the collection.
 
@@ -84,7 +84,7 @@ echo $collection->count();
 ```
 
 
-### Push
+### Push()
 
 Adds an item to the end of the collection. This is useful for appending new items.
 
@@ -96,7 +96,7 @@ $collection->push('orange');
 ```
 
 
-### First
+### First()
 
 Retrieves the first item in the collection that passes a given truth test. If no callback is provided, the first item is returned. A default value can be specified if no item passes the test.
 
@@ -115,7 +115,7 @@ $firstLongName = $collection->first(function ($item) {
 ```
 
 
-### Last
+### Last()
 
 Retrieves the last item in the collection that passes a given truth test. If no callback is provided, the last item is returned. A default value can also be provided.
 
@@ -133,7 +133,7 @@ $lastShortName = $collection->last(function ($item) {
 // $lastShortName is 'apple', because it's the last item with less than 6 characters
 ```
 
-### Take
+### Take()
 
 Creates a new collection with a specified number of items from the start or the end, based on the sign of the provided number.
 
@@ -150,7 +150,7 @@ $newCollection = $collection->take(-2);
 ```
 
 
-### Get
+### Get()
 
 Retrieves the item at a given key. If the key does not exist, a default value is returned.
 
@@ -167,7 +167,7 @@ $height = $collection->get('height', 175);
 ```
 
 
-### Put
+### Put()
 
 Sets an item at a given key. If the key already exists, the value is replaced.
 
@@ -179,7 +179,7 @@ $collection->put('age', 31);
 ```
 
 
-### Sum
+### Sum()
 
 Calculates the sum of the given values. If a callback is provided, it will be used to determine the values to sum.
 
@@ -198,7 +198,7 @@ $total = $collection->sum(function ($item) {
 ```
 
 
-### Reduce
+### Reduce()
 
 Reduces the collection to a single value, using a callback function.
 
@@ -213,7 +213,7 @@ $result = $collection->reduce(function ($carry, $item) {
 ```
 
 
-### Map
+### Map()
 
 Applies a callback to each item in the collection and returns a new collection of the results.
 
@@ -227,7 +227,7 @@ $multiplied = $collection->map(function ($item) {
 ```
 
 
-### Dot
+### Dot()
 
 Flattens a multi-dimensional collection into a single level, using 'dot' notation for nested keys.
 
@@ -239,7 +239,7 @@ $flattened = $collection->dot();
 ```
 
 
-### Pipe
+### Pipe()
 
 Passes the collection to a given closure, allowing for transformation or inspection without modifying the original collection.
 
@@ -253,7 +253,7 @@ $result = $collection->pipe(function ($collection) {
 ```
 
 
-### PipeThrough
+### PipeThrough()
 
 Passes the collection through an array of callbacks, transforming it sequentially.
 
@@ -274,7 +274,7 @@ $result = $collection->pipeThrough([
 ```
 
 
-### Tap
+### Tap()
 
 Applies a callback to the collection for inspection or logging without affecting the original collection.
 
@@ -288,7 +288,7 @@ $collection->tap(function ($collection) {
 ```
 
 
-### All
+### All()
 
 Retrieves all items in the collection as a PHP array.
 
@@ -300,7 +300,7 @@ $items = $collection->all();
 ```
 
 
-### Filter
+### Filter()
 
 Filters the collection using a callback function, returning a new collection with only the items that pass the truth test.
 
@@ -314,7 +314,7 @@ $filtered = $collection->filter(function ($item) {
 ```
 
 
-### Transform
+### Transform()
 
 Transforms each item in the collection using a callback. Unlike `map`, `transform` modifies the collection itself.
 
@@ -328,7 +328,7 @@ $collection->transform(function ($item) {
 ```
 
 
-### Chunk
+### Chunk()
 
 Splits the collection into chunks of the given size.
 
@@ -340,7 +340,7 @@ $chunks = $collection->chunk(2);
 ```
 
 
-### Pluck
+### Pluck()
 
 Extracts a list of values from a collection based on a given key or value pair.
 
@@ -355,7 +355,7 @@ $names = $collection->pluck('name');
 ```
 
 
-### Reject
+### Reject()
 
 Filters the collection by removing items that pass the given truth test.
 
@@ -369,7 +369,7 @@ $rejected = $collection->reject(function ($item) {
 ```
 
 
-### Merge
+### Merge()
 
 Merges another array or collection with the original collection.
 
@@ -381,7 +381,7 @@ $merged = $collection->merge(['cherry', 'date']);
 ```
 
 
-### Ensure
+### Ensure()
 
 Ensures that all elements in the collection match a given type or list of types.
 
@@ -395,7 +395,7 @@ $collection->ensure([Custom::class, AnotherCustom::class]);
 ```
 
 
-### ToArray
+### ToArray()
 
 Converts the collection to a plain PHP array, including all nested objects that can be cast to arrays.
 
@@ -407,7 +407,7 @@ $array = $collection->toArray();
 ```
 
 
-### ToJson
+### ToJson()
 
 Converts the collection into a JSON string.
 
