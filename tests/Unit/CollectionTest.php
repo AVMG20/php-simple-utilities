@@ -395,32 +395,44 @@ class CollectionTest extends TestCase
         $this->assertEquals(9, $result); // (1+1) + (2+1) + (3+1) = 9
     }
 
-
-    public function testPutWithMultipleMethods()
+    public function testPutAddsNewItem()
     {
         $collection = new Collection();
-
-        // Test putting a new item
         $collection->put('key1', 'value1');
         $this->assertEquals('value1', $collection->get('key1'), 'The value1 should be put at key1');
+    }
 
-        // Test updating an existing item
+    public function testPutUpdatesExistingItem()
+    {
+        $collection = new Collection(['key1' => 'value1']);
         $collection->put('key1', 'value2');
         $this->assertEquals('value2', $collection->get('key1'), 'The value at key1 should be updated to value2');
+    }
 
-        // Test numeric key
+    public function testPutWithNumericKey()
+    {
+        $collection = new Collection();
         $collection->put(0, 'numericKey');
         $this->assertEquals('numericKey', $collection->get(0), 'The value should be put at numeric key 0');
-
-        // Test null key (should append)
-        $collection->put(null, 'appendedValue');
-
-        $endValue = $collection->last(); // Get the last value in the collection
-        $this->assertEquals('appendedValue', $endValue, 'The value should be appended to the collection');
-
-        // Ensure the collection size is correct after all operations
-        $this->assertCount(3, $collection, 'The collection should contain exactly 3 items');
     }
+
+    public function testPutAppendsWithNullKey()
+    {
+        $collection = new Collection(['key1' => 'value1', 'key2' => 'value2']);
+        $collection->put(null, 'appendedValue');
+        $endValue = $collection->last(); // Assuming last() method correctly retrieves the last item
+        $this->assertEquals('appendedValue', $endValue, 'The value should be appended to the collection');
+    }
+
+    public function testPutEnsuresCorrectCollectionSize()
+    {
+        $collection = new Collection(['key1' => 'value1']);
+        $collection->put('key2', 'value2');
+        $collection->put(0, 'numericKey');
+        $collection->put(null, 'appendedValue');
+        $this->assertCount(4, $collection, 'The collection should contain exactly 4 items after all operations');
+    }
+
 
     public function testFirstWithNoCallback()
     {
@@ -450,20 +462,41 @@ class CollectionTest extends TestCase
         $this->assertEquals(3, $collection->last());
     }
 
-    public function testLastWithCallback()
-    {
-        $collection = new Collection([1, 2, 3, 4]);
-        $lastEven = $collection->last(function ($item) {
-            return $item % 2 === 0;
-        });
-        $this->assertEquals(4, $lastEven);
-    }
-
     public function testLastReturnsDefault()
     {
         $collection = new Collection();
         $default = 'default';
         $this->assertEquals($default, $collection->last(null, $default));
+    }
+
+    public function testSumWithoutCallback()
+    {
+        $collection = new Collection([1, 2, 3, 4]);
+        $this->assertEquals(10, $collection->sum());
+    }
+
+    public function testSumWithCallback()
+    {
+        $collection = new Collection([1, 2, 3, 4]);
+        $sum = $collection->sum(function ($item) {
+            return $item * 2;
+        });
+        $this->assertEquals(20, $sum);
+    }
+
+    public function testSumWithEmptyCollection()
+    {
+        $collection = new Collection();
+        $this->assertEquals(0, $collection->sum());
+    }
+
+    public function testSumWithNonNumericValues()
+    {
+        $collection = new Collection(['a', 'b', 'c']);
+        $sum = $collection->sum(function ($item) {
+            return is_numeric($item) ? $item : 0;
+        });
+        $this->assertEquals(0, $sum);
     }
 
 }

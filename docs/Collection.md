@@ -13,9 +13,13 @@ This document provides examples for each method in the `Collection` class, illus
 - [last()](#last) retrieve the last item.
 - [take()](#take) create a new collection with a specified number of items from the start.
 - [get()](#get) retrieve the item at a given key.
+- [put()](#put) set the item at a given key.
+- [sum()](#sum) Get the sum of the given values.
+- [reduce()](#reduce) reduce the collection to a single value.
 - [map()](#map) apply a callback to each item in the collection and return a new collection of the results.
 - [dot()](#dot) flatten a multi-dimensional collection into a single level using 'dot' notation for keys.
 - [pipe()](#pipe) pass the collection to a given closure and return the result.
+- [pipeThrough()](#pipeThrough) pass the collection to a given callback and return the result.
 - [tap()](#tap) apply a given callback to the collection without affecting the collection itself.
 - [all()](#all) retrieve all items in the collection. 
 - [filter()](#filter) filter the collection using a callback function.
@@ -106,6 +110,35 @@ The get method returns the item at a given key. If the key does not exist, `null
 $item = $collection->get('name');
 // returns 'a' if the collection looks like this ['name' => 'a', 'age' => 20]
 ```
+## put()
+Setting the item at a given key.
+```php
+// ['name' => a, 'age' => 20]
+$collection->put('name', 'b');
+// ['name' => b, 'age' => 20]
+```
+
+## sum()
+Getting the sum of the given values.
+```php
+$collection = new Collection([1, 2, 3, 4]);
+
+$total = $collection->sum();
+
+// returns 10
+```
+
+## reduce()
+Reducing the collection to a single value.
+```php
+$collection = new Collection([1, 2, 3, 4]);
+
+$total = $collection->reduce(function ($carry, $item) {
+    return $carry + $item;
+}, 1);
+
+// returns 24
+```
 
 You may optionally pass a default value as the second argument:
 ```php
@@ -143,6 +176,23 @@ $result = $collection->pipe(function ($collection) {
     return $collection->count();
 });
 // returns the number of items in the collection
+```
+
+## pipeThrough()
+The `pipeThrough` method passes the collection to the given array of closures and returns the result of the executed closures:
+```php
+$collection = new Collection([1, 2, 3]);
+ 
+$result = $collection->pipeThrough([
+    function (Collection $collection) {
+        return $collection->merge([4, 5]);
+    },
+    function (Collection $collection) {
+        return $collection->sum();
+    },
+]);
+ 
+// 15
 ```
 
 ## tap()

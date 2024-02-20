@@ -53,7 +53,7 @@ class Collection implements ArrayAccess, \Countable
      *
      * Iterates over each item in the collection, applying the callback function. If the callback returns false, iteration stops.
      *
-     * @param callable $callback The callback function to apply. The callback should accept two arguments: the item and its key.
+     * @param (callable(TValue, TKey): mixed) $callback The callback function to apply. The callback should accept two arguments: the item and its key.
      * @return static Returns the collection instance for method chaining.
      */
     public function each(callable $callback): static
@@ -138,30 +138,20 @@ class Collection implements ArrayAccess, \Countable
     }
 
     /**
-     * Retrieves the last item in the collection that passes a given truth test.
-     * If no callback is provided, returns the last item in the collection.
-     * Returns null if the collection is empty or no item passes the truth test.
+     * Get the sum of the given values.
      *
-     * @param callable|null $callback The callback function to apply as a truth test.
-     *                                It should accept the item value and its key as arguments.
-     * @return TValue Returns the last item that passes the truth test, or the last item if no callback is provided,
-     *               or null if the collection is empty or no item passes the test.
+     * @param (callable(TValue): mixed)|string|null  $callback
+     * @return mixed
      */
-    public function last(?callable $callback = null): mixed
+    public function sum($callback = null): mixed
     {
-        if ($callback === null) {
-            return count($this->items) > 0 ? end($this->items) : null;
+        if (is_null($callback)) {
+            return array_sum($this->items);
         }
 
-        $filteredItems = array_reverse($this->items, true);
-
-        foreach ($filteredItems as $key => $item) {
-            if ($callback($item, $key)) {
-                return $item;
-            }
-        }
-
-        return null;
+        return $this->reduce(function ($result, $item) use ($callback) {
+            return $result + $callback($item);
+        }, 0);
     }
 
 
@@ -205,7 +195,7 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Applies a callback function to each item in the collection and returns a new collection of the results.
      *
-     * @param callable $callback The callback function to apply. The callback should accept two arguments: the item and its key.
+     * @param (callable(TValue, TKey): mixed) $callback $callback The callback function to apply. The callback should accept two arguments: the item and its key.
      * @return static Returns a new collection instance containing the results of applying the callback function to each item.
      */
     public function map(callable $callback): static
@@ -258,7 +248,7 @@ class Collection implements ArrayAccess, \Countable
      * This method allows for transforming the collection using a closure, which can return anything,
      * not necessarily a collection. The original collection remains unchanged.
      *
-     * @param callable $callback The closure that performs the transformation. It should accept the collection as its argument.
+     * @param (callable(self): mixed) $callback The closure that performs the transformation. It should accept the collection as its argument.
      * @return mixed The result of the closure.
      */
     public function pipe(callable $callback): mixed
@@ -269,7 +259,7 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Pass the collection through a series of callable pipes and return the result.
      *
-     * @param  array<callable>  $callbacks
+     * @param  array<(callable(mixed): mixed)>  $callbacks
      * @return mixed
      */
     public function pipeThrough($callbacks)
@@ -324,7 +314,7 @@ class Collection implements ArrayAccess, \Countable
      * or logging with the collection, and then continue processing without modifying the original collection.
      * The collection is returned by the tap method, allowing for method chaining.
      *
-     * @param callable $callback The callback function to apply. The callback should accept the collection as its argument.
+     * @param (callable(self): void) $callback The callback function to apply. The callback should accept the collection as its argument.
      * @return static Returns the collection instance for method chaining.
      */
     public function tap(callable $callback): static
@@ -346,7 +336,7 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Filters the collection using a callback function and returns a new collection with the filtered items.
      *
-     * @param callable $callback The callback function for filtering. The callback should accept two arguments: the item and its key.
+     * @param (callable(TValue, TKey): bool) $callback The callback function for filtering. The callback should accept two arguments: the item and its key.
      * @return static Returns a new collection instance containing only the items that pass the callback function filter.
      */
     public function filter(callable $callback): static
@@ -357,7 +347,7 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Transform each item in the collection using a callback.
      *
-     * @param  callable $callback
+     * @param  (callable(TValue, TKey): TValue) $callback
      * @return static
      */
     public function transform(callable $callback): static
@@ -419,7 +409,7 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Filter the collection using the given callback, removing items that pass the truth test.
      *
-     * @param  callable|mixed  $callback
+     * @param  (callable(TValue, TKey): bool)|mixed  $callback
      * @return static
      */
     public function reject(mixed $callback): static
