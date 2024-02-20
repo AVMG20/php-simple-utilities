@@ -291,4 +291,122 @@ class CollectionTest extends TestCase
         // Assert that the collection remains empty
         $this->assertEquals([], $collection->all());
     }
+
+    public function testReduceWithInitialValue()
+    {
+        $collection = new Collection([1, 2, 3, 4]);
+
+        $product = $collection->reduce(function ($carry, $item) {
+            return $carry * $item;
+        }, 1);
+
+        $this->assertEquals(24, $product);
+    }
+
+    public function testPipeThroughWithSingleCallable()
+    {
+        $collection = new Collection([100]);
+        $result = $collection->pipeThrough([
+            function ($collection) {
+                return $collection->reduce(function ($carry, $item) {
+                    return $carry + $item;
+                }, 0);
+            }
+        ]);
+
+        $this->assertEquals(100, $result);
+    }
+
+    public function testPipeThroughWithMultipleCallables()
+    {
+        $collection = new Collection([1, 2, 3]);
+        $result = $collection->pipeThrough([
+            function ($collection) {
+                // Increment each item
+                return $collection->map(function ($item) {
+                    return $item + 1;
+                });
+            },
+            function ($collection) {
+                // Sum all items
+                return $collection->reduce(function ($carry, $item) {
+                    return $carry + $item;
+                }, 0);
+            }
+        ]);
+
+        $this->assertEquals(9, $result); // (1+1) + (2+1) + (3+1) = 9
+    }
+
+
+    public function testPutWithMultipleMethods()
+    {
+        $collection = new Collection();
+
+        // Test putting a new item
+        $collection->put('key1', 'value1');
+        $this->assertEquals('value1', $collection->get('key1'), 'The value1 should be put at key1');
+
+        // Test updating an existing item
+        $collection->put('key1', 'value2');
+        $this->assertEquals('value2', $collection->get('key1'), 'The value at key1 should be updated to value2');
+
+        // Test numeric key
+        $collection->put(0, 'numericKey');
+        $this->assertEquals('numericKey', $collection->get(0), 'The value should be put at numeric key 0');
+
+        // Test null key (should append)
+        $collection->put(null, 'appendedValue');
+
+        $endValue = $collection->last(); // Get the last value in the collection
+        $this->assertEquals('appendedValue', $endValue, 'The value should be appended to the collection');
+
+        // Ensure the collection size is correct after all operations
+        $this->assertCount(3, $collection, 'The collection should contain exactly 3 items');
+    }
+
+    public function testFirstWithNoCallback()
+    {
+        $collection = new Collection([1, 2, 3]);
+        $this->assertEquals(1, $collection->first());
+    }
+
+    public function testFirstWithCallback()
+    {
+        $collection = new Collection([1, 2, 3, 4]);
+        $firstEven = $collection->first(function ($item) {
+            return $item % 2 === 0;
+        });
+        $this->assertEquals(2, $firstEven);
+    }
+
+    public function testFirstReturnsDefault()
+    {
+        $collection = new Collection();
+        $default = 'default';
+        $this->assertEquals($default, $collection->first(null, $default));
+    }
+
+    public function testLastWithNoCallback()
+    {
+        $collection = new Collection([1, 2, 3]);
+        $this->assertEquals(3, $collection->last());
+    }
+
+    public function testLastWithCallback()
+    {
+        $collection = new Collection([1, 2, 3, 4]);
+        $lastEven = $collection->last(function ($item) {
+            return $item % 2 === 0;
+        });
+        $this->assertEquals(4, $lastEven);
+    }
+
+    public function testLastReturnsDefault()
+    {
+        $collection = new Collection();
+        $default = 'default';
+        $this->assertEquals($default, $collection->last(null, $default));
+    }
+
 }

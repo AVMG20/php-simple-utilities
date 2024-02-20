@@ -17,7 +17,7 @@ use UnexpectedValueException;
  * @template TValue
  * @implements ArrayAccess<TKey, TValue>
  */
-class Collection implements ArrayAccess
+class Collection implements ArrayAccess, \Countable
 {
     /**
      * @var array<TKey, TValue> The items contained in the collection.
@@ -67,9 +67,9 @@ class Collection implements ArrayAccess
     /**
      * Counts the number of items in the collection.
      *
-     * @return int|null Returns the count of items in the collection, or null if the count is not applicable.
+     * @return int Returns the count of items in the collection, or null if the count is not applicable.
      */
-    public function count(): ?int
+    public function count(): int
     {
         return count($this->items);
     }
@@ -87,28 +87,51 @@ class Collection implements ArrayAccess
     }
 
     /**
-     * Retrieves the first item in the collection that passes a given truth test.
-     * If no callback is provided, returns the first item in the collection.
-     * Returns null if the collection is empty or no item passes the truth test.
+     * Get the first item from the collection passing the given truth test.
      *
-     * @param callable|null $callback The callback function to apply as a truth test.
-     *                                It should accept the item value and its key as arguments.
-     * @return TValue Returns the first item that passes the truth test, or the first item if no callback is provided,
-     *               or null if the collection is empty or no item passes the test.
+     * @template TFirstDefault
+     *
+     * @param  (callable(TValue, TKey): bool)|null  $callback
+     * @param  TFirstDefault|(\Closure(): TFirstDefault)  $default
+     * @return TValue|TFirstDefault
      */
-    public function first(?callable $callback = null): mixed
+    public function first(callable $callback = null, $default = null)
     {
-        if ($callback === null) {
-            return count($this->items) > 0 ? reset($this->items) : null;
-        }
-
         foreach ($this->items as $key => $item) {
-            if ($callback($item, $key)) {
+            if ($callback === null || $callback($item, $key)) {
                 return $item;
             }
         }
 
-        return null;
+        return $this->value($default);
+    }
+
+    /**
+     * Get the last item from the collection.
+     *
+     * @template TLastDefault
+     *
+     * @param  (callable(TValue, TKey): bool)|null  $callback
+     * @param  TLastDefault|(\Closure(): TLastDefault)  $default
+     * @return TValue|TLastDefault
+     */
+    public function last(callable $callback = null, $default = null)
+    {
+        if (is_null($callback)) {
+            if (empty($this->items)) {
+                return $this->value($default);
+            }
+
+            return end($this->items);
+        }
+
+        $filtered = array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH);
+
+        if (empty($filtered)) {
+            return $this->value($default);
+        }
+
+        return end($filtered);
     }
 
     /**
@@ -211,6 +234,57 @@ class Collection implements ArrayAccess
     {
         return $callback($this);
     }
+
+    /**
+     * Pass the collection through a series of callable pipes and return the result.
+     *
+     * @param  array<callable>  $callbacks
+     * @return mixed
+     */
+    public function pipeThrough($callbacks)
+    {
+        return static::collect($callbacks)->reduce(
+            fn ($carry, $callback) => $callback($carry),
+            $this,
+        );
+    }
+
+    /**
+     * Reduce the collection to a single value.
+     *
+     * @template TReduceInitial
+     * @template TReduceReturnType
+     *
+     * @param  callable(TReduceInitial|TReduceReturnType, TValue, TKey): TReduceReturnType  $callback
+     * @param  TReduceInitial  $initial
+     * @return TReduceReturnType
+     */
+    public function reduce(callable $callback, $initial = null)
+    {
+        $carry = $initial;
+
+        foreach ($this->items as $key => $item) {
+            $carry = $callback($carry, $item, $key);
+        }
+
+        return $carry;
+    }
+
+    /**
+     * Put an item in the collection by key.
+     *
+     * @param  TKey  $key
+     * @param  TValue  $value
+     * @return $this
+     */
+    public function put($key, $value)
+    {
+        $this->offsetSet($key, $value);
+
+        return $this;
+    }
+
+
 
     /**
      * Applies the given callback to the collection without affecting the collection itself.
