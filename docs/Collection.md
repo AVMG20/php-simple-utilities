@@ -32,265 +32,388 @@ This document provides examples for each method in the `Collection` class, illus
 - [toArray()](#toArray) convert the collection into a plain PHP array.
 - [toJson()](#toJson) convert the collection into a JSON string.
 
-## Constructor()
+## Creating Collections
+### Constructor
 
-Creating a new Collection instance with an array of items.
+Instantiates a new Collection object with an array of items.
+
 ```php
 use Avmg\PhpSimpleUtilities\Collection;
 
-$collection = new Collection(['a', 'b', 'c']);
+// Creating a new collection instance with items
+$collection = new Collection(['apple', 'banana', 'orange']);
+// The collection contains: ['apple', 'banana', 'orange']
 ```
 
-## collect()
-Creating a new Collection instance statically.
-```php
-use Avmg\PhpSimpleUtilities\Collection;
 
-$collection = Collection::collect(['a', 'b', 'c']);
+### Collect (Static Factory Method)
+
+Creates a new collection instance statically, which is useful for chaining methods off a newly created collection.
+
+```php
+$collection = Collection::collect(['car', 'bike', 'plane']);
+// The collection contains: ['car', 'bike', 'plane']
 ```
 
-## each()
-Applying a callback function to each item in the collection.
+
+## Working with Items
+### Each
+
+Iterates over each item in the collection, applying a callback function. If the callback returns `false`, iteration stops.
+
 ```php
+$collection = Collection::collect([1, 2, 3, 4]);
+
+// Echo each item in the collection
 $collection->each(function ($item, $key) {
-    echo $item;
+    echo $item . PHP_EOL;
 });
+// Outputs: 1 2 3 4
 ```
 
-## count()
-Counting the number of items in the collection.
+
+### Count
+
+Returns the total number of items in the collection.
+
 ```php
+$collection = Collection::collect(['apple', 'banana', 'orange']);
+
 echo $collection->count();
+// Outputs: 3
 ```
 
-## push()
-Adding an item to the end of the collection.
+
+### Push
+
+Adds an item to the end of the collection. This is useful for appending new items.
+
 ```php
-$collection->push('d');
-// if the collection looks like this ['a', 'b', 'c'], it will now look like this ['a', 'b', 'c', 'd']
+$collection = Collection::collect(['apple', 'banana']);
+
+$collection->push('orange');
+// The collection now contains: ['apple', 'banana', 'orange']
 ```
 
-## first()
-Retrieving the first item
+
+### First
+
+Retrieves the first item in the collection that passes a given truth test. If no callback is provided, the first item is returned. A default value can be specified if no item passes the test.
+
 ```php
+$collection = Collection::collect(['apple', 'banana', 'orange']);
+
+// Retrieve the first item
 $firstItem = $collection->first();
-// returns 'a' if the collection looks like this ['a', 'b', 'c']
-```
-Retrieving the first item that passes a given truth test.
-```php
-$firstItem = $collection->first(function ($item) {
-    return $item === 'b';
-});
-// returns 'b' if the collection looks like this ['a', 'b', 'c']
+// $firstItem is 'apple'
+
+// Retrieve the first item that passes the given truth test
+$firstLongName = $collection->first(function ($item) {
+    return strlen($item) > 5;
+}, 'default');
+// $firstLongName is 'banana', because 'banana' is the first item with more than 5 characters
 ```
 
-## last()
-Retrieving the last item
+
+### Last
+
+Retrieves the last item in the collection that passes a given truth test. If no callback is provided, the last item is returned. A default value can also be provided.
+
 ```php
-$lastItem  = $collection->last();
-// returns 'c' if the collection looks like this ['a', 'b', 'c']
-```
-Retrieving the last item that passes a given truth test.
-```php
-$lastItem = $collection->last(function ($item) {
-    return $item === 'b';
-});
-// returns 'b' if the collection looks like this ['a', 'b', 'c']
+$collection = Collection::collect(['apple', 'banana', 'orange']);
+
+// Retrieve the last item
+$lastItem = $collection->last();
+// $lastItem is 'orange'
+
+// Retrieve the last item that passes a given truth test
+$lastShortName = $collection->last(function ($item) {
+    return strlen($item) < 6;
+}, 'default');
+// $lastShortName is 'apple', because it's the last item with less than 6 characters
 ```
 
-## take()
-Creating a new collection with a specified number of items from the start.
+### Take
+
+Creates a new collection with a specified number of items from the start or the end, based on the sign of the provided number.
+
 ```php
-$newCollection = $collection->take(2);
-// returns a new collection with the items ['a', 'b'] if the original collection looks like this ['a', 'b', 'c']
-```
-## get()
-The get method returns the item at a given key. If the key does not exist, `null` is returned:
-```php
-$item = $collection->get('name');
-// returns 'a' if the collection looks like this ['name' => 'a', 'age' => 20]
-```
-## put()
-Setting the item at a given key.
-```php
-// ['name' => a, 'age' => 20]
-$collection->put('name', 'b');
-// ['name' => b, 'age' => 20]
+$collection = Collection::collect([1, 2, 3, 4, 5]);
+
+// Take the first 3 items
+$newCollection = $collection->take(3);
+// $newCollection contains: [1, 2, 3]
+
+// Take the last 2 items
+$newCollection = $collection->take(-2);
+// $newCollection contains: [4, 5]
 ```
 
-## sum()
-Getting the sum of the given values.
-```php
-$collection = new Collection([1, 2, 3, 4]);
 
+### Get
+
+Retrieves the item at a given key. If the key does not exist, a default value is returned.
+
+```php
+$collection = Collection::collect(['name' => 'John', 'age' => 30]);
+
+// Retrieve item by key
+$name = $collection->get('name');
+// $name is 'John'
+
+// Retrieve with default value
+$height = $collection->get('height', 175);
+// $height is 175
+```
+
+
+### Put
+
+Sets an item at a given key. If the key already exists, the value is replaced.
+
+```php
+$collection = Collection::collect(['name' => 'John', 'age' => 30]);
+
+$collection->put('age', 31);
+// The collection now contains: ['name' => 'John', 'age' => 31]
+```
+
+
+### Sum
+
+Calculates the sum of the given values. If a callback is provided, it will be used to determine the values to sum.
+
+```php
+$collection = Collection::collect([1, 2, 3, 4]);
+
+// Calculate sum
 $total = $collection->sum();
+// $total is 10
 
-// returns 10
-```
-
-## reduce()
-Reducing the collection to a single value.
-```php
-$collection = new Collection([1, 2, 3, 4]);
-
-$total = $collection->reduce(function ($carry, $item) {
-    return $carry + $item;
-}, 1);
-
-// returns 24
-```
-
-You may optionally pass a default value as the second argument:
-```php
-$item = $collection->get('name', 'default');
-// returns 'default' if the specified key does not exist
-```
-You may even pass a callback as the method's default value. The result of the callback will be returned if the specified key does not exist:
-```php
-$item = $collection->get('name', function () {
-    return 'default';
+// Calculate sum using a callback
+$total = $collection->sum(function ($item) {
+    return $item * 2;
 });
-// returns 'default' if the specified key does not exist
+// $total is 20
 ```
 
-## map()
-Applying a callback to each item in the collection and returning a new collection of the results.
+
+### Reduce
+
+Reduces the collection to a single value, using a callback function.
+
 ```php
+$collection = Collection::collect([1, 2, 3, 4]);
+
+// Reduce to a single value
+$result = $collection->reduce(function ($carry, $item) {
+    return $carry + $item;
+}, 0);
+// $result is 10
+```
+
+
+### Map
+
+Applies a callback to each item in the collection and returns a new collection of the results.
+
+```php
+$collection = Collection::collect([1, 2, 3]);
+
 $multiplied = $collection->map(function ($item) {
     return $item * 2;
 });
-// returns a new collection with the items [2, 4, 6] if the original collection looks like this [1, 2, 3]
+// $multiplied contains: [2, 4, 6]
 ```
 
-## dot()
-Flattening a multi-dimensional collection into a single level using 'dot' notation for keys.
+
+### Dot
+
+Flattens a multi-dimensional collection into a single level, using 'dot' notation for nested keys.
+
 ```php
-$flattenedCollection = $collection->dot();
-// ['products' => ['desk' => ['price' => 100]]] becomes ['products.desk.price' => 100]
+$collection = Collection::collect(['product' => ['name' => 'Desk', 'price' => 200]]);
+
+$flattened = $collection->dot();
+// $flattened contains: ['product.name' => 'Desk', 'product.price' => 200]
 ```
 
-## pipe()
-Passing the collection to a given closure and returning the result.
+
+### Pipe
+
+Passes the collection to a given closure, allowing for transformation or inspection without modifying the original collection.
+
 ```php
+$collection = Collection::collect([1, 2, 3]);
+
 $result = $collection->pipe(function ($collection) {
-    return $collection->count();
+    return $collection->sum();
 });
-// returns the number of items in the collection
+// $result is 6
 ```
 
-## pipeThrough()
-The `pipeThrough` method passes the collection to the given array of closures and returns the result of the executed closures:
+
+### PipeThrough
+
+Passes the collection through an array of callbacks, transforming it sequentially.
+
 ```php
-$collection = new Collection([1, 2, 3]);
- 
+$collection = Collection::collect([1, 2, 3]);
+
 $result = $collection->pipeThrough([
-    function (Collection $collection) {
-        return $collection->merge([4, 5]);
+    function ($collection) {
+        return $collection->map(function ($item) {
+            return $item * 2;
+        });
     },
-    function (Collection $collection) {
+    function ($collection) {
         return $collection->sum();
     },
 ]);
- 
-// 15
+// $result is 12
 ```
 
-## tap()
-Applying a given callback to the collection without affecting the collection itself.
+
+### Tap
+
+Applies a callback to the collection for inspection or logging without affecting the original collection.
+
 ```php
+$collection = Collection::collect(['apple', 'banana', 'orange']);
+
 $collection->tap(function ($collection) {
-    // perform operations with the collection here
-    echo 'Values after sorting: '
-    print_r($collection->values()->all());
+    log('Current state:', $collection->all());
 });
-// the collection remains unchanged
+// The collection remains unchanged
 ```
 
-## all()
-Retrieving all items in the collection.
+
+### All
+
+Retrieves all items in the collection as a PHP array.
+
 ```php
+$collection = Collection::collect(['apple', 'banana', 'orange']);
+
 $items = $collection->all();
-
-// returns ['a', 'b', 'c'] if the collection looks like this ['a', 'b', 'c']
+// $items is ['apple', 'banana', 'orange']
 ```
 
-## filter()
-Filtering the collection using a callback function.
-```php
 
-$filteredCollection = $collection->filter(function ($item) {
-    return $item !== 'a';
+### Filter
+
+Filters the collection using a callback function, returning a new collection with only the items that pass the truth test.
+
+```php
+$collection = Collection::collect([1, 2, 3, 4, 5]);
+
+$filtered = $collection->filter(function ($item) {
+    return $item > 2;
 });
-
-// returns a new collection with the items ['b', 'c'] if the original collection looks like this ['a', 'b', 'c']
+// $filtered contains: [3, 4, 5]
 ```
 
-## transform()
-Transforming each item in the collection using a callback.
+
+### Transform
+
+Transforms each item in the collection using a callback. Unlike `map`, `transform` modifies the collection itself.
+
 ```php
+$collection = Collection::collect([1, 2, 3]);
+
 $collection->transform(function ($item) {
-    return strtoupper($item);
+    return $item * 2;
 });
-
-// the collection now looks like this ['A', 'B', 'C']
+// The collection now contains: [2, 4, 6]
 ```
 
-## chunk()
-Splitting the collection into chunks of the given size.
+
+### Chunk
+
+Splits the collection into chunks of the given size.
+
 ```php
+$collection = Collection::collect([1, 2, 3, 4, 5]);
+
 $chunks = $collection->chunk(2);
-
-// returns a new collection with the items [['a', 'b'], ['c']] if the original collection looks like this ['a', 'b', 'c']
+// $chunks is a collection of two collections: [[1, 2], [3, 4], [5]]
 ```
 
-## pluck()
-Getting the values of a specified key from the collection.
+
+### Pluck
+
+Extracts a list of values from a collection based on a given key or value pair.
+
 ```php
-$pluckedValues = $collection->pluck('name');
-// ['product_id' => 'prod-100', 'name' => 'Desk'],
-// ['product_id' => 'prod-200', 'name' => 'Chair'],
-// Becomes:
-// ['Desk', 'Chair']
+$collection = Collection::collect([
+    ['product_id' => 'prod-100', 'name' => 'Desk'],
+    ['product_id' => 'prod-200', 'name' => 'Chair'],
+]);
+
+$names = $collection->pluck('name');
+// $names contains: ['Desk', 'Chair']
 ```
 
-## reject()
-Filtering the collection by removing items that pass the truth test.
+
+### Reject
+
+Filters the collection by removing items that pass the given truth test.
+
 ```php
-$rejectedCollection = $collection->reject(function ($item) {
-    return $item === 'a';
+$collection = Collection::collect([1, 2, 3, 4, 5]);
+
+$rejected = $collection->reject(function ($item) {
+    return $item > 2;
 });
-
-// returns a new collection with the items ['b', 'c'] if the original collection looks like this ['a', 'b', 'c']
+// $rejected contains: [1, 2]
 ```
 
-## merge()
-Merging another array or collection with the original collection.
-```php
-$mergedCollection = $collection->merge(['d', 'e']);
 
-// returns a new collection with the items ['a', 'b', 'c', 'd', 'e'] if the original collection looks like this ['a', 'b', 'c']
+### Merge
+
+Merges another array or collection with the original collection.
+
+```php
+$collection = Collection::collect(['apple', 'banana']);
+
+$merged = $collection->merge(['cherry', 'date']);
+// $merged contains: ['apple', 'banana', 'cherry', 'date']
 ```
 
-## ensure()
-The `ensure` method may be used to verify that all elements of a collection are of a given type or list of types. Otherwise, an `UnexpectedValueException` will be thrown:
+
+### Ensure
+
+Ensures that all elements in the collection match a given type or list of types.
+
 ```php
-return $collection->ensure(User::class);
- 
-return $collection->ensure([User::class, Customer::class]);
-```
-Primitive types such as `string`, `int`, `float`, `bool`, and `array` may also be specified:
-```php
-return $collection->ensure('string');
+$collection = Collection::collect([1, 2, '3', 4]);
+
+// Throws UnexpectedValueException if any element is not an integer
+$collection->ensure('int');
+
+$collection->ensure([Custom::class, AnotherCustom::class]);
 ```
 
-## toArray()
-Converting the collection into a plain PHP array.
+
+### ToArray
+
+Converts the collection to a plain PHP array, including all nested objects that can be cast to arrays.
+
 ```php
+$collection = Collection::collect(['name' => 'John', 'age' => 30]);
+
 $array = $collection->toArray();
+// $array is ['name' => 'John', 'age' => 30]
 ```
 
-## toJson()
-Converting the collection into a JSON string.
+
+### ToJson
+
+Converts the collection into a JSON string.
+
 ```php
+$collection = new Collection(['name' => 'John', 'age' => 30]);
+
 $json = $collection->toJson();
+// $json is '{"name":"John","age":30}'
 ```
