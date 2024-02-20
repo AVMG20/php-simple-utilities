@@ -95,7 +95,7 @@ class Collection implements ArrayAccess, \Countable
      * @template TFirstDefault
      *
      * @param  (callable(TValue, TKey): bool)|null  $callback
-     * @param  TFirstDefault|(\Closure(): TFirstDefault)  $default
+     * @param  TFirstDefault|(Closure(): TFirstDefault)  $default
      * @return TValue|TFirstDefault
      */
     public function first(callable $callback = null, $default = null)
@@ -110,12 +110,42 @@ class Collection implements ArrayAccess, \Countable
     }
 
     /**
+     * Check if the collection is empty.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
+    /**
+     * Check if the collection is not empty.
+     *
+     * @return bool
+     */
+    public function isNotEmpty(): bool
+    {
+        return !$this->isEmpty();
+    }
+
+    /**
+     * Reset the keys on the collection and return only the values.
+     *
+     * @return static<int, TValue> A new collection instance with reindexed values.
+     */
+    public function values(): static
+    {
+        return new static(array_values($this->items));
+    }
+
+    /**
      * Get the last item from the collection.
      *
      * @template TLastDefault
      *
      * @param  (callable(TValue, TKey): bool)|null  $callback
-     * @param  TLastDefault|(\Closure(): TLastDefault)  $default
+     * @param  TLastDefault|(Closure(): TLastDefault)  $default
      * @return TValue|TLastDefault
      */
     public function last(callable $callback = null, $default = null)
@@ -261,7 +291,7 @@ class Collection implements ArrayAccess, \Countable
      * @param  array<(callable(mixed): mixed)>  $callbacks
      * @return mixed
      */
-    public function pipeThrough($callbacks)
+    public function pipeThrough($callbacks): mixed
     {
         return static::collect($callbacks)->reduce(
             fn ($carry, $callback) => $callback($carry),
@@ -297,7 +327,7 @@ class Collection implements ArrayAccess, \Countable
      * @param  TValue  $value
      * @return static
      */
-    public function put($key, $value)
+    public function put($key, $value): static
     {
         $this->offsetSet($key, $value);
 
@@ -511,7 +541,7 @@ class Collection implements ArrayAccess, \Countable
      * @param mixed $value The item to be converted.
      * @return mixed The converted item.
      */
-    protected function recursiveToArray($value)
+    protected function recursiveToArray($value): mixed
     {
         if (is_array($value)) {
             return array_map([$this, 'recursiveToArray'], $value);

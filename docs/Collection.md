@@ -15,6 +15,9 @@ This document provides examples for each method in the `Collection` class, illus
 - [get()](#get) retrieve the item at a given key.
 - [put()](#put) set the item at a given key.
 - [sum()](#sum) Get the sum of the given values.
+- [isEmpty()](#isEmpty) determine if the collection is empty.
+- [isNotEmpty()](#isNotEmpty) determine if the collection is not empty.
+- [values()](#values) get the values of the collection.
 - [reduce()](#reduce) reduce the collection to a single value.
 - [map()](#map) apply a callback to each item in the collection and return a new collection of the results.
 - [dot()](#dot) flatten a multi-dimensional collection into a single level using 'dot' notation for keys.
@@ -197,6 +200,44 @@ $total = $collection->sum(function ($item) {
 // $total is 20
 ```
 
+### IsEmpty()
+
+Determines if the collection is empty.
+
+```php
+$collection = Collection::collect([]);
+
+if ($collection->isEmpty()) {
+    echo 'The collection is empty';
+}
+// Outputs: The collection is empty
+```
+
+### IsNotEmpty()
+
+Determines if the collection is not empty.
+
+```php
+$collection = Collection::collect(['apple', 'banana', 'orange']);
+
+if ($collection->isNotEmpty()) {
+    echo 'The collection is not empty';
+}
+// Outputs: The collection is not empty
+```
+
+### Values()
+
+Retrieves the values of the collection.
+
+```php
+
+$collection = Collection::collect(['name' => 'John', 'age' => 30]);
+
+$values = $collection->values();
+
+// $values is ['John', 30]
+```
 
 ### Reduce()
 

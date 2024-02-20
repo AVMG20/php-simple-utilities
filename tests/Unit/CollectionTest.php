@@ -499,4 +499,45 @@ class CollectionTest extends TestCase
         $this->assertEquals(0, $sum);
     }
 
+    public function testIsEmptyReturnsTrueForEmptyCollection()
+    {
+        $collection = new Collection();
+        $this->assertTrue($collection->isEmpty());
+    }
+
+    public function testIsEmptyReturnsFalseForNonEmptyCollection()
+    {
+        $collection = new Collection(['item']);
+        $this->assertFalse($collection->isEmpty());
+    }
+
+    public function testIsNotEmptyReturnsFalseForEmptyCollection()
+    {
+        $collection = new Collection();
+        $this->assertFalse($collection->isNotEmpty());
+    }
+
+    public function testIsNotEmptyReturnsTrueForNonEmptyCollection()
+    {
+        $collection = new Collection(['item']);
+        $this->assertTrue($collection->isNotEmpty());
+    }
+
+    public function testValuesMethodReindexesCollection()
+    {
+        $collection = new Collection(['first' => 'apple', 'second' => 'banana']);
+        $values = $collection->values();
+        $expected = ['apple', 'banana'];
+
+        $this->assertEquals($expected, $values->toArray());
+    }
+
+    public function testValuesMethodReturnsNewCollectionInstance()
+    {
+        $original = new Collection(['first' => 'apple', 'second' => 'banana']);
+        $values = $original->values();
+
+        $this->assertInstanceOf(Collection::class, $values);
+        $this->assertNotSame($original, $values);
+    }
 }
