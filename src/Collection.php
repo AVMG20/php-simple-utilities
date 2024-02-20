@@ -5,6 +5,9 @@ namespace Avmg\PhpSimpleUtilities;
 
 use ArrayAccess;
 use Closure;
+use Iterator;
+use IteratorAggregate;
+use stdClass;
 use UnexpectedValueException;
 
 /**
@@ -133,6 +136,34 @@ class Collection implements ArrayAccess, \Countable
 
         return end($filtered);
     }
+
+    /**
+     * Retrieves the last item in the collection that passes a given truth test.
+     * If no callback is provided, returns the last item in the collection.
+     * Returns null if the collection is empty or no item passes the truth test.
+     *
+     * @param callable|null $callback The callback function to apply as a truth test.
+     *                                It should accept the item value and its key as arguments.
+     * @return TValue Returns the last item that passes the truth test, or the last item if no callback is provided,
+     *               or null if the collection is empty or no item passes the test.
+     */
+    public function last(?callable $callback = null): mixed
+    {
+        if ($callback === null) {
+            return count($this->items) > 0 ? end($this->items) : null;
+        }
+
+        $filteredItems = array_reverse($this->items, true);
+
+        foreach ($filteredItems as $key => $item) {
+            if ($callback($item, $key)) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Creates a new collection with a specified number of items from the start or end of the current collection.
@@ -484,17 +515,30 @@ class Collection implements ArrayAccess, \Countable
      */
     public function toArray(): array
     {
-        return array_map(function ($value) {
-            if ($value instanceof Collection) {
-                return $value->toArray();
-            }
+        return $this->recursiveToArray($this->items);
+    }
 
-            if (is_object($value) && method_exists($value, 'toArray')) {
-                return $value->toArray();
-            }
+    /**
+     * Recursively convert items to an array.
+     *
+     * @param mixed $value The item to be converted.
+     * @return mixed The converted item.
+     */
+    protected function recursiveToArray($value)
+    {
+        if (is_array($value)) {
+            return array_map([$this, 'recursiveToArray'], $value);
+        } elseif ($value instanceof Collection) {
+            return $this->recursiveToArray($value->all());
+        } elseif ($value instanceof ArrayAccess || $value instanceof Iterator || $value instanceof IteratorAggregate) {
+            return $this->recursiveToArray(iterator_to_array($value));
+        } elseif ($value instanceof stdClass) {
+            return $this->recursiveToArray((array) $value);
+        } elseif (is_object($value) && method_exists($value, 'toArray')) {
+            return $this->recursiveToArray($value->toArray());
+        }
 
-            return $value;
-        }, $this->items);
+        return $value;
     }
 
     /**
