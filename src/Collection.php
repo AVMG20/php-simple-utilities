@@ -154,7 +154,6 @@ class Collection implements ArrayAccess, \Countable
         }, 0);
     }
 
-
     /**
      * Creates a new collection with a specified number of items from the start or end of the current collection.
      * If the number is positive, it takes from the start. If negative, it takes from the end.
@@ -296,7 +295,7 @@ class Collection implements ArrayAccess, \Countable
      *
      * @param  TKey  $key
      * @param  TValue  $value
-     * @return $this
+     * @return static
      */
     public function put($key, $value)
     {
@@ -304,8 +303,6 @@ class Collection implements ArrayAccess, \Countable
 
         return $this;
     }
-
-
 
     /**
      * Applies the given callback to the collection without affecting the collection itself.
