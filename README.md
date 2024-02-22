@@ -10,7 +10,7 @@ This package includes the following utilities:
 - **[Data Class](docs/Data.md)**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
 - **[FileCache Class](docs/FileCache.md)**: A simple interface for storing, retrieving, and managing cache data in the filesystem.
 - **[EventDispatcher Class](docs/EventDispatcher.md)**: A simple, yet powerful way to manage and dispatch events throughout your PHP application.
-- **[Plastic Class](docs/Plastic.md)**: A Simple Carbon inspired class for working with dates and times, with no dependencies with a focus on simplicity and type safety.
+- **[Plastic Class](docs/Plastic.md)**: A Simple Carbon inspired class for working with dates and times, with no dependencies and a focus on simplicity and type safety.
 
 ### Dependencies
 
