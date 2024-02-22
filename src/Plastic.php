@@ -288,8 +288,7 @@ class Plastic extends DateTime
      */
     public function lt(?DateTimeInterface $date = null): bool
     {
-        $compareWith = $date ?: new static();
-        return $this < $compareWith;
+        return $this < ($date ?: new static());
     }
 
     /**
@@ -300,8 +299,7 @@ class Plastic extends DateTime
      */
     public function gt(?DateTimeInterface $date = null): bool
     {
-        $compareWith = $date ?: new static();
-        return $this > $compareWith;
+        return $this > ($date ?: new static());
     }
 
     /**
