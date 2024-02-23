@@ -4,6 +4,7 @@ The `Plastic` class extends PHP's native `DateTime` class, providing additional,
 ## All methods available in the Plastic class
 - [constructor()](#constructor)   Constructs a new Plastic instance.
 - [now()](#now)  Returns a new Plastic instance representing the current date and time.
+- [parse()](#parse)  Create a new Plastic instance from a specific date and time.
 - [addSeconds()](#addSeconds)  Adds a number of seconds to the date.
 - [subSeconds()](#subSeconds)  Subtracts a number of seconds from the date.
 - [addMinutes()](#addMinutes)  Adds a number of minutes to the date.
@@ -33,6 +34,7 @@ The `Plastic` class extends PHP's native `DateTime` class, providing additional,
 - [lt()](#lt)  Checks if the date is less than another date.
 - [gt()](#gt)  Checks if the date is greater than another date.
 - [isInBetween()](#isInBetween)  Checks if the date is in between two other dates.
+- [diffForHumans()](#diffForHumans)  Returns the difference between two dates in a human-readable format.
 
 ### constructor()
 The `Plastic` class constructor accepts the same parameters as PHP's native `DateTime` class, with the addition of a `$timezone` parameter. If no date is provided, the current date and time will be used.
@@ -51,5 +53,56 @@ $now = Plastic::now(); // Returns a new Plastic instance representing the curren
 echo $now->format('Y-m-d H:i:s');
 
 // Outputs: 2022-01-01 00:00:00 
+```
+
+### parse()
+The `parse` method creates a new `Plastic` instance from a specific date and time.
+
+```php
+$plastic = Plastic::parse('2022-01-01 00:00:00', new DateTimeZone('UTC'));
+echo $plastic->format('Y-m-d H:i:s');
+// Outputs: 2022-01-01 00:00:00
+```
+The `parse` method also accepts a `DateTime` instance as a parameter.
+
+```php
+$datetime = new DateTime('2022-01-01 00:00:00', new DateTimeZone('UTC'));
+$plastic = Plastic::parse($datetime);
+echo $plastic->format('Y-m-d H:i:s');
+// Outputs: 2022-01-01 00:00:00
+```
+
+### diffForHumans()
+
+The `diffForHumans` method returns the difference between two dates in a human-readable format. <br />
+The default language is English, but you can set your own translations using the `setTranslations` method. <br />
+If no compare date is given the current date and time will be used for comparison.
+
+```php
+$twoDaysAgo = Plastic::parse('2024-02-21 10:36:35');
+$compare = Plastic::parse('2024-02-23 10:30');
+
+//dutch translations
+$twoDaysAgo->setTranslations([
+    'year' => 'jaar',
+    'years' => 'jaar',
+    'month' => 'maand',
+    'months' => 'maanden',
+    'day' => 'dag',
+    'days' => 'dagen',
+    'hour' => 'uur',
+    'hours' => 'uur',
+    'minute' => 'minuut',
+    'minutes' => 'minuten',
+    'second' => 'seconde',
+    'seconds' => 'seconden',
+    'just now' => 'zojuist',
+    'and' => ' en ',
+    'ago' => '%s geleden',
+    'in' => 'over %s',
+]);
+
+echo $twoDaysAgo->diffForHumans($compare);
+// Outputs: 1 dag, 23 uur, 53 minuten en 25 seconden geleden
 ```
 

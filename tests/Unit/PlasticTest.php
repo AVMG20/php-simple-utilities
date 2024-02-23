@@ -248,4 +248,101 @@ class PlasticTest extends TestCase
         $this->expectException(Exception::class);
         new Plastic('invalid-date');
     }
+
+    public function testDiffForHumansNow()
+    {
+        $now = Plastic::parse('2024-02-23 10:30');
+        $compare = Plastic::parse('2024-02-23 10:30');
+
+        $this->assertEquals('just now', $now->diffForHumans($compare));
+    }
+
+    public function testDiffForHumansPast()
+    {
+        $oneHourAgo = Plastic::parse('2024-02-23 10:30')->subHours(1);
+        $compare = Plastic::parse('2024-02-23 10:30');
+
+        $this->assertEquals('1 hour ago', $oneHourAgo->diffForHumans($compare));
+    }
+
+    public function testDiffForHumansFuture()
+    {
+        $oneHourLater = Plastic::parse('2024-02-23 10:30')->addHours(1);
+        $compare = Plastic::parse('2024-02-23 10:30');
+
+        $this->assertEquals('in 1 hour', $oneHourLater->diffForHumans($compare));
+    }
+
+    public function testDiffForHumansAbsolute()
+    {
+        $fiveMinutesAgo = Plastic::parse('2024-02-23 10:30')->subMinutes(5)->subHours(1);
+        $compare = Plastic::parse('2024-02-23 10:30');
+
+        $this->assertEquals('1 hour and 5 minutes', $fiveMinutesAgo->diffForHumans($compare, absolute: true));
+    }
+
+    public function testDiffForHumansWithTranslations()
+    {
+        $twoDaysAgo = Plastic::parse('2024-02-21 10:36:35');
+        $compare = Plastic::parse('2024-02-23 10:30');
+
+        //dutch translations
+        $twoDaysAgo->setTranslations([
+            'year' => 'jaar',
+            'years' => 'jaar',
+            'month' => 'maand',
+            'months' => 'maanden',
+            'day' => 'dag',
+            'days' => 'dagen',
+            'hour' => 'uur',
+            'hours' => 'uur',
+            'minute' => 'minuut',
+            'minutes' => 'minuten',
+            'second' => 'seconde',
+            'seconds' => 'seconden',
+            'just now' => 'zojuist',
+            'and' => ' en ',
+            'ago' => '%s geleden',
+            'in' => 'over %s',
+        ]);
+
+        $this->assertEquals('1 dag, 23 uur, 53 minuten en 25 seconden geleden', $twoDaysAgo->diffForHumans($compare));
+    }
+
+    public function testParseFromString()
+    {
+        $dateString = '2024-02-23 14:00:00';
+        $plastic = Plastic::parse($dateString);
+
+        $this->assertInstanceOf(Plastic::class, $plastic);
+        $this->assertEquals($dateString, $plastic->format('Y-m-d H:i:s'));
+    }
+
+    public function testParseFromDateTimeInterface()
+    {
+        $dateTime = new DateTime('2024-02-23 14:00:00', new DateTimeZone('UTC'));
+        $plastic = Plastic::parse($dateTime);
+
+        $this->assertInstanceOf(Plastic::class, $plastic);
+        $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $plastic->format('Y-m-d H:i:s'));
+        $this->assertEquals($dateTime->getTimezone()->getName(), $plastic->getTimezone()->getName());
+    }
+
+    public function testParseWithTimezone()
+    {
+        $dateString = '2024-02-23 14:00:00';
+        $timezone = 'Europe/London';
+        $plastic = Plastic::parse($dateString, $timezone);
+
+        $this->assertEquals($timezone, $plastic->getTimezone()->getName());
+    }
+
+    public function testParseWithInvalidTimezone()
+    {
+        $this->expectException(Exception::class);
+
+        $dateString = '2024-02-23 14:00:00';
+        $invalidTimezone = 'Invalid/Timezone';
+        $plastic = Plastic::parse($dateString, $invalidTimezone);
+    }
 }
