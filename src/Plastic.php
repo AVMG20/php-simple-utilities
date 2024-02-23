@@ -277,7 +277,13 @@ class Plastic extends DateTime
      */
     public function isThisWeek(): bool
     {
-        return $this->startOfWeek() <= $this && $this->endOfWeek() >= $this;
+        $startOfWeekPlastic = new static();
+        $startOfWeekPlastic->startOfWeek()->startOfDay();
+
+        $endOfWeekPlastic = new static();
+        $endOfWeekPlastic->endOfWeek()->endOfDay();
+
+        return $startOfWeekPlastic <= $this && $endOfWeekPlastic >= $this;
     }
 
     /**
@@ -287,7 +293,13 @@ class Plastic extends DateTime
      */
     public function isThisMonth(): bool
     {
-        return $this->startOfMonth() <= $this && $this->endOfMonth() >= $this;
+        $startOfMonthPlastic = new static();
+        $startOfMonthPlastic->startOfMonth()->startOfDay();
+
+        $endOfMonthPlastic = new static();
+        $endOfMonthPlastic->endOfMonth()->endOfDay();
+
+        return $startOfMonthPlastic <= $this && $endOfMonthPlastic >= $this;
     }
 
     /**
@@ -297,7 +309,13 @@ class Plastic extends DateTime
      */
     public function isThisYear(): bool
     {
-        return $this->startOfYear() <= $this && $this->endOfYear() >= $this;
+        $startOfYearPlastic = new static();
+        $startOfYearPlastic->startOfYear()->startOfDay();
+
+        $endOfYearPlastic = new static();
+        $endOfYearPlastic->endOfYear()->endOfDay();
+
+        return $startOfYearPlastic <= $this && $endOfYearPlastic >= $this;
     }
 
     /**
