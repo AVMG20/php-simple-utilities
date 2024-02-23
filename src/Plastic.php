@@ -133,7 +133,7 @@ class Plastic extends DateTime
      */
     public function diffInMinutes(DateTimeInterface $date, bool $absolute = true): int
     {
-        return (int) ($this->diffInSeconds($date, $absolute) / 60);
+        return (int)($this->diffInSeconds($date, $absolute) / 60);
     }
 
     /**
@@ -145,7 +145,7 @@ class Plastic extends DateTime
      */
     public function diffInHours(DateTimeInterface $date, bool $absolute = true): int
     {
-        return (int) ($this->diffInMinutes($date, $absolute) / 60);
+        return (int)($this->diffInMinutes($date, $absolute) / 60);
     }
 
     /**
@@ -157,7 +157,7 @@ class Plastic extends DateTime
      */
     public function diffInDays(DateTimeInterface $date, bool $absolute = true): int
     {
-        return (int) $this->diff($date)->format("%a");
+        return (int)$this->diff($date)->format("%a");
     }
 
     /**
@@ -277,7 +277,27 @@ class Plastic extends DateTime
      */
     public function isThisWeek(): bool
     {
-        return $this->startOfWeek() <= $this && $this->endOfWeek() >= $this;
+        return (new static())->startOfWeek()->startOfDay() <= $this && (new static())->endOfWeek()->endOfDay() >= $this;
+    }
+
+    /**
+     * Check if the current instance is this month
+     *
+     * @return bool True if this is this month, false otherwise.
+     */
+    public function isThisMonth(): bool
+    {
+        return (new static())->startOfMonth()->startOfDay() <= $this && (new static())->endOfMonth()->endOfDay() >= $this;
+    }
+
+    /**
+     * Check if the current instance is this year
+     *
+     * @return bool True if this is this year, false otherwise.
+     */
+    public function isThisYear(): bool
+    {
+        return (new static())->startOfYear()->startOfDay() <= $this && (new static())->endOfYear()->endOfDay() >= $this;
     }
 
     /**

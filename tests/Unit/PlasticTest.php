@@ -129,6 +129,54 @@ class PlasticTest extends TestCase
 
         $endOfWeek = $now->endOfWeek();
         $this->assertTrue($endOfWeek->isThisWeek());
+
+        $nextWeek = new Plastic();
+        $nextWeek->addDays(7);
+        $this->assertFalse($nextWeek->isThisWeek());
+
+        $lastWeek = new Plastic();
+        $lastWeek->subDays(7);
+        $this->assertFalse($lastWeek->isThisWeek());
+    }
+
+    public function testIsThisMonth(): void
+    {
+        $now = new Plastic();
+        $this->assertTrue($now->isThisMonth());
+
+        $startOfMonth = $now->startOfMonth();
+        $this->assertTrue($startOfMonth->isThisMonth());
+
+        $endOfMonth = $now->endOfMonth();
+        $this->assertTrue($endOfMonth->isThisMonth());
+
+        $nextMonth = new Plastic();
+        $nextMonth->addDays(35);
+        $this->assertFalse($nextMonth->isThisMonth());
+
+        $lastMonth = new Plastic();
+        $lastMonth->subDays(35);
+        $this->assertFalse($lastMonth->isThisMonth());
+    }
+
+    public function testIsThisYear(): void
+    {
+        $now = new Plastic();
+        $this->assertTrue($now->isThisYear());
+
+        $startOfYear = $now->startOfYear();
+        $this->assertTrue($startOfYear->isThisYear());
+
+        $endOfYear = $now->endOfYear();
+        $this->assertTrue($endOfYear->isThisYear());
+
+        $nextYear = new Plastic();
+        $nextYear->addDays(366);
+        $this->assertFalse($nextYear->isThisYear());
+
+        $lastYear = new Plastic();
+        $lastYear->subDays(366);
+        $this->assertFalse($lastYear->isThisYear());
     }
 
     public function testIsInBetween(): void

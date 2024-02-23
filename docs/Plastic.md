@@ -27,7 +27,9 @@ The `Plastic` class extends PHP's native `DateTime` class, providing additional,
 - [isToday()](#isToday)  Checks if the date is today.
 - [isTomorrow()](#isTomorrow)  Checks if the date is tomorrow.
 - [isYesterday()](#isYesterday)  Checks if the date is yesterday.
-- [isWeekend()](#isWeekend)  Checks if the date is a weekend.
+- [isThisWeek()](#isThisWeek)  Checks if the date is this week.
+- [isThisMonth()](#isThisMonth)  Checks if the date is this month.
+- [isThisYear()](#isThisYear)  Checks if the date is this year.
 - [lt()](#lt)  Checks if the date is less than another date.
 - [gt()](#gt)  Checks if the date is greater than another date.
 - [isInBetween()](#isInBetween)  Checks if the date is in between two other dates.
