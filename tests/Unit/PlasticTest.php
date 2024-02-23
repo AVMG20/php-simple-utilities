@@ -11,6 +11,36 @@ class PlasticTest extends TestCase
         $this->assertEqualsWithDelta(time(), $plastic->getTimestamp(), 2, 'Plastic::now() should be close to the current time.');
     }
 
+    public function testAddAndSubSeconds(): void
+    {
+        $plastic = new Plastic('2024-01-01 00:00:00');
+        $plastic->addSeconds(30);
+        $this->assertEquals('2024-01-01 00:00:30', $plastic->format('Y-m-d H:i:s'));
+
+        $plastic->subSeconds(30);
+        $this->assertEquals('2024-01-01 00:00:00', $plastic->format('Y-m-d H:i:s'));
+    }
+
+    public function testAddAndSubMinutes(): void
+    {
+        $plastic = new Plastic('2024-01-01 00:00');
+        $plastic->addMinutes(30);
+        $this->assertEquals('2024-01-01 00:30', $plastic->format('Y-m-d H:i'));
+
+        $plastic->subMinutes(30);
+        $this->assertEquals('2024-01-01 00:00', $plastic->format('Y-m-d H:i'));
+    }
+
+    public function testAddAndSubHours(): void
+    {
+        $plastic = new Plastic('2024-01-01');
+        $plastic->addHours(24);
+        $this->assertEquals('2024-01-02', $plastic->format('Y-m-d'));
+
+        $plastic->subHours(24);
+        $this->assertEquals('2024-01-01', $plastic->format('Y-m-d'));
+    }
+
     public function testAddAndSubDays(): void
     {
         $plastic = new Plastic('2024-01-01');
@@ -19,6 +49,26 @@ class PlasticTest extends TestCase
 
         $plastic->subDays(2);
         $this->assertEquals('2023-12-31', $plastic->format('Y-m-d'));
+    }
+
+    public function testAddAndSubMonths(): void
+    {
+        $plastic = new Plastic('2024-02-01');
+        $plastic->addMonths(1);
+        $this->assertEquals('2024-03-01', $plastic->format('Y-m-d'));
+
+        $plastic->subMonths(2);
+        $this->assertEquals('2024-01-01', $plastic->format('Y-m-d'));
+    }
+
+    public function testAddAndSubYears(): void
+    {
+        $plastic = new Plastic('2024-02-01');
+        $plastic->addYears(1);
+        $this->assertEquals('2025-02-01', $plastic->format('Y-m-d'));
+
+        $plastic->subYears(2);
+        $this->assertEquals('2023-02-01', $plastic->format('Y-m-d'));
     }
 
     public function testDiffInDays(): void
@@ -57,36 +107,6 @@ class PlasticTest extends TestCase
 
         $this->assertTrue($past->lt(new Plastic()));
         $this->assertTrue($future->gt(new Plastic()));
-    }
-
-    public function testAddAndSubSeconds(): void
-    {
-        $plastic = new Plastic('2024-01-01 00:00:00');
-        $plastic->addSeconds(30);
-        $this->assertEquals('2024-01-01 00:00:30', $plastic->format('Y-m-d H:i:s'));
-
-        $plastic->subSeconds(30);
-        $this->assertEquals('2024-01-01 00:00:00', $plastic->format('Y-m-d H:i:s'));
-    }
-
-    public function testAddAndSubMinutes(): void
-    {
-        $plastic = new Plastic('2024-01-01 00:00');
-        $plastic->addMinutes(30);
-        $this->assertEquals('2024-01-01 00:30', $plastic->format('Y-m-d H:i'));
-
-        $plastic->subMinutes(30);
-        $this->assertEquals('2024-01-01 00:00', $plastic->format('Y-m-d H:i'));
-    }
-
-    public function testAddAndSubHours(): void
-    {
-        $plastic = new Plastic('2024-01-01');
-        $plastic->addHours(24);
-        $this->assertEquals('2024-01-02', $plastic->format('Y-m-d'));
-
-        $plastic->subHours(24);
-        $this->assertEquals('2024-01-01', $plastic->format('Y-m-d'));
     }
 
     public function testStartAndEndOfWeek(): void

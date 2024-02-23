@@ -25,28 +25,6 @@ class Plastic extends DateTime
     }
 
     /**
-     * Add a certain number of days to the instance.
-     *
-     * @param int $days The number of days to add.
-     * @return static The new instance.
-     */
-    public function addDays(int $days): static
-    {
-        return $this->add(new DateInterval("P{$days}D"));
-    }
-
-    /**
-     * Subtract a certain number of days from the instance.
-     *
-     * @param int $days The number of days to subtract.
-     * @return static The new instance.
-     */
-    public function subDays(int $days): static
-    {
-        return $this->sub(new DateInterval("P{$days}D"));
-    }
-
-    /**
      * Add a certain number of seconds to the instance.
      *
      * @param int $seconds The number of seconds to add.
@@ -110,6 +88,72 @@ class Plastic extends DateTime
     public function subHours(int $hours): static
     {
         return $this->sub(new DateInterval("PT{$hours}H"));
+    }
+
+    /**
+     * Add a certain number of days to the instance.
+     *
+     * @param int $days The number of days to add.
+     * @return static The new instance.
+     */
+    public function addDays(int $days): static
+    {
+        return $this->add(new DateInterval("P{$days}D"));
+    }
+
+    /**
+     * Subtract a certain number of days from the instance.
+     *
+     * @param int $days The number of days to subtract.
+     * @return static The new instance.
+     */
+    public function subDays(int $days): static
+    {
+        return $this->sub(new DateInterval("P{$days}D"));
+    }
+
+    /**
+     * Add a certain number of months to the instance.
+     *
+     * @param int $months The number of months to add.
+     * @return static The new instance.
+     */
+    public function addMonths(int $months): static
+    {
+        return $this->add(new DateInterval("P{$months}M"));
+    }
+
+    /**
+     * Subtract a certain number of months from the instance.
+     *
+     * @param int $months The number of months to subtract.
+     * @return static The new instance.
+     */
+    public function subMonths(int $months): static
+    {
+        return $this->sub(new DateInterval("P{$months}M"));
+    }
+
+    /**
+     * Add a certain number of years to the instance.
+     *
+     * @param int $years The number of years to add.
+     * @return static The new instance.
+     */
+    public function addYears(int $years): static
+    {
+        return $this->add(new DateInterval("P{$years}Y"));
+    }
+
+    /**
+     * Subtract a certain number of years from the instance.
+     *
+     * @param int $years The number of years to subtract.
+     * @return static The new instance.
+     */
+    public function subYears(int $years): static
+    {
+        return $this->sub(new DateInterval("P{$years}Y"));
     }
 
     /**
