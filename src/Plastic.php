@@ -25,28 +25,6 @@ class Plastic extends DateTime
     }
 
     /**
-     * Add a certain number of days to the instance.
-     *
-     * @param int $days The number of days to add.
-     * @return static The new instance.
-     */
-    public function addDays(int $days): static
-    {
-        return $this->add(new DateInterval("P{$days}D"));
-    }
-
-    /**
-     * Subtract a certain number of days from the instance.
-     *
-     * @param int $days The number of days to subtract.
-     * @return static The new instance.
-     */
-    public function subDays(int $days): static
-    {
-        return $this->sub(new DateInterval("P{$days}D"));
-    }
-
-    /**
      * Add a certain number of seconds to the instance.
      *
      * @param int $seconds The number of seconds to add.
@@ -110,6 +88,28 @@ class Plastic extends DateTime
     public function subHours(int $hours): static
     {
         return $this->sub(new DateInterval("PT{$hours}H"));
+    }
+
+    /**
+     * Add a certain number of days to the instance.
+     *
+     * @param int $days The number of days to add.
+     * @return static The new instance.
+     */
+    public function addDays(int $days): static
+    {
+        return $this->add(new DateInterval("P{$days}D"));
+    }
+
+    /**
+     * Subtract a certain number of days from the instance.
+     *
+     * @param int $days The number of days to subtract.
+     * @return static The new instance.
+     */
+    public function subDays(int $days): static
+    {
+        return $this->sub(new DateInterval("P{$days}D"));
     }
 
     /**
