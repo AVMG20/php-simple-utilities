@@ -540,4 +540,57 @@ class CollectionTest extends TestCase
         $this->assertInstanceOf(Collection::class, $values);
         $this->assertNotSame($original, $values);
     }
+
+    public function testUniqueWithNoParameters()
+    {
+        $collection = Collection::collect([1, 2, 2, 3, 4, 4, 5]);
+        $unique = $collection->unique();
+
+        $this->assertEquals([1, 2, 3, 4, 5], array_values($unique->toArray()));
+    }
+
+    public function testUniqueWithStringKey()
+    {
+        $collection = Collection::collect([
+            ['id' => 1, 'name' => 'John'],
+            ['id' => 2, 'name' => 'Jane'],
+            ['id' => 1, 'name' => 'John'],
+        ]);
+        $unique = $collection->unique('id');
+
+        $this->assertCount(2, $unique);
+        $this->assertEquals([['id' => 1, 'name' => 'John'], ['id' => 2, 'name' => 'Jane']], array_values($unique->toArray()));
+    }
+
+    public function testUniqueWithStrict()
+    {
+        $collection = Collection::collect([1, '1', 2]);
+        $unique = $collection->unique(null, true);
+
+        $this->assertEquals([1, '1', 2], array_values($unique->toArray()));
+    }
+
+    public function testUniqueWithCallback()
+    {
+        $collection = Collection::collect([1, 2, 3, 4, 5]);
+        $unique = $collection->unique(fn($item) => $item % 2);
+
+        $this->assertEquals([1, 2], array_values($unique->toArray()));
+    }
+
+    public function testUniqueWithNestedArrays()
+    {
+        $collection = Collection::collect([
+            ['product' => ['id' => 1, 'name' => 'Apple']],
+            ['product' => ['id' => 2, 'name' => 'Banana']],
+            ['product' => ['id' => 1, 'name' => 'Apple']],
+        ]);
+        $unique = $collection->unique('product.id');
+
+        $this->assertCount(2, $unique);
+        $this->assertEquals([
+            ['product' => ['id' => 1, 'name' => 'Apple']],
+            ['product' => ['id' => 2, 'name' => 'Banana']],
+        ], array_values($unique->toArray()));
+    }
 }
