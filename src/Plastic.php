@@ -12,6 +12,25 @@ use Exception;
 
 class Plastic extends DateTime
 {
+    protected array $translations = [
+        'year' => 'year',
+        'years' => 'years',
+        'month' => 'month',
+        'months' => 'months',
+        'day' => 'day',
+        'days' => 'days',
+        'hour' => 'hour',
+        'hours' => 'hours',
+        'minute' => 'minute',
+        'minutes' => 'minutes',
+        'second' => 'second',
+        'seconds' => 'seconds',
+        'just now' => 'just now',
+        'and' => ' and ',
+        'ago' => '%s ago',
+        'in' => 'in %s',
+    ];
+
     /**
      * Create a new Plastic instance representing the current time.
      *
@@ -22,6 +41,19 @@ class Plastic extends DateTime
     public static function now(?string $timezone = null): static
     {
         return new static('now', new DateTimeZone($timezone ?: date_default_timezone_get()));
+    }
+
+    /**
+     * Create a new Plastic instance from a specific date and time.
+     *
+     * @param string|DateTimeInterface $datetime The date and time to create the instance from.
+     * @param string|null $timezone Optional. The timezone in which to create the instance.
+     * @return static The new instance.
+     * @throws Exception If the timezone is invalid.
+     */
+    public static function parse(string|DateTimeInterface $datetime, ?string $timezone = null): static
+    {
+        return $datetime instanceof DateTimeInterface ? new static($datetime->format('Y-m-d H:i:s'), $datetime->getTimezone()) : new static($datetime, new DateTimeZone($timezone ?: date_default_timezone_get()));
     }
 
     /**
@@ -376,5 +408,71 @@ class Plastic extends DateTime
     public function isInBetween(DateTimeInterface $start, DateTimeInterface $end): bool
     {
         return $this->gt($start) && $this->lt($end);
+    }
+
+    /**
+     * Returns the difference between two dates in a human-readable format with support for translations.
+     *
+     * @param DateTimeInterface|null $otherDate The date to compare with, or null to compare with now.
+     * @param bool $absolute Removes the past/future tense, making it just '5 minutes', not '5 minutes ago' or 'in 5 minutes'.
+     * @return string The human-readable difference.
+     */
+    public function diffForHumans(?DateTimeInterface $otherDate = null, bool $absolute = false): string
+    {
+        $dateToCompare = $otherDate ?: new static();
+        $interval = $this->diff($dateToCompare);
+
+        $formatMap = [
+            'y' => 'year',
+            'm' => 'month',
+            'd' => 'day',
+            'h' => 'hour',
+            'i' => 'minute',
+            's' => 'second',
+        ];
+
+        // create an array of the parts that are not 0
+        $parts = [];
+        foreach ($formatMap as $key => $text) {
+            $value = $interval->$key;
+            if ($value > 0) {
+                // get the plural or non-plural version of the text
+                $transKey = $value === 1 ? $text : $text . 's';
+                $textTranslated = $this->translations[$transKey];
+
+                $parts[] = $value . ' ' . $textTranslated;
+            }
+        }
+
+        // if the difference is less than a minute, return 'just now'
+        if (empty($parts)) return $this->translations['just now'];
+
+        // Only add 'and' before the last part if there are more than one part
+        $result = count($parts) > 1 ? implode(', ', array_slice($parts, 0, -1)) . $this->translations['and'] . end($parts) : $parts[0];
+
+        // if absolute is true, return the result without the tense
+        if ($absolute) return $result;
+
+        // return the result with the tense
+        $tenseKey = $this < $dateToCompare ? 'ago' : 'in';
+        return sprintf($this->translations[$tenseKey], $result);
+    }
+
+    /**
+     * @return array|string[]
+     */
+    public function getTranslations(): array
+    {
+        return $this->translations;
+    }
+
+    /**
+     * @param array $translations
+     * @return $this
+     */
+    public function setTranslations(array $translations): Plastic
+    {
+        $this->translations = $translations;
+        return $this;
     }
 }
