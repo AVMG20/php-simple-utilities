@@ -131,6 +131,30 @@ class PlasticTest extends TestCase
         $this->assertTrue($endOfWeek->isThisWeek());
     }
 
+    public function testIsThisMonth(): void
+    {
+        $now = new Plastic();
+        $this->assertTrue($now->isThisMonth());
+
+        $startOfMonth = $now->startOfMonth();
+        $this->assertTrue($startOfMonth->isThisMonth());
+
+        $endOfMonth = $now->endOfMonth();
+        $this->assertTrue($endOfMonth->isThisMonth());
+    }
+
+    public function testIsThisYear(): void
+    {
+        $now = new Plastic();
+        $this->assertTrue($now->isThisYear());
+
+        $startOfYear = $now->startOfYear();
+        $this->assertTrue($startOfYear->isThisYear());
+
+        $endOfYear = $now->endOfYear();
+        $this->assertTrue($endOfYear->isThisYear());
+    }
+
     public function testIsInBetween(): void
     {
         $start = new Plastic('2024-01-01');
