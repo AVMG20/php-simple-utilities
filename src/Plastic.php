@@ -113,6 +113,50 @@ class Plastic extends DateTime
     }
 
     /**
+     * Add a certain number of months to the instance.
+     *
+     * @param int $months The number of months to add.
+     * @return static The new instance.
+     */
+    public function addMonths(int $months): static
+    {
+        return $this->add(new DateInterval("P{$months}M"));
+    }
+
+    /**
+     * Subtract a certain number of months from the instance.
+     *
+     * @param int $months The number of months to subtract.
+     * @return static The new instance.
+     */
+    public function subMonths(int $months): static
+    {
+        return $this->sub(new DateInterval("P{$months}M"));
+    }
+
+    /**
+     * Add a certain number of years to the instance.
+     *
+     * @param int $years The number of years to add.
+     * @return static The new instance.
+     */
+    public function addYears(int $years): static
+    {
+        return $this->add(new DateInterval("P{$years}Y"));
+    }
+
+    /**
+     * Subtract a certain number of years from the instance.
+     *
+     * @param int $years The number of years to subtract.
+     * @return static The new instance.
+     */
+    public function subYears(int $years): static
+    {
+        return $this->sub(new DateInterval("P{$years}Y"));
+    }
+
+    /**
      * Get the difference in seconds between this instance and another date.
      *
      * @param DateTimeInterface $date The date to compare with.

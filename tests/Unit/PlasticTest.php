@@ -51,6 +51,26 @@ class PlasticTest extends TestCase
         $this->assertEquals('2023-12-31', $plastic->format('Y-m-d'));
     }
 
+    public function testAddAndSubMonths(): void
+    {
+        $plastic = new Plastic('2024-02-01');
+        $plastic->addMonths(1);
+        $this->assertEquals('2024-03-01', $plastic->format('Y-m-d'));
+
+        $plastic->subMonths(2);
+        $this->assertEquals('2024-01-01', $plastic->format('Y-m-d'));
+    }
+
+    public function testAddAndSubYears(): void
+    {
+        $plastic = new Plastic('2024-02-01');
+        $plastic->addYears(1);
+        $this->assertEquals('2025-02-01', $plastic->format('Y-m-d'));
+
+        $plastic->subYears(2);
+        $this->assertEquals('2023-02-01', $plastic->format('Y-m-d'));
+    }
+
     public function testDiffInDays(): void
     {
         $start = new Plastic('2024-01-01');
