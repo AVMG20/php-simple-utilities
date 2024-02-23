@@ -15,6 +15,7 @@ This document provides examples for each method in the `Collection` class, illus
 - [get()](#get) retrieve the item at a given key.
 - [put()](#put) set the item at a given key.
 - [sum()](#sum) Get the sum of the given values.
+- [unique()](#unique) retrieve all unique items in the collection.
 - [isEmpty()](#isEmpty) determine if the collection is empty.
 - [isNotEmpty()](#isNotEmpty) determine if the collection is not empty.
 - [values()](#values) get the values of the collection.
@@ -198,6 +199,30 @@ $total = $collection->sum(function ($item) {
     return $item * 2;
 });
 // $total is 20
+```
+
+### Unique()
+
+Retrieves all unique items in the collection.
+
+```php
+$collection = Collection::collect([1, 2, 2, 3, 3, 3]);
+
+$unique = $collection->unique();
+
+// $unique contains: [1, 2, 3]
+```
+Retrieves all unique items in the collection, based on a given key.
+```php
+$collection = Collection::collect([
+    ['name' => 'John', 'age' => 30],
+    ['name' => 'Jane', 'age' => 30],
+    ['name' => 'John', 'age' => 30],
+]);
+
+$unique = $collection->unique('name');
+
+// $unique contains: [['name' => 'John', 'age' => 30], ['name' => 'Jane', 'age' => 30]]
 ```
 
 ### IsEmpty()

@@ -405,6 +405,33 @@ class Collection implements ArrayAccess, \Countable
     }
 
     /**
+     * Return only unique items from the collection array.
+     *
+     * @param  (callable(TValue, TKey): mixed)|string|null  $key
+     * @param  bool  $strict
+     * @return static
+     */
+    public function unique($key = null, $strict = false): static
+    {
+        if (is_null($key) && $strict === false) {
+            return new static(array_unique($this->items, SORT_REGULAR));
+        }
+
+        $callback = $this->valueRetriever($key);
+
+        $exists = [];
+
+        return $this->reject(function ($item, $key) use ($callback, $strict, &$exists) {
+            if (in_array($id = $callback($item, $key), $exists, $strict)) {
+                return true;
+            }
+
+            $exists[] = $id;
+            return false;
+        });
+    }
+
+    /**
      * Get the values of a specified key from the collection.
      * The method allows using "dot" notation for accessing nested array elements.
      * If a key is provided, the method returns an associative array with keys from the collection
@@ -497,6 +524,25 @@ class Collection implements ArrayAccess, \Countable
     protected function value(mixed $value): mixed
     {
         return $value instanceof Closure ? $value() : $value;
+    }
+
+    /**
+     * Get the values of a specified key from the collection.
+     *
+     * @param callable|string|null $key The key to pluck from the collection items. Supports dot notation for nested arrays.
+     * @return callable|Closure|string|null The value retriever.
+     */
+    protected function valueRetriever($key)
+    {
+        if (is_null($key)) {
+            return fn ($item) => $item;
+        }
+
+        if (is_string($key)) {
+            return fn ($item) => $this->dataGet($item, $key);
+        }
+
+        return $key;
     }
 
     /**
