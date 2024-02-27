@@ -71,38 +71,21 @@ $plastic = Plastic::parse($datetime);
 echo $plastic->format('Y-m-d H:i:s');
 // Outputs: 2022-01-01 00:00:00
 ```
-
-### diffForHumans()
-
-The `diffForHumans` method returns the difference between two dates in a human-readable format. <br />
-The default language is English, but you can set your own translations using the `setTranslations` method. <br />
-If no compare date is given the current date and time will be used for comparison.
-
+The `diffForHumans` method can also be customized to show only the most significant time segments and to remove the tense of time (past or future) by using the `absolute` and `segments` parameters respectively.
 ```php
-$twoDaysAgo = Plastic::parse('2024-02-21 10:36:35');
-$compare = Plastic::parse('2024-02-23 10:30');
+$someTimeAgo = Plastic::parse('2024-01-01 09:15:30');
+$currentDate = Plastic::parse('2024-02-25 12:00');
 
-//dutch translations
-$twoDaysAgo->setTranslations([
-    'year' => 'jaar',
-    'years' => 'jaar',
-    'month' => 'maand',
-    'months' => 'maanden',
-    'day' => 'dag',
-    'days' => 'dagen',
-    'hour' => 'uur',
-    'hours' => 'uur',
-    'minute' => 'minuut',
-    'minutes' => 'minuten',
-    'second' => 'seconde',
-    'seconds' => 'seconden',
-    'just now' => 'zojuist',
-    'and' => ' en ',
-    'ago' => '%s geleden',
-    'in' => 'over %s',
-]);
+// Use the method without tense (absolute) and limit to 2 time segments
+echo $someTimeAgo->diffForHumans($currentDate, true, 2);
+// Outputs: 1 month and 24 days
 
-echo $twoDaysAgo->diffForHumans($compare);
-// Outputs: 1 dag, 23 uur, 53 minuten en 25 seconden geleden
+// Now with tense and still limited to 2 segments
+echo $someTimeAgo->diffForHumans($currentDate, false, 2);
+// Outputs: 1 month and 24 days ago
+
+// Example with more segments but still limiting the output
+$anotherTime = Plastic::parse('2023-12-25 08:00');
+echo $anotherTime->diffForHumans($currentDate, false, 4);
+// Outputs: 1 year, 2 months, 1 day and 4 hours ago
 ```
-
