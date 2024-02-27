@@ -281,34 +281,6 @@ class PlasticTest extends TestCase
         $this->assertEquals('1 hour and 5 minutes', $fiveMinutesAgo->diffForHumans($compare, absolute: true));
     }
 
-    public function testDiffForHumansWithTranslations()
-    {
-        $twoDaysAgo = Plastic::parse('2024-02-21 10:36:35');
-        $compare = Plastic::parse('2024-02-23 10:30');
-
-        //dutch translations
-        $twoDaysAgo->setTranslations([
-            'year' => 'jaar',
-            'years' => 'jaar',
-            'month' => 'maand',
-            'months' => 'maanden',
-            'day' => 'dag',
-            'days' => 'dagen',
-            'hour' => 'uur',
-            'hours' => 'uur',
-            'minute' => 'minuut',
-            'minutes' => 'minuten',
-            'second' => 'seconde',
-            'seconds' => 'seconden',
-            'just now' => 'zojuist',
-            'and' => ' en ',
-            'ago' => '%s geleden',
-            'in' => 'over %s',
-        ]);
-
-        $this->assertEquals('1 dag, 23 uur, 53 minuten en 25 seconden geleden', $twoDaysAgo->diffForHumans($compare));
-    }
-
     public function testParseFromString()
     {
         $dateString = '2024-02-23 14:00:00';
@@ -344,5 +316,45 @@ class PlasticTest extends TestCase
         $dateString = '2024-02-23 14:00:00';
         $invalidTimezone = 'Invalid/Timezone';
         $plastic = Plastic::parse($dateString, $invalidTimezone);
+    }
+
+    public function testDiffForHumansSegments()
+    {
+        $date = Plastic::parse('2024-02-23 14:00:00');
+        $complexDate = Plastic::parse('2025-04-28 19:00:00');
+
+        // Only show the two most significant segments (year and months)
+        $this->assertEquals('in 1 year and 2 months', $complexDate->diffForHumans($date, false, 2));
+
+        // Show all available segments
+        $this->assertEquals('in 1 year, 2 months and 5 days', $complexDate->diffForHumans($date, false, 3));
+    }
+
+    public function testDiffForHumansWithTranslations()
+    {
+        $twoDaysAgo = Plastic::parse('2024-02-21 10:36:35');
+        $compare = Plastic::parse('2024-02-23 10:30');
+
+        //dutch translations
+        $twoDaysAgo->setTranslations([
+            'year' => 'jaar',
+            'years' => 'jaar',
+            'month' => 'maand',
+            'months' => 'maanden',
+            'day' => 'dag',
+            'days' => 'dagen',
+            'hour' => 'uur',
+            'hours' => 'uur',
+            'minute' => 'minuut',
+            'minutes' => 'minuten',
+            'second' => 'seconde',
+            'seconds' => 'seconden',
+            'just now' => 'zojuist',
+            'and' => ' en ',
+            'ago' => '%s geleden',
+            'in' => 'over %s',
+        ]);
+
+        $this->assertEquals('1 dag, 23 uur, 53 minuten en 25 seconden geleden', $twoDaysAgo->diffForHumans($compare, segments: 10));
     }
 }

@@ -415,9 +415,11 @@ class Plastic extends DateTime
      *
      * @param DateTimeInterface|null $otherDate The date to compare with, or null to compare with now.
      * @param bool $absolute Removes the past/future tense, making it just '5 minutes', not '5 minutes ago' or 'in 5 minutes'.
+     * @param int $segments The number of time segments to include in the string. Example "2 weeks, 4 hours,  5 minutes and 36 seconds" would be 4 segments.
+     *                      We only include the highest segments, so this string would become "2 weeks and 4 hours".
      * @return string The human-readable difference.
      */
-    public function diffForHumans(?DateTimeInterface $otherDate = null, bool $absolute = false): string
+    public function diffForHumans(?DateTimeInterface $otherDate = null, bool $absolute = false, int $segments = 2): string
     {
         $dateToCompare = $otherDate ?: new static();
         $interval = $this->diff($dateToCompare);
@@ -431,18 +433,19 @@ class Plastic extends DateTime
             's' => 'second',
         ];
 
-        // create an array of the parts that are not 0
+        // create an array of the parts that are not 0, then slice to limit segments
         $parts = [];
         foreach ($formatMap as $key => $text) {
             $value = $interval->$key;
             if ($value > 0) {
-                // get the plural or non-plural version of the text
                 $transKey = $value === 1 ? $text : $text . 's';
                 $textTranslated = $this->translations[$transKey];
-
                 $parts[] = $value . ' ' . $textTranslated;
             }
         }
+
+        // Limit the number of parts to the number of segments required
+        $parts = array_slice($parts, 0, $segments);
 
         // if the difference is less than a minute, return 'just now'
         if (empty($parts)) return $this->translations['just now'];
