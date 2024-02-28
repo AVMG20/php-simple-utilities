@@ -11,6 +11,7 @@ This package includes the following utilities:
 - **[FileCache Class](docs/FileCache.md)**: A simple interface for storing, retrieving, and managing cache data in the filesystem.
 - **[EventDispatcher Class](docs/EventDispatcher.md)**: A simple, yet powerful way to manage and dispatch events throughout your PHP application.
 - **[Plastic Class](docs/Plastic.md)**: A Simple Carbon inspired class for working with dates and times, with no dependencies and a focus on simplicity and type safety.
+- **[FileStorage Class](docs/FileStorage.md)**: A simple and efficient way to handle file storage operations within a filesystem, providing functionalities such as creating directories, storing, retrieving, and deleting files.
 
 ### Dependencies
 

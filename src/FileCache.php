@@ -171,7 +171,7 @@ class FileCache
      */
     protected function getHashedKey(string $key): string
     {
-        return hash('xxh64', $key);
+        return hash('xxh128', $key);
     }
 
     /**
