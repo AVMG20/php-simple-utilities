@@ -441,7 +441,6 @@ class Collection implements ArrayAccess, \Countable
      * @param  string|null  $key  Optional. The key to serve as the resulting array's keys. Also supports dot notation.
      * @return static  A new collection instance containing the plucked values.
      */
-
     public function pluck(string $value, string|null $key = null): static
     {
         $results = [];
@@ -458,6 +457,42 @@ class Collection implements ArrayAccess, \Countable
         }
 
         return new static($results);
+    }
+
+    /**
+     * Flatten a multi-dimensional collection into a single level collection.
+     *
+     * @paramint $depth
+     * @param int $depth
+     * @return static
+     */
+    public function flatten(int $depth = 256): static
+    {
+        return new static($this->doFlatten($this->items, $depth));
+    }
+
+    /**
+     * A helper method to recursively flatten an array.
+     *
+     * @param  array  $array
+     * @param int $depth
+     * @return array
+     */
+    protected function doFlatten(array $array, int $depth = 256): array
+    {
+        $result = [];
+
+        foreach ($array as $item) {
+            if (!is_array($item)) {
+                $result[] = $item;
+            } elseif ($depth === 1) {
+                $result = array_merge($result, array_values($item));
+            } else {
+                $result = array_merge($result, $this->doFlatten($item, $depth - 1));
+            }
+        }
+
+        return $result;
     }
 
     /**

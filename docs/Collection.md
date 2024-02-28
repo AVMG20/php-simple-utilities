@@ -30,6 +30,7 @@ This document provides examples for each method in the `Collection` class, illus
 - [transform()](#transform) transform each item in the collection using a callback.
 - [chunk()](#chunk) split the collection into chunks of the given size.
 - [pluck()](#pluck) get the values of a specified key from the collection.
+- [flatten()](#flatten) flatten a multi-dimensional collection into a single level.
 - [reject()](#reject) filter the collection by removing items that pass the truth test.
 - [merge()](#merge) merge another array or collection with the original collection.
 - [ensure()](#ensure) verify that all elements of a collection are of a given type or list of types.
@@ -446,6 +447,17 @@ $merged = $collection->merge(['cherry', 'date']);
 // $merged contains: ['apple', 'banana', 'cherry', 'date']
 ```
 
+### Flatten()
+
+Flattens a multi-dimensional collection into a single level.
+
+```php
+$collection = Collection::collect([1, [2, 3], [4, [5, 6]]]);
+
+$flattened = $collection->flatten();
+
+// $flattened contains: [1, 2, 3, 4, 5, 6]
+```
 
 ### Ensure()
 

@@ -593,4 +593,20 @@ class CollectionTest extends TestCase
             ['product' => ['id' => 2, 'name' => 'Banana']],
         ], array_values($unique->toArray()));
     }
+
+    public function testSimpleFlatten()
+    {
+        $collection = Collection::collect([1, [2, 3], [4, [5, 6]]]);
+        $flattened = $collection->flatten();
+
+        $this->assertEquals([1, 2, 3, 4, 5, 6], array_values($flattened->toArray()));
+    }
+
+    public function testFlattenWithDepth()
+    {
+        $collection = Collection::collect([1, [2, 3], [4, [5, 6]]]);
+        $flattened = $collection->flatten(1);
+
+        $this->assertEquals([1, 2, 3, 4, [5, 6]], array_values($flattened->toArray()));
+    }
 }
