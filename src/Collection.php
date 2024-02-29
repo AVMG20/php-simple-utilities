@@ -363,10 +363,10 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Filters the collection using a callback function and returns a new collection with the filtered items.
      *
-     * @param (callable(TValue, TKey): bool) $callback The callback function for filtering. The callback should accept two arguments: the item and its key.
+     * @param (callable(TValue, TKey): bool)|null $callback The callback function for filtering. The callback should accept two arguments: the item and its key.
      * @return static Returns a new collection instance containing only the items that pass the callback function filter.
      */
-    public function filter(callable $callback): static
+    public function filter(?callable $callback = null): static
     {
         return new static(array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH));
     }
