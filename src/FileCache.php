@@ -95,14 +95,19 @@ class FileCache
         }
 
         $contents = file($filePath);
+
+        // get the expiry time
         $expireTime = (int)$contents[0];
+        unset($contents[0]);
 
         if (time() > $expireTime) {
             unlink($filePath);
             return $this->value($default);
         }
 
-        return unserialize($contents[1]);
+        // create contents of all remaining lines
+        $contents = implode('', $contents);
+        return unserialize($contents);
     }
 
     /**
