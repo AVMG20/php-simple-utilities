@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace Avmg\PhpSimpleUtilities;
 
+use BackedEnum;
 use InvalidArgumentException;
 use JsonSerializable;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
+use UnitEnum;
 
 /**
  * Base DTO Data class
@@ -24,7 +26,7 @@ abstract class Data implements JsonSerializable
      * @return static Returns an instance of the data object.
      * @throws InvalidArgumentException|ReflectionException
      */
-    public static function from(array $attributes)
+    public static function from(array $attributes): static
     {
         $reflectionClass = new ReflectionClass(static::class);
         $constructor = $reflectionClass->getConstructor();
@@ -54,7 +56,7 @@ abstract class Data implements JsonSerializable
      * @return mixed Returns the value for the parameter.
      * @throws ReflectionException Throws an exception if the parameter is required but not found in the attributes array.
      */
-    protected static function getValue(ReflectionParameter $parameter, array $attributes)
+    protected static function getValue(ReflectionParameter $parameter, array $attributes): mixed
     {
         $name = $parameter->getName();
         $type = $parameter->getType();
@@ -96,9 +98,9 @@ abstract class Data implements JsonSerializable
         if ($type && !$type->isBuiltin() && $value !== null) {
             $typeName = $type->getName();
 
-            // Handle enum types for PHP 8.1+
-            if (PHP_VERSION_ID >= 80100 && enum_exists($typeName)) {
+            if (enum_exists($typeName)) {
                 // Bypass casting if value is already of the correct enum type
+                /** @var UnitEnum|BackedEnum $typeName */
                 if ($value instanceof $typeName) {
                     return $value;
                 }
@@ -150,18 +152,16 @@ abstract class Data implements JsonSerializable
     public function toArray(): array {
         $result = [];
         foreach ($this as $propertyName => $value) {
-            // Check for PHP 8.1+ enums, ensuring compatibility with PHP 7.4+
-            if (PHP_VERSION_ID >= 80100 && $value instanceof \UnitEnum) {
-                $result[$propertyName] = $value instanceof \BackedEnum ? $value->value : $value->name;
+            if ($value instanceof UnitEnum) {
+                $result[$propertyName] = $value instanceof BackedEnum ? $value->value : $value->name;
                 continue;
             }
 
             // Recursively convert nested Data objects to arrays
             if (is_iterable($value)) {
                 $result[$propertyName] = array_map(function ($item) {
-                    // PHP 8.1+ enum handling within nested structures
-                    if (PHP_VERSION_ID >= 80100 && $item instanceof \UnitEnum) {
-                        return $item instanceof \BackedEnum ? $item->value : $item->name;
+                    if ($item instanceof UnitEnum) {
+                        return $item instanceof BackedEnum ? $item->value : $item->name;
                     }
                     if ($item instanceof self) {
                         return $item->toArray();
