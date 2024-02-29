@@ -121,3 +121,14 @@ $lastModifiedInSubDir = $storage->lastModified('someDir/anotherDir/report.txt');
 // Using dir() to set the context before getting the last modification time
 $lastModifiedUsingDir = $storage->dir('someDir/anotherDir')->lastModified('report.txt');
 ```
+
+### mimeType()
+
+Gets the mime type of a specified file.
+
+```php
+// Get the mime type of 'report.txt'
+$mimeType = $storage->mimeType('report.txt');
+
+// output: text/plain
+```
