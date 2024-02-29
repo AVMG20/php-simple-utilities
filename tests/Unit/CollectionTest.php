@@ -49,6 +49,13 @@ class CollectionTest extends TestCase
         $this->assertEquals([4, 5], array_values($filtered->all())); // array_values to reset keys
     }
 
+    public function testFilterMethodWithNoCallback()
+    {
+        $collection = new Collection([1, false, 3, null, 5]);
+        $filtered = $collection->filter();
+        $this->assertEquals([1, 3, 5], array_values($filtered->all()));
+    }
+
     public function testFirstMethodReturnsFirstItemThatPassesGivenTruthTest()
     {
         $collection = Collection::collect([1, 2, 3]);
