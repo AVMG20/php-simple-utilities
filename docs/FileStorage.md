@@ -7,6 +7,8 @@ The `FileStorage` class offers a simple and efficient way to handle file storage
 - [constructor()](#constructor)  Constructs a new FileStorage instance.
 - [dir()](#dir) Create or set the directory context for file operations.
 - [put()](#put) Stores content in a file at the specified path.
+- [append()](#append) Appends content to a file at the specified path.
+- [prepend()](#prepend) Prepends content to a file at the specified path.
 - [delete()](#delete) Deletes a file from the specified path.
 - [allFiles()](#allFiles) Retrieves all files in the current or a specified directory.
 - [lastModified()](#lastModified) Gets the last modification time of a specified file.
@@ -43,6 +45,34 @@ $storage->dir('someDir/anotherDir')->put('greetings.txt', 'Hello, world!');
 // Or shorthand without setting the dir context
 $storage->put('someDir/anotherDir/greetings.txt', 'Hello, world!');
 ```
+
+### append()
+
+Appends content to a file at the specified path. If the file does not exist, it will be created.
+
+```php
+// Append 'Hello, world!' to 'greetings.txt'
+$storage->append('greetings.txt', 'Hello, world!');
+```
+
+Append to a file located in a sub directory
+```php
+// Append to a file inside a nested directory
+$storage->dir('someDir/anotherDir')->append('greetings.txt', 'Hello, world!');
+// Or shorthand without setting the dir context
+$storage->append('someDir/anotherDir/greetings.txt', 'Hello, world!');
+```
+
+### prepend()
+
+Prepends content to a file at the specified path. If the file does not exist, it will be created.
+
+```php
+// Prepend 'Hello, world!' to 'greetings.txt'
+$storage->prepend('greetings.txt', 'Hello, world!');
+```
+
+
 ### delete()
 
 Deletes a file from the specified path.

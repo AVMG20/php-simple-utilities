@@ -114,4 +114,33 @@ class FileStorageTest extends TestCase
         $files = $this->storage->allFiles();
         $this->assertCount(2, $files, 'There should be two files listed');
     }
+
+    public function testAppendToFile(): void
+    {
+        $filename = 'testFile.txt';
+        $content = 'Hello, world!';
+        $this->storage->put($filename, $content);
+
+        $this->storage->append($filename, ' Appended content');
+        $this->assertEquals($content . ' Appended content', file_get_contents($this->testDir . '/' . $filename), 'File content should match');
+    }
+
+    public function testPrependToFile(): void
+    {
+        $filename = 'testFile.txt';
+        $content = 'Hello, world!';
+        $this->storage->put($filename, $content);
+
+        $this->storage->prepend($filename, 'Prepended content ');
+        $this->assertEquals('Prepended content ' . $content, file_get_contents($this->testDir . '/' . $filename), 'File content should match');
+    }
+
+    public function testGetMimeTypeOfFile(): void
+    {
+        $filename = 'testFile.txt';
+        $content = 'Hello, world!';
+        $this->storage->put($filename, $content);
+
+        $this->assertEquals('text/plain', $this->storage->mimeType($filename), 'Mime type should be text/plain');
+    }
 }

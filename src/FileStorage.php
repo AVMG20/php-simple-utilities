@@ -66,6 +66,34 @@ class FileStorage
     }
 
     /**
+     * Append a file in the selected path.
+     *
+     * @param string $filename Name or Path of the file starting from the base path.
+     * @param mixed $content Content to be written.
+     */
+    public function append(string $filename, mixed $content): void {
+        $fullPath = $this->getFullPath($filename);
+
+        if (false === file_put_contents($fullPath, $content, FILE_APPEND)) {
+            throw new InvalidArgumentException('The file could not be written.');
+        }
+    }
+
+    /**
+     * Prepend a file in the selected path.
+     *
+     * @param string $filename Name or Path of the file starting from the base path.
+     * @param mixed $content Content to be written.
+     */
+    public function prepend(string $filename, mixed $content): void {
+        $fullPath = $this->getFullPath($filename);
+
+        if (false === file_put_contents($fullPath, $content . file_get_contents($fullPath))) {
+            throw new InvalidArgumentException('The file could not be written.');
+        }
+    }
+
+    /**
      * Delete a file from the selected path.
      *
      * @param string $filename Name or Path of the file starting from the base path.
@@ -100,7 +128,7 @@ class FileStorage
         /** @var SplFileInfo $file */
         foreach ($iterator as $file) {
             if ($file->isFile()) {
-                $files[] = $file->getRealPath();
+                $files[] = $file->getFilename();
             }
         }
 
@@ -121,6 +149,22 @@ class FileStorage
         }
 
         return filemtime($fullPath);
+    }
+    /**
+     * The size method returns the file size in bytes.
+     *
+     * @param string $filename Name or Path of the file starting from the base path.
+     * @return false|string The MIME type of the file
+     */
+    public function mimeType(string $filename): false|string
+    {
+        $fullPath = $this->getFullPath($filename);
+
+        if (!file_exists($fullPath)) {
+            throw new InvalidArgumentException('The file does not exist.');
+        }
+
+        return mime_content_type($fullPath);
     }
 
     /**
