@@ -66,6 +66,22 @@ class FileStorage
     }
 
     /**
+     * Get the full path of the file creating directories if needed.
+     *
+     * @param string $filename Name or Path of the file starting from the base path.
+     * @return string The full path of the file
+     */
+    public function get(string $filename): string {
+        $fullPath = $this->getFullPath($filename);
+
+        if (!file_exists($fullPath)) {
+            throw new InvalidArgumentException('The file does not exist.');
+        }
+
+        return file_get_contents($fullPath);
+    }
+
+    /**
      * Append a file in the selected path.
      *
      * @param string $filename Name or Path of the file starting from the base path.
