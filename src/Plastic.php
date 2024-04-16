@@ -57,6 +57,16 @@ class Plastic extends DateTime
     }
 
     /**
+     * Create a new copy of the existing instance.
+     *
+     * @return static
+     */
+    public function copy(): static
+    {
+        return clone $this;
+    }
+
+    /**
      * Add a certain number of seconds to the instance.
      *
      * @param int $seconds The number of seconds to add.
