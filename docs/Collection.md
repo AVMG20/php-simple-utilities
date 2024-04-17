@@ -21,6 +21,7 @@ This document provides examples for each method in the `Collection` class, illus
 - [values()](#values) get the values of the collection.
 - [reduce()](#reduce) reduce the collection to a single value.
 - [map()](#map) apply a callback to each item in the collection and return a new collection of the results.
+- [mapWithKeys()](#mapWithKeys) apply a callback to each item in the collection and return a new collection with the keys and values swapped.
 - [dot()](#dot) flatten a multi-dimensional collection into a single level using 'dot' notation for keys.
 - [pipe()](#pipe) pass the collection to a given closure and return the result.
 - [pipeThrough()](#pipeThrough) pass the collection to a given callback and return the result.
@@ -293,6 +294,37 @@ $multiplied = $collection->map(function ($item) {
 // $multiplied contains: [2, 4, 6]
 ```
 
+
+### MapWithKeys()
+The `mapWithKeys` method iterates through the collection and passes each value to the given callback. The callback should return an associative array containing a single key / value pair:
+
+```php
+$collection = Collection::collect([
+ [
+        'name' => 'John',
+        'department' => 'Sales',
+        'email' => 'john@example.com',
+    ],
+    [
+        'name' => 'Jane',
+        'department' => 'Marketing',
+        'email' => 'jane@example.com',
+    ]
+]);
+
+$keyed = $collection->mapWithKeys(function (array $item, int $key) {
+    return [$item['email'] => $item['name']];
+});
+ 
+$keyed->all();
+
+/*
+    [
+        'john@example.com' => 'John',
+        'jane@example.com' => 'Jane',
+    ]
+*/
+```
 
 ### Dot()
 
