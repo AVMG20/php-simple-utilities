@@ -333,7 +333,7 @@ class Plastic extends DateTime
      */
     public function isToday(): bool
     {
-        return $this->format('Y-m-d') === (new static())->format('Y-m-d');
+        return $this->format('Y-m-d') === (new static('now', $this->getTimezone()))->format('Y-m-d');
     }
 
     /**
@@ -343,7 +343,7 @@ class Plastic extends DateTime
      */
     public function isTomorrow(): bool
     {
-        return $this->format('Y-m-d') === (new static('tomorrow'))->format('Y-m-d');
+        return $this->format('Y-m-d') === (new static('tomorrow', $this->getTimezone()))->format('Y-m-d');
     }
 
     /**
@@ -353,7 +353,7 @@ class Plastic extends DateTime
      */
     public function isYesterday(): bool
     {
-        return $this->format('Y-m-d') === (new static('yesterday'))->format('Y-m-d');
+        return $this->format('Y-m-d') === (new static('yesterday', $this->getTimezone()))->format('Y-m-d');
     }
 
     /**
@@ -363,7 +363,7 @@ class Plastic extends DateTime
      */
     public function isThisWeek(): bool
     {
-        return (new static())->startOfWeek()->startOfDay() <= $this && (new static())->endOfWeek()->endOfDay() >= $this;
+        return (new static('now', $this->getTimezone()))->startOfWeek()->startOfDay() <= $this && (new static('now', $this->getTimezone()))->endOfWeek()->endOfDay() >= $this;
     }
 
     /**
@@ -373,7 +373,7 @@ class Plastic extends DateTime
      */
     public function isThisMonth(): bool
     {
-        return (new static())->startOfMonth()->startOfDay() <= $this && (new static())->endOfMonth()->endOfDay() >= $this;
+        return (new static('now', $this->getTimezone()))->startOfMonth()->startOfDay() <= $this && (new static('now', $this->getTimezone()))->endOfMonth()->endOfDay() >= $this;
     }
 
     /**
@@ -383,7 +383,7 @@ class Plastic extends DateTime
      */
     public function isThisYear(): bool
     {
-        return (new static())->startOfYear()->startOfDay() <= $this && (new static())->endOfYear()->endOfDay() >= $this;
+        return (new static('now', $this->getTimezone()))->startOfYear()->startOfDay() <= $this && (new static('now', $this->getTimezone()))->endOfYear()->endOfDay() >= $this;
     }
 
     /**
@@ -394,7 +394,7 @@ class Plastic extends DateTime
      */
     public function lt(?DateTimeInterface $date = null): bool
     {
-        return $this < ($date ?: new static());
+        return $this < ($date ?: new static('now', $this->getTimezone()));
     }
 
     /**
@@ -405,7 +405,7 @@ class Plastic extends DateTime
      */
     public function gt(?DateTimeInterface $date = null): bool
     {
-        return $this > ($date ?: new static());
+        return $this > ($date ?: new static('now', $this->getTimezone()));
     }
 
     /**
@@ -431,7 +431,7 @@ class Plastic extends DateTime
      */
     public function diffForHumans(?DateTimeInterface $otherDate = null, bool $absolute = false, int $segments = 2): string
     {
-        $dateToCompare = $otherDate ?: new static();
+        $dateToCompare = $otherDate ?: new static('now', $this->getTimezone());
         $interval = $this->diff($dateToCompare);
 
         $formatMap = [
