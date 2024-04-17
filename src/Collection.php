@@ -238,6 +238,29 @@ class Collection implements ArrayAccess, \Countable
     }
 
     /**
+     * Run an associative map over each of the items.
+     *
+     * The callback should return an associative array with a single key/value pair.
+     *
+     * @template TMapWithKeysKey of array-key
+     * @template TMapWithKeysValue
+     *
+     * @param  callable(TValue, TKey): array<TMapWithKeysKey, TMapWithKeysValue>  $callback
+     * @return static<TMapWithKeysKey, TMapWithKeysValue>
+     */
+    public function mapWithKeys(callable $callback)
+    {
+        $result = [];
+        foreach ($this->items as $key => $value) {
+            $assoc = $callback($value, $key);
+            foreach ($assoc as $assocKey => $assocValue) {
+                $result[$assocKey] = $assocValue; // Assigning each key-value pair to the result array
+            }
+        }
+        return new static($result); // Assuming static constructor can take an array to re-create an instance
+    }
+
+    /**
      * Flattens a multi-dimensional collection into a single level collection using 'dot' notation for keys.
      *
      * @return static Returns a new flattened collection instance.

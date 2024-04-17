@@ -616,4 +616,16 @@ class CollectionTest extends TestCase
 
         $this->assertEquals([1, 2, 3, 4, [5, 6]], array_values($flattened->toArray()));
     }
+
+    public function testMapWithKeys(){
+        $collection = Collection::collect([
+            ['name' => 'John', 'age' => 30],
+            ['name' => 'Jane', 'age' => 25],
+        ]);
+        $mapped = $collection->mapWithKeys(function ($item) {
+            return [$item['name'] => $item['age']];
+        });
+
+        $this->assertEquals(['John' => 30, 'Jane' => 25], $mapped->toArray());
+    }
 }

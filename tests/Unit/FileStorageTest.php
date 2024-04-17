@@ -143,4 +143,13 @@ class FileStorageTest extends TestCase
 
         $this->assertEquals('text/plain', $this->storage->mimeType($filename), 'Mime type should be text/plain');
     }
+
+    public function testGetMethod(): void
+    {
+        $filename = 'testFile.txt';
+        $content = 'Hello, world!';
+        $this->storage->put($filename, $content);
+
+        $this->assertEquals($content, $this->storage->get($filename), 'File content should match');
+    }
 }

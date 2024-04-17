@@ -6,6 +6,7 @@ The `FileStorage` class offers a simple and efficient way to handle file storage
 
 - [constructor()](#constructor)  Constructs a new FileStorage instance.
 - [dir()](#dir) Create or set the directory context for file operations.
+- [get()](#get) Retrieves the content of a file at the specified path.
 - [put()](#put) Stores content in a file at the specified path.
 - [append()](#append) Appends content to a file at the specified path.
 - [prepend()](#prepend) Prepends content to a file at the specified path.
@@ -27,6 +28,24 @@ Create or set the directory context for file operations. If the directory does n
 ```php
 // Return a new instance of FileStorage with the new set path.
 $storage->dir('user/images');
+```
+
+### get()
+
+Retrieves the content of a file at the specified path.
+
+```php
+// Get the content of 'report.txt'
+
+$content = $storage->get('report.txt');
+```
+
+Get the content of a file located in a sub directory
+```php
+// Get the content of a file inside a nested directory
+$contentInSubDir = $storage->dir('someDir/anotherDir')->get('report.txt');
+// Or shorthand without setting the dir context
+$contentInSubDirDirect = $storage->get('someDir/anotherDir/report.txt');
 ```
 
 ### put()
