@@ -33,6 +33,7 @@ abstract class Data implements JsonSerializable
         $args = [];
 
         if ($constructor) {
+            // Loop through all parameters of the constructor
             foreach ($constructor->getParameters() as $parameter) {
 
                 // Get the value for each parameter from the attributes array
@@ -65,7 +66,7 @@ abstract class Data implements JsonSerializable
         $hasDefaultValue = $parameter->isDefaultValueAvailable();
         $isOptional = $hasDefaultValue || $isNullable;
 
-        // Check if the parameter is includes in the provided attributes
+        // Check if the parameter is included in the provided attributes
         if (!array_key_exists($name, $attributes)) {
 
             // Check if the parameter that was not found in the provided attributes is optional
@@ -98,6 +99,7 @@ abstract class Data implements JsonSerializable
         if ($type && !$type->isBuiltin() && $value !== null) {
             $typeName = $type->getName();
 
+            // Cast to enum
             if (enum_exists($typeName)) {
                 // Bypass casting if value is already of the correct enum type
                 /** @var UnitEnum|BackedEnum $typeName */
@@ -111,6 +113,7 @@ abstract class Data implements JsonSerializable
                     throw new InvalidArgumentException("Invalid enum value '{$value}' for enum type '{$typeName}'.");
                 }
             }
+
             // Cast to Data object
             if (is_subclass_of($typeName, self::class)) {
                 /** @var static $typeName */ // check if value is not already of type data object.
@@ -151,38 +154,54 @@ abstract class Data implements JsonSerializable
      */
     public function toArray(): array {
         $result = [];
+
+        // Loop through all properties of the object
         foreach ($this as $propertyName => $value) {
+
+            // Convert UnitEnum to string
             if ($value instanceof UnitEnum) {
                 $result[$propertyName] = $value instanceof BackedEnum ? $value->value : $value->name;
-                continue;
+                continue; // value converted, skip to next property
             }
 
-            // Recursively convert nested Data objects to arrays
+            // Recursively convert nested Data objects or iterables to arrays
             if (is_iterable($value)) {
+
+                // Convert all items in the array
                 $result[$propertyName] = array_map(function ($item) {
+
+                    // Convert UnitEnum to string
                     if ($item instanceof UnitEnum) {
                         return $item instanceof BackedEnum ? $item->value : $item->name;
                     }
+
+                    // Recursively convert nested Data objects to arrays
                     if ($item instanceof self) {
                         return $item->toArray();
                     }
+
+                    // Convert Data objects in arrays to arrays
                     if (is_object($item) && method_exists($item, 'toArray')) {
                         return $item->toArray();
                     }
+
+                    // Just return the value if no conversion method is found
                     return $item;
                 }, is_array($value) ? $value : iterator_to_array($value));
-                continue;
+
+                continue; // value converted, skip to next property
             }
 
             // Convert object to array if it has a toArray method
             if (is_object($value) && method_exists($value, 'toArray')) {
                 $result[$propertyName] = $value->toArray();
-                continue;
+                continue; // value converted, skip to next property
             }
 
             // Just set the value if no conversion method is found
             $result[$propertyName] = $value;
         }
+
         return $result;
     }
 
