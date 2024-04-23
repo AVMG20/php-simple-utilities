@@ -71,10 +71,11 @@ class Plastic extends DateTime
      *
      * @param int $seconds The number of seconds to add.
      * @return static The new instance.
+     * @throws Exception
      */
     public function addSeconds(int $seconds): static
     {
-        return $this->add(new DateInterval("PT{$seconds}S"));
+        return self::parse($this)->add(new DateInterval("PT{$seconds}S"));
     }
 
     /**
@@ -82,10 +83,11 @@ class Plastic extends DateTime
      *
      * @param int $seconds The number of seconds to subtract.
      * @return static The new instance.
+     * @throws Exception
      */
     public function subSeconds(int $seconds): static
     {
-        return $this->sub(new DateInterval("PT{$seconds}S"));
+        return self::parse($this)->sub(new DateInterval("PT{$seconds}S"));
     }
 
     /**
@@ -93,10 +95,11 @@ class Plastic extends DateTime
      *
      * @param int $minutes The number of minutes to add.
      * @return static The new instance.
+     * @throws Exception
      */
     public function addMinutes(int $minutes): static
     {
-        return $this->add(new DateInterval("PT{$minutes}M"));
+        return self::parse($this)->add(new DateInterval("PT{$minutes}M"));
     }
 
     /**
@@ -104,10 +107,11 @@ class Plastic extends DateTime
      *
      * @param int $minutes The number of minutes to subtract.
      * @return static The new instance.
+     * @throws Exception
      */
     public function subMinutes(int $minutes): static
     {
-        return $this->sub(new DateInterval("PT{$minutes}M"));
+        return self::parse($this)->sub(new DateInterval("PT{$minutes}M"));
     }
 
     /**
@@ -115,10 +119,11 @@ class Plastic extends DateTime
      *
      * @param int $hours The number of hours to add.
      * @return static The new instance.
+     * @throws Exception
      */
     public function addHours(int $hours): static
     {
-        return $this->add(new DateInterval("PT{$hours}H"));
+        return self::parse($this)->add(new DateInterval("PT{$hours}H"));
     }
 
     /**
@@ -126,10 +131,11 @@ class Plastic extends DateTime
      *
      * @param int $hours The number of hours to subtract.
      * @return static The new instance.
+     * @throws Exception
      */
     public function subHours(int $hours): static
     {
-        return $this->sub(new DateInterval("PT{$hours}H"));
+        return self::parse($this)->sub(new DateInterval("PT{$hours}H"));
     }
 
     /**
@@ -137,10 +143,11 @@ class Plastic extends DateTime
      *
      * @param int $days The number of days to add.
      * @return static The new instance.
+     * @throws Exception
      */
     public function addDays(int $days): static
     {
-        return $this->add(new DateInterval("P{$days}D"));
+        return self::parse($this)->add(new DateInterval("P{$days}D"));
     }
 
     /**
@@ -148,10 +155,11 @@ class Plastic extends DateTime
      *
      * @param int $days The number of days to subtract.
      * @return static The new instance.
+     * @throws Exception
      */
     public function subDays(int $days): static
     {
-        return $this->sub(new DateInterval("P{$days}D"));
+        return self::parse($this)->sub(new DateInterval("P{$days}D"));
     }
 
     /**
@@ -159,10 +167,11 @@ class Plastic extends DateTime
      *
      * @param int $months The number of months to add.
      * @return static The new instance.
+     * @throws Exception
      */
     public function addMonths(int $months): static
     {
-        return $this->add(new DateInterval("P{$months}M"));
+        return self::parse($this)->add(new DateInterval("P{$months}M"));
     }
 
     /**
@@ -170,10 +179,11 @@ class Plastic extends DateTime
      *
      * @param int $months The number of months to subtract.
      * @return static The new instance.
+     * @throws Exception
      */
     public function subMonths(int $months): static
     {
-        return $this->sub(new DateInterval("P{$months}M"));
+        return self::parse($this)->sub(new DateInterval("P{$months}M"));
     }
 
     /**
@@ -181,10 +191,11 @@ class Plastic extends DateTime
      *
      * @param int $years The number of years to add.
      * @return static The new instance.
+     * @throws Exception
      */
     public function addYears(int $years): static
     {
-        return $this->add(new DateInterval("P{$years}Y"));
+        return self::parse($this)->add(new DateInterval("P{$years}Y"));
     }
 
     /**
@@ -192,10 +203,11 @@ class Plastic extends DateTime
      *
      * @param int $years The number of years to subtract.
      * @return static The new instance.
+     * @throws Exception
      */
     public function subYears(int $years): static
     {
-        return $this->sub(new DateInterval("P{$years}Y"));
+        return self::parse($this)->sub(new DateInterval("P{$years}Y"));
     }
 
     /**
@@ -250,86 +262,95 @@ class Plastic extends DateTime
      * Set the instance to the start of the day.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function startOfDay(): static
     {
-        return $this->setTime(0, 0, 0);
+        return self::parse($this)->setTime(0, 0, 0);
     }
 
     /**
      * Set the instance to the end of the day.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function endOfDay(): static
     {
-        return $this->setTime(23, 59, 59);
+        return self::parse($this)->setTime(23, 59, 59);
     }
 
     /**
      * Set the instance to the start of the week.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function startOfWeek(): static
     {
-        return $this->modify('monday this week')->startOfDay();
+        return self::parse($this)->modify('monday this week')->startOfDay();
     }
 
     /**
      * Set the instance to the end of the week.
      *
-     * @return static
+     * @return static The new instance.
+     * @throws Exception
      */
     public function endOfWeek(): static
     {
-        return $this->modify('sunday this week')->endOfDay();
+        return self::parse($this)->modify('sunday this week')->endOfDay();
     }
 
     /**
      * Set the instance to the start of the month.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function startOfMonth(): static
     {
-        return $this->modify('first day of this month')->startOfDay();
+        return self::parse($this)->modify('first day of this month')->startOfDay();
     }
 
     /**
      * Set the instance to the end of the month.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function endOfMonth(): static
     {
-        return $this->modify('last day of this month')->endOfDay();
+        return self::parse($this)->modify('last day of this month')->endOfDay();
     }
 
     /**
      * Set the instance to the start of the year.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function startOfYear(): static
     {
-        return $this->modify('first day of january this year')->startOfDay();
+        return self::parse($this)->modify('first day of january this year')->startOfDay();
     }
 
     /**
      * Set the instance to the end of the year.
      *
      * @return static The new instance.
+     * @throws Exception
      */
     public function endOfYear(): static
     {
-        return $this->modify('last day of december this year')->endOfDay();
+        return self::parse($this)->modify('last day of december this year')->endOfDay();
     }
 
     /**
      * Check if the current instance is today
      *
      * @return bool True if this is today, false otherwise.
+     * @throws Exception
      */
     public function isToday(): bool
     {
@@ -340,6 +361,7 @@ class Plastic extends DateTime
      * Check if the current instance is tomorrow
      *
      * @return bool True if this is tomorrow, false otherwise.
+     * @throws Exception
      */
     public function isTomorrow(): bool
     {
@@ -350,6 +372,7 @@ class Plastic extends DateTime
      * Check if the current instance is yesterday
      *
      * @return bool True if this is yesterday, false otherwise.
+     * @throws Exception
      */
     public function isYesterday(): bool
     {
@@ -360,6 +383,7 @@ class Plastic extends DateTime
      * Check if the current instance is this week
      *
      * @return bool True if this is this week, false otherwise.
+     * @throws Exception
      */
     public function isThisWeek(): bool
     {
@@ -370,6 +394,7 @@ class Plastic extends DateTime
      * Check if the current instance is this month
      *
      * @return bool True if this is this month, false otherwise.
+     * @throws Exception
      */
     public function isThisMonth(): bool
     {
@@ -380,6 +405,7 @@ class Plastic extends DateTime
      * Check if the current instance is this year
      *
      * @return bool True if this is this year, false otherwise.
+     * @throws Exception
      */
     public function isThisYear(): bool
     {
@@ -391,6 +417,7 @@ class Plastic extends DateTime
      *
      * @param DateTimeInterface|null $date The date to compare with, or null to compare with now.
      * @return bool True if this is in the past, false otherwise.
+     * @throws Exception
      */
     public function lt(?DateTimeInterface $date = null): bool
     {
@@ -402,6 +429,7 @@ class Plastic extends DateTime
      *
      * @param DateTimeInterface|null $date The date to compare with, or null to compare with now.
      * @return bool True if this is in the future, false otherwise.
+     * @throws Exception
      */
     public function gt(?DateTimeInterface $date = null): bool
     {
@@ -414,6 +442,7 @@ class Plastic extends DateTime
      * @param DateTimeInterface $start The start date.
      * @param DateTimeInterface $end The end date.
      * @return bool True if this is in between the two dates, false otherwise.
+     * @throws Exception
      */
     public function isInBetween(DateTimeInterface $start, DateTimeInterface $end): bool
     {
@@ -428,6 +457,7 @@ class Plastic extends DateTime
      * @param int $segments The number of time segments to include in the string. Example "2 weeks, 4 hours,  5 minutes and 36 seconds" would be 4 segments.
      *                      We only include the highest segments, so this string would become "2 weeks and 4 hours".
      * @return string The human-readable difference.
+     * @throws Exception
      */
     public function diffForHumans(?DateTimeInterface $otherDate = null, bool $absolute = false, int $segments = 2): string
     {
