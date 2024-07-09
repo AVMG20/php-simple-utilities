@@ -255,7 +255,7 @@ class Plastic extends DateTime
      */
     public function diffInDays(DateTimeInterface $date, bool $absolute = true): int
     {
-        return (int)$this->diff($date)->format("%a");
+        return (int)$this->diff($date, $absolute)->format("%a");
     }
 
     /**
