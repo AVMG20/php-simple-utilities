@@ -74,7 +74,11 @@ class Validator
     public function validate(): bool
     {
         foreach ($this->rules as $field => $rules) {
-            foreach (explode('|', $rules) as $rule) {
+            if (is_string($rules)) {
+                $rules = explode('|', $rules);
+            }
+
+            foreach ($rules as $rule) {
                 $parameters = [];
                 if (strpos($rule, ':')) {
                     [$rule, $parameterString] = explode(':', $rule);
@@ -106,7 +110,7 @@ class Validator
      * @template TResult as bool|string
      *
      * @param string $name The name of the validation method.
-     * @param (callable(TValue, TValue, TParams): TResult) $callback The validation method.
+     * @param (callable(TField, TValue, TParams): TResult) $callback The validation method.
      * @return void
      */
     public function addValidationMethod(string $name, callable $callback): void
@@ -288,3 +292,15 @@ class Validator
         $this->errors[$field][] = $message;
     }
 }
+
+$validator = new Validator( // Create a new instance of the Validator class
+    [ // The data to validate
+        'number' => 3,
+        'username' => 'john'
+    ],
+    [ // The rules to apply to the data
+        'number' => ['required', 'numeric', 'even'], // The 'even' rule is a custom rule
+        'username' => 'required|string|lengthBetween:5,10'
+    ]
+);
+

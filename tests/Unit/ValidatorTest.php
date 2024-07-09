@@ -396,4 +396,23 @@ class ValidatorTest extends TestCase
         $this->assertArrayHasKey('person.2.name', $errors);
         $this->assertContains('The person.2.name field must not exceed 6 characters.', $errors['person.2.name']);
     }
+
+    /**
+     * Test that validation rules can be passed as an array.
+     */
+    public function testValidationRulesAsArray(): void
+    {
+        $data = ['number' => 3, 'username' => 'john'];
+        $rules = [
+            'number' => ['required', 'numeric'],
+            'username' => ['required', 'string', 'min:5']
+        ];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+
+        $this->assertArrayHasKey('username', $errors);
+        $this->assertContains('The username field must be at least 5 characters long.', $errors['username']);
+    }
 }

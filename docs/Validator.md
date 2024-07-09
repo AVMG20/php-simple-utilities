@@ -17,13 +17,17 @@ To start using the `Validator`, instantiate it with the data to validate, the ru
 
 ```php
 // Create a new Validator instance
-$validator = new Validator([
-    'name' => 'John Doe',
-    'age' => 30
-], [
-    'name' => 'required|string|min:5|max:50',
-    'age' => 'required|numeric|min:18|max:65'
-]);
+$data = [
+    'number' => 3,
+    'username' => 'john'
+];
+
+$rules = [
+    'number' => ['required', 'numeric'], // Passing rules as an array
+    'username' => 'required|string|min:5|max:10' // Passing rules as a string
+];
+
+$validator = new Validator($data, $rules);
 
 // or with custom messages
 $validator = new Validator([
