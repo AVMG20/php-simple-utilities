@@ -68,7 +68,6 @@ class Validator
      * Validates the data against the rules.
      *
      * @return bool Returns true if validation passes, false otherwise.
-     * @throws Exception
      */
     public function validate(): bool
     {
@@ -90,7 +89,7 @@ class Validator
                         $this->addError($field, $result);
                     }
                 } else {
-                    throw new Exception("Validation rule {$rule} does not exist.");
+                    throw new InvalidArgumentException("Validation rule {$rule} does not exist.");
                 }
             }
         }
@@ -130,7 +129,10 @@ class Validator
     private function registerDefaultValidationMethods(): void
     {
         $this->addValidationMethod('required', function ($value, $field) {
-            return !isset($value) || $value === '' ? str_replace(':attribute', $field, $this->messages['required']) : true;
+            if (is_null($value) || $value === '' || (is_array($value) && empty($value))) {
+                return str_replace(':attribute', $field, $this->messages['required']);
+            }
+            return true;
         });
 
         $this->addValidationMethod('string', function ($value, $field) {
@@ -199,6 +201,29 @@ class Validator
             }
 
             throw new InvalidArgumentException('The max rule only supports numeric and string values.');
+        });
+
+        $this->addValidationMethod('between', function ($value, $field, $min, $max) {
+            if (is_numeric($value)) {
+                return $value >= $min && $value <= $max
+                    ? true
+                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], 'The :attribute field must be between :min and :max.');
+            }
+
+            if (is_string($value)) {
+                $length = strlen($value);
+                return $length >= $min && $length <= $max
+                    ? true
+                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], 'The :attribute field must be between :min and :max characters.');
+            }
+
+            throw new InvalidArgumentException('The between rule only supports numeric and string values.');
+        });
+
+        $this->addValidationMethod('in', function ($value, $field, ...$list) {
+            return in_array($value, $list)
+                ? true
+                : str_replace(':attribute', $field, 'The :attribute field must be one of the following values: ' . implode(', ', $list) . '.');
         });
     }
 

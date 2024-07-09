@@ -22,6 +22,64 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test that required fields handle empty arrays correctly.
+     */
+    public function testRequiredFieldHandlesEmptyArray(): void
+    {
+        $data = ['items' => []];
+        $rules = ['items' => 'required'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('items', $errors);
+        $this->assertContains('The items field is required.', $errors['items']);
+    }
+
+    /**
+     * Test that required fields handle the value '0' correctly.
+     */
+    public function testRequiredFieldHandlesZeroValue(): void
+    {
+        $data = ['age' => '0'];
+        $rules = ['age' => 'required'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+    }
+
+    /**
+     * Test that required fields fail on empty string value.
+     */
+    public function testRequiredFieldFailsOnEmptyString(): void
+    {
+        $data = ['name' => ''];
+        $rules = ['name' => 'required'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('name', $errors);
+        $this->assertContains('The name field is required.', $errors['name']);
+    }
+
+    /**
+     * Test that required fields fail on null value.
+     */
+    public function testRequiredFieldFailsOnNullValue(): void
+    {
+        $data = ['name' => null];
+        $rules = ['name' => 'required'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('name', $errors);
+        $this->assertContains('The name field is required.', $errors['name']);
+    }
+
+    /**
      * Test that string fields are validated correctly.
      */
     public function testStringFieldValidation(): void
@@ -173,4 +231,71 @@ class ValidatorTest extends TestCase
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('(name)', $errors['name']);
     }
+
+    /**
+     * Test that between rule validates numeric values correctly.
+     */
+    public function testBetweenRuleValidatesNumericValues(): void
+    {
+        $data = ['age' => 25];
+        $rules = ['age' => 'between:18,30'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['age' => 35];
+        $rules = ['age' => 'between:18,30'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('age', $errors);
+        $this->assertContains('The age field must be between 18 and 30.', $errors['age']);
+    }
+
+    /**
+     * Test that between rule validates string lengths correctly.
+     */
+    public function testBetweenRuleValidatesStringLengths(): void
+    {
+        $data = ['name' => 'John'];
+        $rules = ['name' => 'between:3,5'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['name' => 'Jonathan'];
+        $rules = ['name' => 'between:3,5'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('name', $errors);
+        $this->assertContains('The name field must be between 3 and 5 characters.', $errors['name']);
+    }
+
+    /**
+     * Test that in rule validates values correctly.
+     */
+    public function testInRuleValidatesValues(): void
+    {
+        $data = ['status' => 'active'];
+        $rules = ['status' => 'in:active,inactive'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['status' => 'pending'];
+        $rules = ['status' => 'in:active,inactive'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('status', $errors);
+        $this->assertContains('The status field must be one of the following values: active, inactive.', $errors['status']);
+    }
+
 }
