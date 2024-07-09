@@ -289,14 +289,3 @@ class Validator
         $this->errors[$field][] = $message;
     }
 }
-
-$validator = new Validator(
-    ['age' => 25],
-    ['age' => 'iets:18']
-);
-
-$validator->addValidationMethod('iets', function($value, $field, $parameter) {
-    $iets = $value;
-
-        return 15;
-});
