@@ -292,15 +292,3 @@ class Validator
         $this->errors[$field][] = $message;
     }
 }
-
-$validator = new Validator( // Create a new instance of the Validator class
-    [ // The data to validate
-        'number' => 3,
-        'username' => 'john'
-    ],
-    [ // The rules to apply to the data
-        'number' => ['required', 'numeric', 'even'], // The 'even' rule is a custom rule
-        'username' => 'required|string|lengthBetween:5,10'
-    ]
-);
-
