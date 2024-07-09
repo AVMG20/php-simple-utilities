@@ -66,6 +66,7 @@ if (!$is_valid) {
 ### addValidationMethod()
 
 Adds a custom validation method.
+The first argument is the name of the custom rule, and the second argument is a closure that defines the validation logic. The rest of the parameters are all passed to the rule. The closure should return `true` if the validation passes or an error message if it fails.
 
 ```php
 // Add a custom validation method to check if a value is even
@@ -73,11 +74,24 @@ $validator->addValidationMethod('even', function ($value, $field) {
     return $value % 2 === 0 ? true : "The {$field} field must be an even number.";
 });
 
-// Usage of custom validation rule
-$validator = new Validator(
-    ['number' => 3],
-    ['number' => 'required|numeric|even']
-);
+// Add a custom validation method to check if a string's length is within a specified range
+$validator->addValidationMethod('exampleBetween', function ($value, $field, $min, $max) {
+    $length = strlen($value);
+    if ($length < $min || $length > $max) {
+        return "The {$field} field must be between {$min} and {$max} characters long.";
+    }
+    return true;
+});
+
+
+// Usage of custom validation rules
+$validator = new Validator([
+    'number' => 3,
+    'username' => 'john'
+], [
+    'number' => 'required|numeric|even',
+    'username' => 'required|string|exampleBetween:5,10'
+]);
 
 $is_valid = $validator->validate(); // Will return false
 $errors = $validator->errors(); // Will contain custom error message for 'even' rule
