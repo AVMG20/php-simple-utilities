@@ -93,7 +93,9 @@ class Validator
                         $field,
                         $min
                     ], $this->messages['min.numeric']);
-            } elseif (is_string($value)) {
+            }
+
+            if (is_string($value)) {
                 return strlen($value) >= $min
                     ? true
                     : str_replace([
@@ -104,7 +106,8 @@ class Validator
                         $min
                     ], $this->messages['min.string']);
             }
-            return true;
+
+            throw new \InvalidArgumentException('The min rule only supports numeric and string values.');
         });
 
         $this->addValidationMethod('max', function ($value, $field, $max) {
@@ -118,7 +121,9 @@ class Validator
                         $field,
                         $max
                     ], $this->messages['max.numeric']);
-            } elseif (is_string($value)) {
+            }
+
+            if (is_string($value)) {
                 return strlen($value) <= $max
                     ? true
                     : str_replace([
@@ -129,7 +134,8 @@ class Validator
                         $max
                     ], $this->messages['max.string']);
             }
-            return true;
+
+            throw new \InvalidArgumentException('The max rule only supports numeric and string values.');
         });
     }
 
