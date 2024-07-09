@@ -298,4 +298,102 @@ class ValidatorTest extends TestCase
         $this->assertContains('The status field must be one of the following values: active, inactive.', $errors['status']);
     }
 
+    /**
+     * Test that required fields in nested arrays are validated correctly.
+     */
+    public function testRequiredFieldInNestedArray(): void
+    {
+        $data = [
+            'author' => [
+                'name' => 'John Doe',
+                'details' => [
+                    'email' => 'john.doe@example.com'
+                ]
+            ]
+        ];
+        $rules = ['author.details.email' => 'required'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        // Test failure case
+        $data = [
+            'author' => [
+                'name' => 'John Doe',
+                'details' => []
+            ]
+        ];
+        $validator = new Validator($data, $rules);
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('author.details.email', $errors);
+        $this->assertContains('The author.details.email field is required.', $errors['author.details.email']);
+    }
+
+    /**
+     * Test that min rule for nested arrays validates correctly.
+     */
+    public function testMinRuleForNestedArray(): void
+    {
+        $data = [
+            'author' => [
+                'details' => [
+                    'age' => 25
+                ]
+            ]
+        ];
+        $rules = ['author.details.age' => 'min:18'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        // Test failure case
+        $data = [
+            'author' => [
+                'details' => [
+                    'age' => 15
+                ]
+            ]
+        ];
+        $validator = new Validator($data, $rules);
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('author.details.age', $errors);
+        $this->assertContains('The author.details.age field must be at least 18.', $errors['author.details.age']);
+    }
+
+    /**
+     * Test that max rule for wildcard fields validates correctly.
+     */
+    public function testMaxRuleForWildcardFields(): void
+    {
+        $data = [
+            'person' => [
+                ['name' => 'Alice'],
+                ['name' => 'Bob'],
+                ['name' => 'Charls']
+            ]
+        ];
+        $rules = ['person.*.name' => 'max:6'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        // Test failure case
+        $data = [
+            'person' => [
+                ['name' => 'Alice'],
+                ['name' => 'Bob'],
+                ['name' => 'Charleston']
+            ]
+        ];
+        $validator = new Validator($data, $rules);
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('person.2.name', $errors);
+        $this->assertContains('The person.2.name field must not exceed 6 characters.', $errors['person.2.name']);
+    }
 }

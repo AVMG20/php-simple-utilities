@@ -75,18 +75,19 @@ class Validator
             foreach (explode('|', $rules) as $rule) {
                 $parameters = [];
                 if (strpos($rule, ':')) {
-                    [
-                        $rule,
-                        $parameterString
-                    ] = explode(':', $rule);
+                    [$rule, $parameterString] = explode(':', $rule);
                     $parameters = explode(',', $parameterString);
                 }
 
                 if (isset($this->validationMethods[$rule])) {
                     $validationMethod = $this->validationMethods[$rule];
-                    $result = $validationMethod($this->data[$field] ?? null, $field, ...$parameters);
-                    if ($result !== true) {
-                        $this->addError($field, $result);
+                    $fieldValues = $this->getFieldValues($field);
+
+                    foreach ($fieldValues as $key => $value) {
+                        $result = $validationMethod($value, $key, ...$parameters);
+                        if ($result !== true) {
+                            $this->addError($key, $result);
+                        }
                     }
                 } else {
                     throw new InvalidArgumentException("Validation rule {$rule} does not exist.");
@@ -225,6 +226,52 @@ class Validator
                 ? true
                 : str_replace(':attribute', $field, 'The :attribute field must be one of the following values: ' . implode(', ', $list) . '.');
         });
+    }
+
+    /**
+     * Retrieves the values of a field.
+     *
+     * @param string $field
+     * @return array
+     */
+    private function getFieldValues(string $field): array
+    {
+        $fieldValues = [];
+        if (str_contains($field, '.*.')) {
+            $segments = explode('.*.', $field);
+            $baseArray = $this->getNestedValue($this->data, $segments[0]);
+
+            if (is_array($baseArray)) {
+                foreach ($baseArray as $key => $subArray) {
+                    $fieldKey = "{$segments[0]}.{$key}.{$segments[1]}";
+                    $fieldValues[$fieldKey] = $this->getNestedValue($this->data, $fieldKey);
+                }
+            }
+        } else {
+            $fieldValues[$field] = $this->getNestedValue($this->data, $field);
+        }
+
+        return $fieldValues;
+    }
+
+    /**
+     * Retrieves a nested value from an array.
+     *
+     * @param array $array
+     * @param string $field
+     * @return array|mixed|null
+     */
+    private function getNestedValue(array $array, string $field): mixed
+    {
+        $keys = explode('.', $field);
+        foreach ($keys as $key) {
+            if (isset($array[$key])) {
+                $array = $array[$key];
+            } else {
+                return null;
+            }
+        }
+        return $array;
     }
 
     /**
