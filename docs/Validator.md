@@ -163,3 +163,23 @@ $rules = ['name' => 'max:50'];
 // Maximum value for numeric
 $rules = ['age' => 'max:65'];
 ```
+
+### between
+
+Ensures that a field is within a specified range. Works for both strings (length) and numeric values.
+
+```php
+// Range for string length
+$rules = ['name' => 'between:5,50'];
+
+// Range for numeric value
+$rules = ['age' => 'between:18,65'];
+```
+
+### in
+
+Ensures that a field is one of the specified values.
+
+```php
+$rules = ['status' => 'in:active,inactive'];
+```
