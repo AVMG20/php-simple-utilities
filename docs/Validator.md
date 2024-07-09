@@ -1,3 +1,5 @@
+Certainly! Below is the updated `Validator` class documentation with more practical examples and explanations, including support for nested arrays.
+
 # Validator Class Documentation
 
 The `Validator` class provides a straightforward way to validate arrays of data against a set of rules. This class allows for easy definition and execution of validation rules with custom error messages.
@@ -53,6 +55,7 @@ $is_valid = $validator->validate();
 ```
 
 Retrieve validation errors if validation fails:
+
 ```php
 if (!$is_valid) {
     $errors = $validator->errors();
@@ -91,6 +94,7 @@ print_r($errors);
 ```
 
 Example of error output:
+
 ```php
 Array
 (
@@ -183,3 +187,89 @@ Ensures that a field is one of the specified values.
 ```php
 $rules = ['status' => 'in:active,inactive'];
 ```
+
+### Nested Array Validation
+
+The Validator class also supports validation of nested arrays. You can specify validation rules for nested arrays using the `*` notation.
+
+```php
+// Example nested array data
+$data = [
+    'users' => [
+        ['name' => 'Alice', 'email' => 'alice@example.com'],
+        ['name' => 'Bob', 'email' => 'bob@example.com']
+    ]
+];
+
+// Rules for nested array
+$rules = [
+    'users.*.name' => 'required|string|min:3|max:50',
+    'users.*.email' => 'required|string|email'
+];
+
+// Create Validator instance
+$validator = new Validator($data, $rules);
+
+// Validate data
+$is_valid = $validator->validate();
+
+// Retrieve errors if validation fails
+if (!$is_valid) {
+    $errors = $validator->errors();
+    print_r($errors);
+}
+```
+
+### Email
+
+Ensures that a field contains a valid email address.
+
+```php
+$rules = ['email' => 'email'];
+```
+
+## Full Example
+
+Below is a full example that demonstrates the use of the `Validator` class with various rules, including nested arrays and custom messages.
+
+```php
+$data = [
+    'name' => 'John',
+    'age' => 17,
+    'email' => 'invalid-email',
+    'users' => [
+        ['name' => 'Alice', 'email' => 'alice@example.com'],
+        ['name' => 'Bob', 'email' => 'invalid-email']
+    ]
+];
+
+$rules = [
+    'name' => 'required|string|min:5|max:50',
+    'age' => 'required|numeric|min:18|max:65',
+    'email' => 'required|email',
+    'users.*.name' => 'required|string|min:3|max:50',
+    'users.*.email' => 'required|email'
+];
+
+$messages = [
+    'required' => '(:attribute) is required',
+    'email' => '(:attribute) must be a valid email address',
+    'min.string' => '(:attribute) is too short',
+    'max.string' => '(:attribute) is too long',
+    'min.numeric' => '(:attribute) is too low',
+    'max.numeric' => '(:attribute) is too high',
+    'string' => '(:attribute) must be a string',
+    'numeric' => '(:attribute) must be a number'
+];
+
+$validator = new Validator($data, $rules, $messages);
+
+$is_valid = $validator->validate();
+
+if (!$is_valid) {
+    $errors = $validator->errors();
+    print_r($errors);
+}
+```
+
+This updated documentation includes practical examples, detailed usage instructions for nested arrays, and custom validation methods. The Validator class is designed to be flexible and easy to extend with custom validation rules.
