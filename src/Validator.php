@@ -37,6 +37,9 @@ class Validator
         'min.numeric' => 'The :attribute field must be at least :min.',
         'max.string' => 'The :attribute field must not exceed :max characters.',
         'max.numeric' => 'The :attribute field must not exceed :max.',
+        'between.numeric' => 'The :attribute field must be between :min and :max.',
+        'between.string' => 'The :attribute field must be between :min and :max characters.',
+        'in' => 'The :attribute field must be one of the following values: :values.',
     ];
 
     /**
@@ -208,14 +211,14 @@ class Validator
             if (is_numeric($value)) {
                 return $value >= $min && $value <= $max
                     ? true
-                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], 'The :attribute field must be between :min and :max.');
+                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.numeric']);
             }
 
             if (is_string($value)) {
                 $length = strlen($value);
                 return $length >= $min && $length <= $max
                     ? true
-                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], 'The :attribute field must be between :min and :max characters.');
+                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.string']);
             }
 
             throw new InvalidArgumentException('The between rule only supports numeric and string values.');
@@ -224,7 +227,7 @@ class Validator
         $this->addValidationMethod('in', function ($value, $field, ...$list) {
             return in_array($value, $list)
                 ? true
-                : str_replace(':attribute', $field, 'The :attribute field must be one of the following values: ' . implode(', ', $list) . '.');
+                : str_replace([':attribute', ':values'], [$field, implode(', ', $list)], $this->messages['in']);
         });
     }
 
