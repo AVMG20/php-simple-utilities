@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Avmg\PhpSimpleUtilities;
 
-use Exception;
 use InvalidArgumentException;
 
 /**
