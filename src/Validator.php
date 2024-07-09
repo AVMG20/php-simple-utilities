@@ -8,18 +8,20 @@ use InvalidArgumentException;
 
 /**
  * Validator Class
+ * @template TField as string
+ * @template TValue as mixed
  *
  * This class provides a way to validate arrays of data against a set of rules.
  */
 class Validator
 {
     /**
-     * @var array<string, mixed> The data to validate.
+     * @var array<TField, TValue> The data to validate.
      */
     private array $data;
 
     /**
-     * @var array<string, string> The rules to apply to the data.
+     * @var array<TField, string> The rules to apply to the data.
      */
     private array $rules;
 
@@ -38,7 +40,7 @@ class Validator
     ];
 
     /**
-     * @var array<string, array<int, string>> The validation errors.
+     * @var array<TField, array<int, string>> The validation errors.
      */
     private array $errors = [];
 
@@ -48,9 +50,9 @@ class Validator
     private array $validationMethods = [];
 
     /**
-     * @param array<string, mixed> $data The data to validate.
-     * @param array<string, string> $rules The rules to apply to the data.
-     * @param array<string, string> $messages Custom error messages.
+     * @param array<TField, TValue> $data The data to validate.
+     * @param array<TField, string> $rules The rules to apply to the data.
+     * @param array<TField, string> $messages Custom error messages.
      */
     public function __construct(array $data, array $rules, array $messages = [])
     {
@@ -98,13 +100,11 @@ class Validator
 
     /**
      * Adds a custom validation method.
-     * @template TValue as mixed
-     * @template TField as string
-     * @template TParams as ...string
-     * @template TResult as bool|string Return a string error message if validation fails, true otherwise.
+     * @template TParams as mixed
+     * @template TResult as bool|string
      *
      * @param string $name The name of the validation method.
-     * @param callable(TValue, TField, TParams): TResult $callback The validation method.
+     * @param (callable(TValue, TValue, TParams): TResult) $callback The validation method.
      * @return void
      */
     public function addValidationMethod(string $name, callable $callback): void
@@ -214,3 +214,14 @@ class Validator
         $this->errors[$field][] = $message;
     }
 }
+
+$validator = new Validator(
+    ['age' => 25],
+    ['age' => 'iets:18']
+);
+
+$validator->addValidationMethod('iets', function($value, $field, $parameter) {
+    $iets = $value;
+
+        return 15;
+});
