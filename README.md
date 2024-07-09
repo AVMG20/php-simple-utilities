@@ -12,7 +12,7 @@ This package includes the following utilities:
 - **[EventDispatcher Class](docs/EventDispatcher.md)**: A simple, yet powerful way to manage and dispatch events throughout your PHP application.
 - **[Plastic Class](docs/Plastic.md)**: A Simple Carbon inspired class for working with dates and times, with no dependencies and a focus on simplicity and type safety.
 - **[FileStorage Class](docs/FileStorage.md)**: A simple and efficient way to handle file storage operations within a filesystem, providing functionalities such as creating directories, storing, retrieving, and deleting files.
-
+- **[Validator Class](docs/Validator.md)**: A simple and flexible way to validate data against a set of rules, with support for custom validation methods and error messages.
 ### Dependencies
 
 This package has **no dependenci*e*s**. It is designed to be lightweight, self-contained, fast and easy to integrate into any PHP project.
