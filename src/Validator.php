@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace Avmg\PhpSimpleUtilities;
 
+use Exception;
+use InvalidArgumentException;
+
 /**
  * Validator Class
  *
@@ -60,6 +63,66 @@ class Validator
     }
 
     /**
+     * Validates the data against the rules.
+     *
+     * @return bool Returns true if validation passes, false otherwise.
+     * @throws Exception
+     */
+    public function validate(): bool
+    {
+        foreach ($this->rules as $field => $rules) {
+            foreach (explode('|', $rules) as $rule) {
+                $parameters = [];
+                if (strpos($rule, ':')) {
+                    [
+                        $rule,
+                        $parameterString
+                    ] = explode(':', $rule);
+                    $parameters = explode(',', $parameterString);
+                }
+
+                if (isset($this->validationMethods[$rule])) {
+                    $validationMethod = $this->validationMethods[$rule];
+                    $result = $validationMethod($this->data[$field] ?? null, $field, ...$parameters);
+                    if ($result !== true) {
+                        $this->addError($field, $result);
+                    }
+                } else {
+                    throw new Exception("Validation rule {$rule} does not exist.");
+                }
+            }
+        }
+
+        return empty($this->errors);
+    }
+
+    /**
+     * Adds a custom validation method.
+     * @template TValue as mixed
+     * @template TField as string
+     * @template TParams as ...string
+     * @template TResult as bool|string Return a string error message if validation fails, true otherwise.
+     *
+     * @param string $name The name of the validation method.
+     * @param callable(TValue, TField, TParams): TResult $callback The validation method.
+     * @return void
+     */
+    public function addValidationMethod(string $name, callable $callback): void
+    {
+        $this->validationMethods[$name] = $callback;
+    }
+
+    /**
+     * Retrieves the validation errors.
+     *
+     * @return array<string, array<int, string>> The validation errors.
+     */
+    public function errors(): array
+    {
+        return $this->errors;
+    }
+
+    /**
      * Registers the default validation methods.
      *
      * @return void
@@ -107,7 +170,7 @@ class Validator
                     ], $this->messages['min.string']);
             }
 
-            throw new \InvalidArgumentException('The min rule only supports numeric and string values.');
+            throw new InvalidArgumentException('The min rule only supports numeric and string values.');
         });
 
         $this->addValidationMethod('max', function ($value, $field, $max) {
@@ -135,65 +198,8 @@ class Validator
                     ], $this->messages['max.string']);
             }
 
-            throw new \InvalidArgumentException('The max rule only supports numeric and string values.');
+            throw new InvalidArgumentException('The max rule only supports numeric and string values.');
         });
-    }
-
-    /**
-     * Validates the data against the rules.
-     *
-     * @return bool Returns true if validation passes, false otherwise.
-     * @throws \Exception
-     */
-    public function validate(): bool
-    {
-        foreach ($this->rules as $field => $rules) {
-            foreach (explode('|', $rules) as $rule) {
-                $parameters = [];
-                if (strpos($rule, ':')) {
-                    [$rule, $parameterString] = explode(':', $rule);
-                    $parameters = explode(',', $parameterString);
-                }
-
-                if (isset($this->validationMethods[$rule])) {
-                    $validationMethod = $this->validationMethods[$rule];
-                    $result = $validationMethod($this->data[$field] ?? null, $field, ...$parameters);
-                    if ($result !== true) {
-                        $this->addError($field, $result);
-                    }
-                } else {
-                    throw new \Exception("Validation rule {$rule} does not exist.");
-                }
-            }
-        }
-
-        return empty($this->errors);
-    }
-
-    /**
-     * Adds a custom validation method.
-     * @template TValue as mixed
-     * @template TField as string
-     * @template TParams as ...string
-     * @template TResult as bool|string
-     *
-     * @param string $name The name of the validation method.
-     * @param callable(TValue, TField, TParams): TResult $callback The validation method.
-     * @return void
-     */
-    public function addValidationMethod(string $name, callable $callback): void
-    {
-        $this->validationMethods[$name] = $callback;
-    }
-
-    /**
-     * Retrieves the validation errors.
-     *
-     * @return array<string, array<int, string>> The validation errors.
-     */
-    public function errors(): array
-    {
-        return $this->errors;
     }
 
     /**
