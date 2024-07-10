@@ -1,5 +1,3 @@
-Certainly! Below is the updated `Validator` class documentation with more practical examples and explanations, including support for nested arrays.
-
 # Validator Class Documentation
 
 The `Validator` class provides a straightforward way to validate arrays of data against a set of rules. This class allows for easy definition and execution of validation rules with custom error messages.
@@ -314,5 +312,3 @@ if (!$is_valid) {
     print_r($errors);
 }
 ```
-
-This updated documentation includes practical examples, detailed usage instructions for nested arrays, and custom validation methods. The Validator class is designed to be flexible and easy to extend with custom validation rules.
