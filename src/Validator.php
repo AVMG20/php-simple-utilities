@@ -29,6 +29,8 @@ class Validator
      */
     private array $messages = [
         'required' => 'The :attribute field is required.',
+        'required_if' => 'The :attribute field is required when :anotherField is :anotherValue.',
+        'required_unless' => 'The :attribute field is required unless :anotherField is :anotherValue.',
         'string' => 'The :attribute field must be a string.',
         'numeric' => 'The :attribute field must be a numeric value.',
         'array' => 'The :attribute field must be an array.',
@@ -52,6 +54,8 @@ class Validator
     private array $validationMethods = [];
 
     /**
+     * Creates a new instance of the Validator class.
+     *
      * @param array<TField, TValue> $data The data to validate.
      * @param array<TField, string> $rules The rules to apply to the data.
      * @param array<TField, string> $messages Custom error messages.
@@ -64,6 +68,19 @@ class Validator
 
         // Register default rules
         $this->registerDefaultValidationMethods();
+    }
+
+    /**
+     * Creates a new instance of the Validator class.
+     *
+     * @param array<TField, TValue> $data The data to validate.
+     * @param array<TField, string> $rules The rules to apply to the data.
+     * @param array<TField, string> $messages Custom error messages.
+     * @return static
+     */
+    public static function make(array $data, array $rules, array $messages = []): static
+    {
+        return new static($data, $rules, $messages);
     }
 
     /**
@@ -136,8 +153,43 @@ class Validator
     private function registerDefaultValidationMethods(): void
     {
         $this->addValidationMethod('required', function ($value, $field) {
-            if (is_null($value) || $value === '' || (is_array($value) && empty($value))) {
+            if ($this->isEmpty($value)) {
                 return str_replace(':attribute', $field, $this->messages['required']);
+            }
+            return true;
+        });
+
+        $this->addValidationMethod('required_if', function ($value, $field, $anotherField, $anotherValue) {
+            if ($this->data[$anotherField] == $anotherValue) {
+                if ($this->isEmpty($value)) {
+                    return str_replace([
+                        ':attribute',
+                        ':anotherField',
+                        ':anotherValue'
+                    ], [
+                        $field,
+                        $anotherField,
+                        $anotherValue
+                    ], $this->messages['required_if']);
+                }
+            }
+            return true;
+        });
+
+
+        $this->addValidationMethod('required_unless', function ($value, $field, $anotherField, $anotherValue) {
+            if ($this->data[$anotherField] != $anotherValue) {
+                if ($this->isEmpty($value)) {
+                    return str_replace([
+                        ':attribute',
+                        ':anotherField',
+                        ':anotherValue'
+                    ], [
+                        $field,
+                        $anotherField,
+                        $anotherValue
+                    ], $this->messages['required_unless']);
+                }
             }
             return true;
         });
@@ -155,6 +207,10 @@ class Validator
         });
 
         $this->addValidationMethod('min', function ($value, $field, $min) {
+
+            // Do nothing if the value is empty to allow other rules to be applied
+            if ($this->isEmpty($value)) return true;
+
             if (is_numeric($value)) {
                 return $value >= $min
                     ? true
@@ -179,10 +235,15 @@ class Validator
                     ], $this->messages['min.string']);
             }
 
-            throw new InvalidArgumentException('The min rule only supports numeric and string values.');
+            // Do nothing if the value is not a string or a number to allow other rules to be applied
+            return true;
         });
 
         $this->addValidationMethod('max', function ($value, $field, $max) {
+
+            // Do nothing if the value is empty to allow other rules to be applied
+            if ($this->isEmpty($value)) return true;
+
             if (is_numeric($value)) {
                 return $value <= $max
                     ? true
@@ -207,10 +268,15 @@ class Validator
                     ], $this->messages['max.string']);
             }
 
-            throw new InvalidArgumentException('The max rule only supports numeric and string values.');
+            // Do nothing if the value is not a string or a number to allow other rules to be applied
+            return true;
         });
 
         $this->addValidationMethod('between', function ($value, $field, $min, $max) {
+
+            // Do nothing if the value is empty to allow other rules to be applied
+            if ($this->isEmpty($value)) return true;
+
             if (is_numeric($value)) {
                 return $value >= $min && $value <= $max
                     ? true
@@ -224,7 +290,8 @@ class Validator
                     : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.string']);
             }
 
-            throw new InvalidArgumentException('The between rule only supports numeric and string values.');
+            // Do nothing if the value is not a string or a number to allow other rules to be applied
+            return true;
         });
 
         $this->addValidationMethod('in', function ($value, $field, ...$list) {
@@ -278,6 +345,17 @@ class Validator
             }
         }
         return $array;
+    }
+
+    /**
+     * Check if a value is empty.
+     *
+     * @param $value
+     * @return bool
+     */
+    private function isEmpty($value): bool
+    {
+        return is_null($value) || $value === '' || (is_array($value) && empty($value));
     }
 
     /**

@@ -415,4 +415,61 @@ class ValidatorTest extends TestCase
         $this->assertArrayHasKey('username', $errors);
         $this->assertContains('The username field must be at least 5 characters long.', $errors['username']);
     }
+
+    /**
+     * Test that required_if rule validates values correctly.
+     */
+    public function testRequiredIfRuleValidatesValues(): void
+    {
+        $data = ['status' => 'active', 'reason' => ''];
+        $rules = ['reason' => 'required_if:status,active'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('reason', $errors);
+        $this->assertContains('The reason field is required when status is active.', $errors['reason']);
+
+        $data = ['status' => 'inactive', 'reason' => ''];
+        $rules = ['reason' => 'required_if:status,active'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+    }
+
+    /**
+     * Test that required_unless rule validates values correctly.
+     */
+    public function testRequiredUnlessRuleValidatesValues(): void
+    {
+        $data = ['status' => 'active', 'reason' => ''];
+        $rules = ['reason' => 'required_unless:status,inactive'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('reason', $errors);
+        $this->assertContains('The reason field is required unless status is inactive.', $errors['reason']);
+
+        $data = ['status' => 'inactive', 'reason' => ''];
+        $rules = ['reason' => 'required_unless:status,inactive'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+    }
+
+    /**
+     * Test min and max and between rules with null values
+     */
+    public function testMinMaxBetweenWithNullValues(): void
+    {
+        $data = ['age' => null];
+        $rules = ['age' => 'min:18|max:65|between:18,65'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+    }
 }
