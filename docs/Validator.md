@@ -6,6 +6,7 @@ The `Validator` class provides a straightforward way to validate arrays of data 
 
 - [__construct()](#__construct) Constructs a new Validator instance.
 - [validate()](#validate) Validates the data against the defined rules.
+- [make()](#make) Creates a new Validator instance using static method.
 - [addValidationMethod()](#addValidationMethod) Adds a custom validation method.
 - [errors()](#errors) Retrieves the validation errors.
 
@@ -57,6 +58,14 @@ $validator = new Validator([
     'numeric' => '(:attribute) must be a number',
     'array' => '(:attribute) must be an array'
 ]);
+```
+
+### make()
+
+Create a new Validator instance using a static method.
+
+```php
+$validator = Validator::make($data, $rules, $messages = []);
 ```
 
 ### validate()
