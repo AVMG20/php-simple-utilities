@@ -95,7 +95,13 @@ class Validator
                 $rules = explode('|', $rules);
             }
 
+            $isNullable = in_array('nullable', $rules, true);
+
             foreach ($rules as $rule) {
+                if ($rule === 'nullable') {
+                    continue;
+                }
+
                 $parameters = [];
                 if (strpos($rule, ':')) {
                     [$rule, $parameterString] = explode(':', $rule);
@@ -107,6 +113,10 @@ class Validator
                     $fieldValues = $this->getFieldValues($field);
 
                     foreach ($fieldValues as $key => $value) {
+                        if ($isNullable && $this->isEmpty($value)) {
+                            continue;
+                        }
+
                         $result = $validationMethod($value, $key, ...$parameters);
                         if ($result !== true) {
                             $this->addError($key, $result);

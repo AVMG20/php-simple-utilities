@@ -472,4 +472,43 @@ class ValidatorTest extends TestCase
         $this->assertTrue($validator->validate());
         $this->assertEmpty($validator->errors());
     }
+
+    /**
+     * Test that nullable fields are not required and validation passes when the field is not provided.
+     */
+    public function testNullableFieldNotProvided(): void
+    {
+        $data = ['title' => 'A valid title'];
+        $rules = [
+            'version' => 'nullable|numeric',
+            'title' => 'required|string'
+        ];
+
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+    }
+
+    /**
+     * Test that nullable fields are validated correctly when provided with a valid value.
+     */
+    public function testNullableFieldProvidedWithValidValue(): void
+    {
+        $data = ['version' => 1, 'title' => 'A valid title'];
+        $rules = ['version' => 'nullable|numeric', 'title' => 'required|string'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        //make version a text instead and see if it fails
+        $data = ['version' => 'one', 'title' => 'A valid title'];
+        $rules = ['version' => 'nullable|numeric', 'title' => 'required|string'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('version', $errors);
+    }
 }

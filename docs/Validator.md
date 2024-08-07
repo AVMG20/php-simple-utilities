@@ -21,6 +21,7 @@ The `Validator` class provides a straightforward way to validate arrays of data 
 - [max](#max) Ensures that a field does not exceed the maximum requirement.
 - [between](#between) Ensures that a field is within a specified range.
 - [in](#in) Ensures that a field is one of the specified values.
+- [nullable](#nullable) Allows a field to be null.
 
 ### Constructing a Validator Instance
 
@@ -276,6 +277,14 @@ Ensures that a field is one of the specified values.
 
 ```php
 $rules = ['status' => 'in:active,inactive'];
+```
+
+### nullable
+
+Allows a field to be null.
+
+```php
+$rules = ['middle_name' => 'nullable|string'];
 ```
 
 ## Full Example
