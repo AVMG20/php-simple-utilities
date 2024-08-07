@@ -98,10 +98,6 @@ class Validator
             $isNullable = in_array('nullable', $rules, true);
 
             foreach ($rules as $rule) {
-                if ($rule === 'nullable') {
-                    continue;
-                }
-
                 $parameters = [];
                 if (strpos($rule, ':')) {
                     [$rule, $parameterString] = explode(':', $rule);
@@ -162,6 +158,10 @@ class Validator
      */
     private function registerDefaultValidationMethods(): void
     {
+        $this->addValidationMethod('nullable', function ($value) {
+            return true;
+        });
+
         $this->addValidationMethod('required', function ($value, $field) {
             if ($this->isEmpty($value)) {
                 return str_replace(':attribute', $field, $this->messages['required']);
