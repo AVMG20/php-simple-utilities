@@ -320,17 +320,29 @@ class Validator
     private function getFieldValues(string $field): array
     {
         $fieldValues = [];
+
+        // Handle recursive nesting
         if (str_contains($field, '.*.')) {
             $segments = explode('.*.', $field);
-            $baseArray = $this->getNestedValue($this->data, $segments[0]);
+            $baseField = array_shift($segments);
+            $remainingField = implode('.*.', $segments);
+
+            $baseArray = $this->getNestedValue($this->data, $baseField);
 
             if (is_array($baseArray)) {
                 foreach ($baseArray as $key => $subArray) {
-                    $fieldKey = "{$segments[0]}.{$key}.{$segments[1]}";
-                    $fieldValues[$fieldKey] = $this->getNestedValue($this->data, $fieldKey);
+                    $fieldKey = "{$baseField}.{$key}";
+                    if ($remainingField) {
+                        // Recursive call for deeper nesting
+                        $nestedFieldValues = $this->getFieldValues("{$fieldKey}.{$remainingField}");
+                        $fieldValues = array_merge($fieldValues, $nestedFieldValues);
+                    } else {
+                        $fieldValues[$fieldKey] = $subArray;
+                    }
                 }
             }
         } else {
+            // Handle the case where there's no wildcard in the field
             $fieldValues[$field] = $this->getNestedValue($this->data, $field);
         }
 

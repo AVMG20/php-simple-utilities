@@ -398,6 +398,51 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * Test deep nesting array validation
+     */
+    public function testDeepNestingArrayValidation(): void
+    {
+        $data = [
+            'person' => [
+                [
+                    'name' => 'Alice',
+                    'details' => [
+                        ['age' => 25],
+                        ['age' => 30],
+                        ['age' => 35]
+                    ]
+                ],
+                [
+                    'name' => 'Bob',
+                    'details' => [
+                        ['age' => 20],
+                        ['age' => 25],
+                        ['age' => 30]
+                    ]
+                ]
+            ]
+        ];
+
+        $rules = [
+            'person.*.details.*.age' => 'min:18|max:30'
+        ];
+
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+
+        $this->assertArrayHasKey('person.0.details.2.age', $errors);
+        $this->assertContains('The person.0.details.2.age field must not exceed 30.', $errors['person.0.details.2.age']);
+
+        //unset the one that's wrong and assert the validation succeeds
+        unset($data['person'][0]['details'][2]);
+        $validator = new Validator($data, $rules);
+        $this->assertTrue($validator->validate());
+    }
+
+
+    /**
      * Test that validation rules can be passed as an array.
      */
     public function testValidationRulesAsArray(): void
