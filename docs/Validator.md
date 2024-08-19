@@ -235,6 +235,14 @@ Ensures that a field is an array.
 $rules = ['items' => 'array'];
 ```
 
+### boolean
+
+Ensures that a field is a boolean value.
+
+```php
+$rules = ['is_active' => 'boolean'];
+```
+
 ### min
 
 Ensures that a field meets the minimum requirement. Works for both strings (minimum length) and numeric values.

@@ -299,6 +299,35 @@ class ValidatorTest extends TestCase
     }
 
     /**
+     * test boolean rule, must be true,false,0,1,'0','1'
+     */
+    public function testBooleanRule(): void
+    {
+        $data = ['status' => 'active'];
+        $rules = ['status' => 'boolean'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('status', $errors);
+        $this->assertContains('The status field must be a boolean value.', $errors['status']);
+
+        $data = ['status' => 1];
+        $rules = ['status' => 'boolean'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['status' => '1'];
+        $rules = ['status' => 'boolean'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+    }
+
+    /**
      * Test that required fields in nested arrays are validated correctly.
      */
     public function testRequiredFieldInNestedArray(): void

@@ -34,6 +34,7 @@ class Validator
         'string' => 'The :attribute field must be a string.',
         'numeric' => 'The :attribute field must be a numeric value.',
         'array' => 'The :attribute field must be an array.',
+        'boolean' => 'The :attribute field must be a boolean value.',
         'min.string' => 'The :attribute field must be at least :min characters long.',
         'min.numeric' => 'The :attribute field must be at least :min.',
         'max.string' => 'The :attribute field must not exceed :max characters.',
@@ -211,6 +212,17 @@ class Validator
         $this->addValidationMethod('numeric', function ($value, $field) {
             return is_numeric($value) ? true : str_replace(':attribute', $field, $this->messages['numeric']);
         });
+
+        $this->addValidationMethod('boolean', function ($value, $field) {
+            // Check if the value is strictly true, false, 1, 0, '1', or '0'
+            if (is_bool($value) || in_array($value, [1, 0, '1', '0'], true)) {
+                return true;
+            }
+
+            // Return the error message if the value is not boolean
+            return str_replace(':attribute', $field, $this->messages['boolean']);
+        });
+
 
         $this->addValidationMethod('array', function ($value, $field) {
             return is_array($value) ? true : str_replace(':attribute', $field, $this->messages['array']);
