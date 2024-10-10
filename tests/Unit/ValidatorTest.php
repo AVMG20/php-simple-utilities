@@ -468,6 +468,28 @@ class ValidatorTest extends TestCase
         unset($data['person'][0]['details'][2]);
         $validator = new Validator($data, $rules);
         $this->assertTrue($validator->validate());
+
+
+        //test nested like person.details.*.age
+        $data = [
+            'person' => [
+                [
+                    'name' => 'Alice',
+                    'details' => [
+                        ['age' => 25],
+                        ['age' => 30],
+                        ['age' => 35]
+                    ]
+                ],
+            ]
+        ];
+
+        $rules = [
+            'person.details.*.age' => 'min:18|max:30'
+        ];
+
+        $validator = new Validator($data, $rules);
+        $this->assertTrue($validator->validate());
     }
 
 
@@ -584,5 +606,159 @@ class ValidatorTest extends TestCase
         $this->assertFalse($validator->validate());
         $errors = $validator->errors();
         $this->assertArrayHasKey('version', $errors);
+    }
+
+    /**
+     * Test that 'numeric' rule with 'min' validates correctly for string input.
+     */
+    public function testNumericMinWithStringInput(): void
+    {
+        $data = ['amount' => '100'];
+        $rules = ['amount' => 'numeric|min:50'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['amount' => '40'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('amount', $errors);
+        $this->assertContains('The amount field must be at least 50.', $errors['amount']);
+    }
+
+    /**
+     * Test that 'numeric' rule with 'max' validates correctly for string input.
+     */
+    public function testNumericMaxWithStringInput(): void
+    {
+        $data = ['price' => '99.99'];
+        $rules = ['price' => 'numeric|max:100'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['price' => '100.01'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('price', $errors);
+        $this->assertContains('The price field must not exceed 100.', $errors['price']);
+    }
+
+    /**
+     * Test that 'numeric' rule with 'between' validates correctly for string input.
+     */
+    public function testNumericBetweenWithStringInput(): void
+    {
+        $data = ['score' => '75.5'];
+        $rules = ['score' => 'numeric|between:0,100'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['score' => '100.1'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('score', $errors);
+        $this->assertContains('The score field must be between 0 and 100.', $errors['score']);
+    }
+
+    /**
+     * Test that 'string' rule with 'min' validates correctly for numeric input.
+     */
+    public function testStringMinWithNumericInput(): void
+    {
+        $data = ['code' => '12345'];
+        $rules = ['code' => 'string|min:5'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['code' => '1234'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('code', $errors);
+        $this->assertContains('The code field must be at least 5 characters long.', $errors['code']);
+    }
+
+    /**
+     * Test that 'string' rule with 'max' validates correctly for numeric input.
+     */
+    public function testStringMaxWithNumericInput(): void
+    {
+        $data = ['zip' => '12345'];
+        $rules = ['zip' => 'string|max:5'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['zip' => '123456'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('zip', $errors);
+        $this->assertContains('The zip field must not exceed 5 characters.', $errors['zip']);
+    }
+
+    /**
+     * Test that 'string' rule with 'between' validates correctly for numeric input.
+     */
+    public function testStringBetweenWithNumericInput(): void
+    {
+        $data = ['id' => '12345'];
+        $rules = ['id' => 'string|between:5,10'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
+
+        $data = ['id' => '1234'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('id', $errors);
+        $this->assertContains('The id field must be between 5 and 10 characters.', $errors['id']);
+    }
+
+    /**
+     * Test that 'numeric' rule fails for non-numeric string input.
+     */
+    public function testNumericFailsForNonNumericString(): void
+    {
+        $data = ['amount' => 'one hundred'];
+        $rules = ['amount' => 'numeric|min:50'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->validate());
+        $errors = $validator->errors();
+        $this->assertArrayHasKey('amount', $errors);
+        $this->assertContains('The amount field must be a numeric value.', $errors['amount']);
+    }
+
+    /**
+     * Test that 'string' rule passes for numeric string input.
+     */
+    public function testStringPassesForNumericString(): void
+    {
+        $data = ['code' => '12345'];
+        $rules = ['code' => 'string|min:5'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertTrue($validator->validate());
+        $this->assertEmpty($validator->errors());
     }
 }

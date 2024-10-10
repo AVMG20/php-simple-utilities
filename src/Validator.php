@@ -213,6 +213,70 @@ class Validator
             return is_numeric($value) ? true : str_replace(':attribute', $field, $this->messages['numeric']);
         });
 
+        $this->addValidationMethod('array', function ($value, $field) {
+            return is_array($value) ? true : str_replace(':attribute', $field, $this->messages['array']);
+        });
+
+        $this->addValidationMethod('min', function ($value, $field, $min) {
+            if ($this->isEmpty($value)) return true;
+
+            $isNumeric = $this->isNumericRule($field);
+            $isString = $this->isStringRule($field);
+
+            if ($isNumeric || (!$isString && is_numeric($value))) {
+                return $value >= $min
+                    ? true
+                    : str_replace([':attribute', ':min'], [$field, $min], $this->messages['min.numeric']);
+            }
+
+            $length = is_string($value) ? strlen($value) : strlen((string)$value);
+            return $length >= $min
+                ? true
+                : str_replace([':attribute', ':min'], [$field, $min], $this->messages['min.string']);
+        });
+
+        $this->addValidationMethod('max', function ($value, $field, $max) {
+            if ($this->isEmpty($value)) return true;
+
+            $isNumeric = $this->isNumericRule($field);
+            $isString = $this->isStringRule($field);
+
+            if ($isNumeric || (!$isString && is_numeric($value))) {
+                return $value <= $max
+                    ? true
+                    : str_replace([':attribute', ':max'], [$field, $max], $this->messages['max.numeric']);
+            }
+
+            $length = is_string($value) ? strlen($value) : strlen((string)$value);
+            return $length <= $max
+                ? true
+                : str_replace([':attribute', ':max'], [$field, $max], $this->messages['max.string']);
+        });
+
+        $this->addValidationMethod('between', function ($value, $field, $min, $max) {
+            if ($this->isEmpty($value)) return true;
+
+            $isNumeric = $this->isNumericRule($field);
+            $isString = $this->isStringRule($field);
+
+            if ($isNumeric || (!$isString && is_numeric($value))) {
+                return $value >= $min && $value <= $max
+                    ? true
+                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.numeric']);
+            }
+
+            $length = is_string($value) ? strlen($value) : strlen((string)$value);
+            return $length >= $min && $length <= $max
+                ? true
+                : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.string']);
+        });
+
+        $this->addValidationMethod('in', function ($value, $field, ...$list) {
+            return in_array($value, $list)
+                ? true
+                : str_replace([':attribute', ':values'], [$field, implode(', ', $list)], $this->messages['in']);
+        });
+
         $this->addValidationMethod('boolean', function ($value, $field) {
             // Check if the value is strictly true, false, 1, 0, '1', or '0'
             if (is_bool($value) || in_array($value, [1, 0, '1', '0'], true)) {
@@ -222,105 +286,26 @@ class Validator
             // Return the error message if the value is not boolean
             return str_replace(':attribute', $field, $this->messages['boolean']);
         });
+    }
 
+    private function isNumericRule(string $field): bool
+    {
+        return $this->hasRule($field, 'numeric');
+    }
 
-        $this->addValidationMethod('array', function ($value, $field) {
-            return is_array($value) ? true : str_replace(':attribute', $field, $this->messages['array']);
-        });
+    private function isStringRule(string $field): bool
+    {
+        return $this->hasRule($field, 'string');
+    }
 
-        $this->addValidationMethod('min', function ($value, $field, $min) {
+    private function hasRule(string $field, string $rule): bool
+    {
+        if (!isset($this->rules[$field])) {
+            return false;
+        }
 
-            // Do nothing if the value is empty to allow other rules to be applied
-            if ($this->isEmpty($value)) return true;
-
-            if (is_numeric($value)) {
-                return $value >= $min
-                    ? true
-                    : str_replace([
-                        ':attribute',
-                        ':min'
-                    ], [
-                        $field,
-                        $min
-                    ], $this->messages['min.numeric']);
-            }
-
-            if (is_string($value)) {
-                return strlen($value) >= $min
-                    ? true
-                    : str_replace([
-                        ':attribute',
-                        ':min'
-                    ], [
-                        $field,
-                        $min
-                    ], $this->messages['min.string']);
-            }
-
-            // Do nothing if the value is not a string or a number to allow other rules to be applied
-            return true;
-        });
-
-        $this->addValidationMethod('max', function ($value, $field, $max) {
-
-            // Do nothing if the value is empty to allow other rules to be applied
-            if ($this->isEmpty($value)) return true;
-
-            if (is_numeric($value)) {
-                return $value <= $max
-                    ? true
-                    : str_replace([
-                        ':attribute',
-                        ':max'
-                    ], [
-                        $field,
-                        $max
-                    ], $this->messages['max.numeric']);
-            }
-
-            if (is_string($value)) {
-                return strlen($value) <= $max
-                    ? true
-                    : str_replace([
-                        ':attribute',
-                        ':max'
-                    ], [
-                        $field,
-                        $max
-                    ], $this->messages['max.string']);
-            }
-
-            // Do nothing if the value is not a string or a number to allow other rules to be applied
-            return true;
-        });
-
-        $this->addValidationMethod('between', function ($value, $field, $min, $max) {
-
-            // Do nothing if the value is empty to allow other rules to be applied
-            if ($this->isEmpty($value)) return true;
-
-            if (is_numeric($value)) {
-                return $value >= $min && $value <= $max
-                    ? true
-                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.numeric']);
-            }
-
-            if (is_string($value)) {
-                $length = strlen($value);
-                return $length >= $min && $length <= $max
-                    ? true
-                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.string']);
-            }
-
-            // Do nothing if the value is not a string or a number to allow other rules to be applied
-            return true;
-        });
-
-        $this->addValidationMethod('in', function ($value, $field, ...$list) {
-            return in_array($value, $list)
-                ? true
-                : str_replace([':attribute', ':values'], [$field, implode(', ', $list)], $this->messages['in']);
-        });
+        $rules = is_string($this->rules[$field]) ? explode('|', $this->rules[$field]) : $this->rules[$field];
+        return in_array($rule, $rules, true);
     }
 
     /**
