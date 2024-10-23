@@ -15,7 +15,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'required', 'age' => 'required'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('age', $errors);
         $this->assertContains('The age field is required.', $errors['age']);
@@ -30,7 +30,7 @@ class ValidatorTest extends TestCase
         $rules = ['items' => 'required'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('items', $errors);
         $this->assertContains('The items field is required.', $errors['items']);
@@ -45,7 +45,7 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'required'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -58,7 +58,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'required'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('The name field is required.', $errors['name']);
@@ -73,7 +73,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'required'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('The name field is required.', $errors['name']);
@@ -88,7 +88,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'string'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('The name field must be a string.', $errors['name']);
@@ -103,7 +103,7 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'numeric'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('age', $errors);
         $this->assertContains('The age field must be a numeric value.', $errors['age']);
@@ -118,7 +118,7 @@ class ValidatorTest extends TestCase
         $rules = ['items' => 'array'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('items', $errors);
         $this->assertContains('The items field must be an array.', $errors['items']);
@@ -133,7 +133,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'min:5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('The name field must be at least 5 characters long.', $errors['name']);
@@ -148,7 +148,7 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'min:18'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('age', $errors);
         $this->assertContains('The age field must be at least 18.', $errors['age']);
@@ -163,7 +163,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'max:5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('The name field must not exceed 5 characters.', $errors['name']);
@@ -178,7 +178,7 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'max:18'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('age', $errors);
         $this->assertContains('The age field must not exceed 18.', $errors['age']);
@@ -193,7 +193,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'required|string|min:5', 'age' => 'required|numeric'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
 
         $this->assertArrayHasKey('name', $errors);
@@ -212,7 +212,7 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'required|string|min:5|max:50', 'age' => 'required|numeric|min:18|max:65'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -226,7 +226,7 @@ class ValidatorTest extends TestCase
         $messages = ['min.string' => '(:attribute)'];
         $validator = new Validator($data, $rules, $messages);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('(name)', $errors['name']);
@@ -241,14 +241,14 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'between:18,30'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['age' => 35];
         $rules = ['age' => 'between:18,30'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('age', $errors);
         $this->assertContains('The age field must be between 18 and 30.', $errors['age']);
@@ -263,14 +263,14 @@ class ValidatorTest extends TestCase
         $rules = ['name' => 'between:3,5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['name' => 'Jonathan'];
         $rules = ['name' => 'between:3,5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
         $this->assertContains('The name field must be between 3 and 5 characters.', $errors['name']);
@@ -285,14 +285,14 @@ class ValidatorTest extends TestCase
         $rules = ['status' => 'in:active,inactive'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['status' => 'pending'];
         $rules = ['status' => 'in:active,inactive'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('status', $errors);
         $this->assertContains('The status field must be one of the following values: active, inactive.', $errors['status']);
@@ -307,7 +307,7 @@ class ValidatorTest extends TestCase
         $rules = ['status' => 'boolean'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('status', $errors);
         $this->assertContains('The status field must be a boolean value.', $errors['status']);
@@ -316,14 +316,14 @@ class ValidatorTest extends TestCase
         $rules = ['status' => 'boolean'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['status' => '1'];
         $rules = ['status' => 'boolean'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -343,7 +343,7 @@ class ValidatorTest extends TestCase
         $rules = ['author.details.email' => 'required'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         // Test failure case
@@ -354,7 +354,7 @@ class ValidatorTest extends TestCase
             ]
         ];
         $validator = new Validator($data, $rules);
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('author.details.email', $errors);
         $this->assertContains('The author.details.email field is required.', $errors['author.details.email']);
@@ -375,7 +375,7 @@ class ValidatorTest extends TestCase
         $rules = ['author.details.age' => 'min:18'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         // Test failure case
@@ -387,7 +387,7 @@ class ValidatorTest extends TestCase
             ]
         ];
         $validator = new Validator($data, $rules);
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('author.details.age', $errors);
         $this->assertContains('The author.details.age field must be at least 18.', $errors['author.details.age']);
@@ -408,7 +408,7 @@ class ValidatorTest extends TestCase
         $rules = ['person.*.name' => 'max:6'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         // Test failure case
@@ -420,7 +420,7 @@ class ValidatorTest extends TestCase
             ]
         ];
         $validator = new Validator($data, $rules);
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('person.2.name', $errors);
         $this->assertContains('The person.2.name field must not exceed 6 characters.', $errors['person.2.name']);
@@ -458,7 +458,7 @@ class ValidatorTest extends TestCase
 
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
 
         $this->assertArrayHasKey('person.0.details.2.age', $errors);
@@ -467,7 +467,7 @@ class ValidatorTest extends TestCase
         //unset the one that's wrong and assert the validation succeeds
         unset($data['person'][0]['details'][2]);
         $validator = new Validator($data, $rules);
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
 
 
         //test nested like person.details.*.age
@@ -489,7 +489,7 @@ class ValidatorTest extends TestCase
         ];
 
         $validator = new Validator($data, $rules);
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
     }
 
 
@@ -505,7 +505,7 @@ class ValidatorTest extends TestCase
         ];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
 
         $this->assertArrayHasKey('username', $errors);
@@ -521,7 +521,7 @@ class ValidatorTest extends TestCase
         $rules = ['reason' => 'required_if:status,active'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('reason', $errors);
         $this->assertContains('The reason field is required when status is active.', $errors['reason']);
@@ -530,7 +530,7 @@ class ValidatorTest extends TestCase
         $rules = ['reason' => 'required_if:status,active'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -543,7 +543,7 @@ class ValidatorTest extends TestCase
         $rules = ['reason' => 'required_unless:status,inactive'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('reason', $errors);
         $this->assertContains('The reason field is required unless status is inactive.', $errors['reason']);
@@ -552,7 +552,7 @@ class ValidatorTest extends TestCase
         $rules = ['reason' => 'required_unless:status,inactive'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -565,7 +565,7 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'min:18|max:65|between:18,65'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -582,7 +582,7 @@ class ValidatorTest extends TestCase
 
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
     }
 
@@ -595,7 +595,7 @@ class ValidatorTest extends TestCase
         $rules = ['version' => 'nullable|numeric', 'title' => 'required|string'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         //make version a text instead and see if it fails
@@ -603,7 +603,7 @@ class ValidatorTest extends TestCase
         $rules = ['version' => 'nullable|numeric', 'title' => 'required|string'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('version', $errors);
     }
@@ -617,13 +617,13 @@ class ValidatorTest extends TestCase
         $rules = ['amount' => 'numeric|min:50'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['amount' => '40'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('amount', $errors);
         $this->assertContains('The amount field must be at least 50.', $errors['amount']);
@@ -638,13 +638,13 @@ class ValidatorTest extends TestCase
         $rules = ['price' => 'numeric|max:100'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['price' => '100.01'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('price', $errors);
         $this->assertContains('The price field must not exceed 100.', $errors['price']);
@@ -659,13 +659,13 @@ class ValidatorTest extends TestCase
         $rules = ['score' => 'numeric|between:0,100'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['score' => '100.1'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('score', $errors);
         $this->assertContains('The score field must be between 0 and 100.', $errors['score']);
@@ -680,13 +680,13 @@ class ValidatorTest extends TestCase
         $rules = ['code' => 'string|min:5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['code' => '1234'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('code', $errors);
         $this->assertContains('The code field must be at least 5 characters long.', $errors['code']);
@@ -701,13 +701,13 @@ class ValidatorTest extends TestCase
         $rules = ['zip' => 'string|max:5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['zip' => '123456'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('zip', $errors);
         $this->assertContains('The zip field must not exceed 5 characters.', $errors['zip']);
@@ -722,13 +722,13 @@ class ValidatorTest extends TestCase
         $rules = ['id' => 'string|between:5,10'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
 
         $data = ['id' => '1234'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('id', $errors);
         $this->assertContains('The id field must be between 5 and 10 characters.', $errors['id']);
@@ -743,7 +743,7 @@ class ValidatorTest extends TestCase
         $rules = ['amount' => 'numeric|min:50'];
         $validator = new Validator($data, $rules);
 
-        $this->assertFalse($validator->validate());
+        $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('amount', $errors);
         $this->assertContains('The amount field must be a numeric value.', $errors['amount']);
@@ -758,7 +758,49 @@ class ValidatorTest extends TestCase
         $rules = ['code' => 'string|min:5'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->validate());
+        $this->assertTrue($validator->passes());
         $this->assertEmpty($validator->errors());
+    }
+
+    /**
+     * Test validate throws an exception when not valid
+     */
+    public function testValidateThrowsException(): void
+    {
+        //assert invalid argument exception is thrown
+        $this->expectException(Exception::class);
+        $data = ['name' => ''];
+        $rules = ['name' => 'required'];
+        $validator = new Validator($data, $rules);
+        $validator->validate();
+    }
+
+    /**
+     * test passes() and fails() methods work as expected
+     */
+    public function testPassesAndFailsMethods(): void
+    {
+        $data = ['name' => ''];
+        $rules = ['name' => 'required'];
+        $validator = new Validator($data, $rules);
+
+        $this->assertFalse($validator->passes());
+        $this->assertTrue($validator->fails());
+    }
+
+    /**
+     * test that validated only returns the validated data and not the whole data
+     */
+    public function testValidatedMethodOnlyReturnsValidatedData(): void
+    {
+        //3 fields but we only validate 2 of them, validate should return only the validated fields
+        $data = ['name' => 'John Doe', 'age' => '30', 'job' => 'developer'];
+        $rules = ['name' => 'required|string', 'age' => 'required|min:5|max:50'];
+        $validator = new Validator($data, $rules);
+        $validated = $validator->validated();
+
+        $this->assertArrayHasKey('name', $validated);
+        $this->assertArrayHasKey('age', $validated);
+        $this->assertArrayNotHasKey('job', $validated);
     }
 }

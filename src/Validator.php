@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Avmg\PhpSimpleUtilities;
 
+use Exception;
 use InvalidArgumentException;
 
 /**
@@ -10,7 +11,7 @@ use InvalidArgumentException;
  * @template TField as string
  * @template TValue as mixed
  *
- * This class provides a way to validate arrays of data against a set of rules.
+ * This class provides a Laravel-style way to validate arrays of data against a set of rules.
  */
 class Validator
 {
@@ -55,6 +56,11 @@ class Validator
     private array $validationMethods = [];
 
     /**
+     * @var bool Whether validation has been run
+     */
+    private bool $hasRun = false;
+
+    /**
      * Creates a new instance of the Validator class.
      *
      * @param array<TField, TValue> $data The data to validate.
@@ -67,7 +73,6 @@ class Validator
         $this->rules = $rules;
         $this->messages = array_merge($this->messages, $messages);
 
-        // Register default rules
         $this->registerDefaultValidationMethods();
     }
 
@@ -85,12 +90,100 @@ class Validator
     }
 
     /**
-     * Validates the data against the rules.
+     * Validate the data and throw an exception if validation fails.
      *
-     * @return bool Returns true if validation passes, false otherwise.
+     * @throws Exception
+     * @return array The validated data
      */
-    public function validate(): bool
+    public function validate(): array
     {
+        if (!$this->passes()) {
+            throw new Exception('Validation failed');
+        }
+
+        return $this->validated();
+    }
+
+    /**
+     * Determine if the validation passes.
+     *
+     * @return bool
+     */
+    public function passes(): bool
+    {
+        $this->runValidation();
+        return empty($this->errors);
+    }
+
+    /**
+     * Determine if the validation fails.
+     *
+     * @return bool
+     */
+    public function fails(): bool
+    {
+        return !$this->passes();
+    }
+
+    /**
+     * Get the validated data.
+     *
+     * @return array
+     * @throws Exception if validation hasn't been run or failed
+     */
+    public function validated(): array
+    {
+        if (!$this->hasRun) {
+            $this->validate();
+        }
+
+        if ($this->fails()) {
+            throw new Exception('Validation failed');
+        }
+
+        $validated = [];
+        foreach ($this->rules as $field => $rules) {
+            if (isset($this->data[$field])) {
+                $validated[$field] = $this->data[$field];
+            }
+        }
+
+        return $validated;
+    }
+
+    /**
+     * Get the failed validation rules.
+     *
+     * @return array
+     */
+    public function failed(): array
+    {
+        $this->runValidation();
+
+        $failed = [];
+        foreach ($this->errors as $field => $messages) {
+            $failed[$field] = array_map(function ($message) {
+                // Extract rule name from message (this is a simple implementation)
+                return strtolower(explode(' ', $message)[0]);
+            }, $messages);
+        }
+
+        return $failed;
+    }
+
+    /**
+     * Run the validator's rules.
+     *
+     * @return void
+     */
+    private function runValidation(): void
+    {
+        if ($this->hasRun) {
+            return;
+        }
+
+        $this->errors = [];
+
         foreach ($this->rules as $field => $rules) {
             if (is_string($rules)) {
                 $rules = explode('|', $rules);
@@ -125,7 +218,35 @@ class Validator
             }
         }
 
-        return empty($this->errors);
+        $this->hasRun = true;
+    }
+
+    /**
+     * Add a custom validation rule.
+     *
+     * @param string $name
+     * @param callable $callback
+     * @param string|null $message
+     * @return $this
+     */
+    public function addRule(string $name, callable $callback, ?string $message = null): self
+    {
+        $this->addValidationMethod($name, $callback);
+        if ($message !== null) {
+            $this->messages[$name] = $message;
+        }
+        return $this;
+    }
+
+    /**
+     * Get the validation errors.
+     *
+     * @return array<string, array<int, string>>
+     */
+    public function errors(): array
+    {
+        $this->runValidation();
+        return $this->errors;
     }
 
     /**
@@ -140,16 +261,6 @@ class Validator
     public function addValidationMethod(string $name, callable $callback): void
     {
         $this->validationMethods[$name] = $callback;
-    }
-
-    /**
-     * Retrieves the validation errors.
-     *
-     * @return array<string, array<int, string>> The validation errors.
-     */
-    public function errors(): array
-    {
-        return $this->errors;
     }
 
     /**
