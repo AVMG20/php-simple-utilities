@@ -80,8 +80,8 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Adds an item to the end of the collection.
      *
-     * @param mixed $item The item to add to the collection.
-     * @return static Returns the collection instance for method chaining.
+     * @param TValue $item The item to add to the collection.
+     * @return static<TKey, TValue> Returns the collection instance for method chaining.
      */
     public function push(mixed $item): static
     {
@@ -224,8 +224,9 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Applies a callback function to each item in the collection and returns a new collection of the results.
      *
-     * @param (callable(TValue, TKey): mixed) $callback $callback The callback function to apply. The callback should accept two arguments: the item and its key.
-     * @return static Returns a new collection instance containing the results of applying the callback function to each item.
+     * @template TMapValue
+     * @param (callable(TValue, TKey): TMapValue) $callback The callback function to apply...
+     * @return static<int, TMapValue> Returns a new collection instance containing the results...
      */
     public function map(callable $callback): static
     {
@@ -397,8 +398,8 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Transform each item in the collection using a callback.
      *
-     * @param  (callable(TValue, TKey): TValue) $callback
-     * @return static
+     * @param (callable(TValue, TKey): TValue) $callback
+     * @return static<TKey, TValue>
      */
     public function transform(callable $callback): static
     {
@@ -410,8 +411,8 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Split the collection into chunks of the given size.
      *
-     * @param  int  $size
-     * @return static
+     * @param int $size
+     * @return static<int, static<TKey, TValue>>
      */
     public function chunk(int $size): static
     {
@@ -485,9 +486,8 @@ class Collection implements ArrayAccess, \Countable
     /**
      * Flatten a multi-dimensional collection into a single level collection.
      *
-     * @paramint $depth
      * @param int $depth
-     * @return static
+     * @return static<int, mixed>
      */
     public function flatten(int $depth = 256): static
     {
@@ -610,8 +610,8 @@ class Collection implements ArrayAccess, \Countable
      * the value from the given items will overwrite the original value.
      * If the keys are numeric, the values will be appended to the end of the collection.
      *
-     * @param Collection|array $items The items to be merged into the collection.
-     * @return static<TKey, TValue> Returns a new collection instance containing the merged items.
+     * @param Collection<TKey, TValue>|array<TKey, TValue> $items The items to be merged into the collection.
+     * @return static<TKey, TValue>
      */
     public function merge(Collection|array $items): static
     {
