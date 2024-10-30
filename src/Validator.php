@@ -7,28 +7,26 @@ use Exception;
 use InvalidArgumentException;
 
 /**
- * Validator Class
- * @template TField as string
- * @template TValue as mixed
+ * Class Validator
  *
- * This class provides a Laravel-style way to validate arrays of data against a set of rules.
+ * Provides validation functionality for array data against defined rules.
+ *
+ * @template TData of array<string, mixed>
+ * @template TRules of array<string, string|array>
+ * @template TMessages of array<string, string>
  */
 class Validator
 {
-    /**
-     * @var array<TField, TValue> The data to validate.
-     */
-    private array $data;
+    /** @var array<string, array<int, string>> */
+    private array $errors = [];
 
-    /**
-     * @var array<TField, string> The rules to apply to the data.
-     */
-    private array $rules;
+    private bool $hasRun = false;
 
-    /**
-     * @var array<string, string> Custom error messages.
-     */
-    private array $messages = [
+    /** @var array<string, callable(mixed, string, array, array):bool|string> */
+    private array $validationMethods = [];
+
+    /** @var array<string, string> */
+    private array $defaultMessages = [
         'required' => 'The :attribute field is required.',
         'required_if' => 'The :attribute field is required when :anotherField is :anotherValue.',
         'required_unless' => 'The :attribute field is required unless :anotherField is :anotherValue.',
@@ -46,42 +44,27 @@ class Validator
     ];
 
     /**
-     * @var array<TField, array<int, string>> The validation errors.
-     */
-    private array $errors = [];
-
-    /**
-     * @var array<string, callable> Registered validation methods.
-     */
-    private array $validationMethods = [];
-
-    /**
-     * @var bool Whether validation has been run
-     */
-    private bool $hasRun = false;
-
-    /**
-     * Creates a new instance of the Validator class.
+     * Constructor
      *
-     * @param array<TField, TValue> $data The data to validate.
-     * @param array<TField, string> $rules The rules to apply to the data.
-     * @param array<TField, string> $messages Custom error messages.
+     * @param TData $data The data to validate
+     * @param TRules $rules The validation rules
+     * @param TMessages $messages Custom error messages
      */
-    public function __construct(array $data, array $rules, array $messages = [])
-    {
-        $this->data = $data;
-        $this->rules = $rules;
-        $this->messages = array_merge($this->messages, $messages);
-
+    public function __construct(
+        private array $data,
+        private array $rules,
+        private array $messages = []
+    ) {
+        $this->messages = array_merge($this->defaultMessages, $messages);
         $this->registerDefaultValidationMethods();
     }
 
     /**
-     * Creates a new instance of the Validator class.
+     * Creates a new validator instance
      *
-     * @param array<TField, TValue> $data The data to validate.
-     * @param array<TField, string> $rules The rules to apply to the data.
-     * @param array<TField, string> $messages Custom error messages.
+     * @param TData $data
+     * @param TRules $rules
+     * @param TMessages $messages
      * @return static
      */
     public static function make(array $data, array $rules, array $messages = []): static
@@ -90,22 +73,21 @@ class Validator
     }
 
     /**
-     * Validate the data and throw an exception if validation fails.
+     * Validates the data and returns validated fields or throws exception
      *
-     * @throws Exception
-     * @return array The validated data
+     * @throws Exception When validation fails
+     * @return array<string, mixed> Validated data
      */
     public function validate(): array
     {
         if (!$this->passes()) {
             throw new Exception('Validation failed');
         }
-
         return $this->validated();
     }
 
     /**
-     * Determine if the validation passes.
+     * Checks if validation passes
      *
      * @return bool
      */
@@ -116,7 +98,7 @@ class Validator
     }
 
     /**
-     * Determine if the validation fails.
+     * Checks if validation fails
      *
      * @return bool
      */
@@ -126,10 +108,10 @@ class Validator
     }
 
     /**
-     * Get the validated data.
+     * Returns validated data or throws exception
      *
-     * @return array
-     * @throws Exception if validation hasn't been run or failed
+     * @throws Exception When validation fails
+     * @return array<string, mixed>
      */
     public function validated(): array
     {
@@ -142,7 +124,7 @@ class Validator
         }
 
         $validated = [];
-        foreach ($this->rules as $field => $rules) {
+        foreach ($this->rules as $field => $rule) {
             if (isset($this->data[$field])) {
                 $validated[$field] = $this->data[$field];
             }
@@ -152,94 +134,7 @@ class Validator
     }
 
     /**
-     * Get the failed validation rules.
-     *
-     * @return array
-     */
-    public function failed(): array
-    {
-        $this->runValidation();
-
-        $failed = [];
-        foreach ($this->errors as $field => $messages) {
-            $failed[$field] = array_map(function ($message) {
-                // Extract rule name from message (this is a simple implementation)
-                return strtolower(explode(' ', $message)[0]);
-            }, $messages);
-        }
-
-        return $failed;
-    }
-
-    /**
-     * Run the validator's rules.
-     *
-     * @return void
-     */
-    private function runValidation(): void
-    {
-        if ($this->hasRun) {
-            return;
-        }
-
-        $this->errors = [];
-
-        foreach ($this->rules as $field => $rules) {
-            if (is_string($rules)) {
-                $rules = explode('|', $rules);
-            }
-
-            $isNullable = in_array('nullable', $rules, true);
-
-            foreach ($rules as $rule) {
-                $parameters = [];
-                if (strpos($rule, ':')) {
-                    [$rule, $parameterString] = explode(':', $rule);
-                    $parameters = explode(',', $parameterString);
-                }
-
-                if (isset($this->validationMethods[$rule])) {
-                    $validationMethod = $this->validationMethods[$rule];
-                    $fieldValues = $this->getFieldValues($field);
-
-                    foreach ($fieldValues as $key => $value) {
-                        if ($isNullable && $this->isEmpty($value)) {
-                            continue;
-                        }
-
-                        $result = $validationMethod($value, $key, ...$parameters);
-                        if ($result !== true) {
-                            $this->addError($key, $result);
-                        }
-                    }
-                } else {
-                    throw new InvalidArgumentException("Validation rule {$rule} does not exist.");
-                }
-            }
-        }
-
-        $this->hasRun = true;
-    }
-
-    /**
-     * Add a custom validation rule.
-     *
-     * @param string $name
-     * @param callable $callback
-     * @param string|null $message
-     * @return $this
-     */
-    public function addRule(string $name, callable $callback, ?string $message = null): self
-    {
-        $this->addValidationMethod($name, $callback);
-        if ($message !== null) {
-            $this->messages[$name] = $message;
-        }
-        return $this;
-    }
-
-    /**
-     * Get the validation errors.
+     * Returns validation errors
      *
      * @return array<string, array<int, string>>
      */
@@ -250,253 +145,344 @@ class Validator
     }
 
     /**
-     * Adds a custom validation method.
-     * @template TParams as mixed
-     * @template TResult as bool|string
-     *
-     * @param string $name The name of the validation method.
-     * @param (callable(TField, TValue, TParams): TResult) $callback The validation method.
-     * @return void
+     * Runs validation if not already run
      */
-    public function addValidationMethod(string $name, callable $callback): void
+    private function runValidation(): void
     {
-        $this->validationMethods[$name] = $callback;
+        if ($this->hasRun) {
+            return;
+        }
+
+        $this->errors = [];
+
+        foreach ($this->rules as $field => $ruleSet) {
+            $rules = $this->parseRules($ruleSet);
+            $isNullable = $this->hasRule($rules, 'nullable');
+
+            foreach ($rules as $rule) {
+                $this->validateRule($field, $rule, $isNullable);
+            }
+        }
+
+        $this->hasRun = true;
     }
 
     /**
-     * Registers the default validation methods.
+     * Validates a single rule for a field
      *
-     * @return void
+     * @param string $field Field name
+     * @param array{name: string, parameters: array<int, string>} $rule Rule configuration
+     * @param bool $isNullable Whether field is nullable
+     * @throws InvalidArgumentException When validation rule doesn't exist
+     */
+    private function validateRule(string $field, array $rule, bool $isNullable): void
+    {
+        if (!isset($this->validationMethods[$rule['name']])) {
+            throw new InvalidArgumentException("Validation rule {$rule['name']} does not exist.");
+        }
+
+        $validationMethod = $this->validationMethods[$rule['name']];
+        $fieldValues = $this->getFieldValues($field);
+
+        foreach ($fieldValues as $key => $value) {
+            if ($isNullable && $this->isEmpty($value) && $rule['name'] !== 'required') {
+                continue;
+            }
+
+            $result = $validationMethod($value, $key, $rule['parameters'], $this->data);
+
+            if ($result !== true) {
+                $this->addError($key, $this->formatMessage($result, [
+                    'name' => $rule['name'],
+                    'field' => $key,
+                    'parameters' => $rule['parameters']
+                ]));
+            }
+        }
+    }
+
+    /**
+     * Adds an error message for a field
+     *
+     * @param string $field Field name
+     * @param string $message Error message
+     */
+    private function addError(string $field, string $message): void
+    {
+        $this->errors[$field][] = $message;
+    }
+
+    /**
+     * Parses rule string or array into structured format
+     *
+     * @param string|array<int|string, mixed> $ruleSet
+     * @return array<int, array{name: string, parameters: array<int, string>}>
+     */
+    private function parseRules(string|array $ruleSet): array
+    {
+        $rules = is_string($ruleSet) ? explode('|', $ruleSet) : $ruleSet;
+        return array_map(function ($rule) {
+            $parts = explode(':', $rule);
+            return [
+                'name' => $parts[0],
+                'parameters' => isset($parts[1]) ? explode(',', $parts[1]) : []
+            ];
+        }, $rules);
+    }
+
+    /**
+     * Registers all default validation methods
      */
     private function registerDefaultValidationMethods(): void
     {
-        $this->addValidationMethod('nullable', function ($value) {
-            return true;
-        });
+        $this->validationMethods['nullable'] = fn($value, $field, $params, $data) => true;
 
-        $this->addValidationMethod('required', function ($value, $field) {
+        $this->validationMethods['required'] = function ($value, $field, $params, $data) {
             if ($this->isEmpty($value)) {
-                return str_replace(':attribute', $field, $this->messages['required']);
+                return $this->messages['required'];
             }
             return true;
-        });
+        };
 
-        $this->addValidationMethod('required_if', function ($value, $field, $anotherField, $anotherValue) {
-            if ($this->data[$anotherField] == $anotherValue) {
-                if ($this->isEmpty($value)) {
-                    return str_replace([
-                        ':attribute',
-                        ':anotherField',
-                        ':anotherValue'
-                    ], [
-                        $field,
-                        $anotherField,
-                        $anotherValue
-                    ], $this->messages['required_if']);
-                }
+        $this->validationMethods['required_if'] = function ($value, $field, $params, $data) {
+            [$anotherField, $anotherValue] = $params;
+            if (isset($data[$anotherField]) && $data[$anotherField] == $anotherValue && $this->isEmpty($value)) {
+                return $this->messages['required_if'];
             }
             return true;
-        });
+        };
 
-
-        $this->addValidationMethod('required_unless', function ($value, $field, $anotherField, $anotherValue) {
-            if ($this->data[$anotherField] != $anotherValue) {
-                if ($this->isEmpty($value)) {
-                    return str_replace([
-                        ':attribute',
-                        ':anotherField',
-                        ':anotherValue'
-                    ], [
-                        $field,
-                        $anotherField,
-                        $anotherValue
-                    ], $this->messages['required_unless']);
-                }
+        $this->validationMethods['required_unless'] = function ($value, $field, $params, $data) {
+            [$anotherField, $anotherValue] = $params;
+            if ((!isset($data[$anotherField]) || $data[$anotherField] != $anotherValue) && $this->isEmpty($value)) {
+                return $this->messages['required_unless'];
             }
             return true;
-        });
+        };
 
-        $this->addValidationMethod('string', function ($value, $field) {
-            return is_string($value) ? true : str_replace(':attribute', $field, $this->messages['string']);
-        });
+        $this->validationMethods['string'] = function ($value, $field, $params, $data) {
+            if (!is_string($value)) {
+                return $this->messages['string'];
+            }
+            return true;
+        };
 
-        $this->addValidationMethod('numeric', function ($value, $field) {
-            return is_numeric($value) ? true : str_replace(':attribute', $field, $this->messages['numeric']);
-        });
+        $this->validationMethods['numeric'] = function ($value, $field, $params, $data) {
+            if (!is_numeric($value)) {
+                return $this->messages['numeric'];
+            }
+            return true;
+        };
 
-        $this->addValidationMethod('array', function ($value, $field) {
-            return is_array($value) ? true : str_replace(':attribute', $field, $this->messages['array']);
-        });
+        $this->validationMethods['array'] = function ($value, $field, $params, $data) {
+            if (!is_array($value)) {
+                return $this->messages['array'];
+            }
+            return true;
+        };
 
-        $this->addValidationMethod('min', function ($value, $field, $min) {
+        $this->validationMethods['boolean'] = function ($value, $field, $params, $data) {
+            if (!(is_bool($value) || in_array($value, [1, 0, '1', '0'], true))) {
+                return $this->messages['boolean'];
+            }
+            return true;
+        };
+
+        $this->validationMethods['min'] = function ($value, $field, $params, $data) {
             if ($this->isEmpty($value)) return true;
 
-            $isNumeric = $this->isNumericRule($field);
-            $isString = $this->isStringRule($field);
+            $min = $params[0];
+            $isNumeric = $this->hasNumericRule($field);
+            $isString = $this->hasStringRule($field);
 
             if ($isNumeric || (!$isString && is_numeric($value))) {
-                return $value >= $min
-                    ? true
-                    : str_replace([':attribute', ':min'], [$field, $min], $this->messages['min.numeric']);
+                return $value >= $min ? true : $this->messages['min.numeric'];
             }
 
-            $length = is_string($value) ? strlen($value) : strlen((string)$value);
-            return $length >= $min
-                ? true
-                : str_replace([':attribute', ':min'], [$field, $min], $this->messages['min.string']);
-        });
+            $length = strlen((string)$value);
+            return $length >= $min ? true : $this->messages['min.string'];
+        };
 
-        $this->addValidationMethod('max', function ($value, $field, $max) {
+        $this->validationMethods['max'] = function ($value, $field, $params, $data) {
             if ($this->isEmpty($value)) return true;
 
-            $isNumeric = $this->isNumericRule($field);
-            $isString = $this->isStringRule($field);
+            $max = $params[0];
+            $isNumeric = $this->hasNumericRule($field);
+            $isString = $this->hasStringRule($field);
 
             if ($isNumeric || (!$isString && is_numeric($value))) {
-                return $value <= $max
-                    ? true
-                    : str_replace([':attribute', ':max'], [$field, $max], $this->messages['max.numeric']);
+                return $value <= $max ? true : $this->messages['max.numeric'];
             }
 
-            $length = is_string($value) ? strlen($value) : strlen((string)$value);
-            return $length <= $max
-                ? true
-                : str_replace([':attribute', ':max'], [$field, $max], $this->messages['max.string']);
-        });
+            $length = strlen((string)$value);
+            return $length <= $max ? true : $this->messages['max.string'];
+        };
 
-        $this->addValidationMethod('between', function ($value, $field, $min, $max) {
+        $this->validationMethods['between'] = function ($value, $field, $params, $data) {
             if ($this->isEmpty($value)) return true;
 
-            $isNumeric = $this->isNumericRule($field);
-            $isString = $this->isStringRule($field);
+            [$min, $max] = $params;
+            $isNumeric = $this->hasNumericRule($field);
+            $isString = $this->hasStringRule($field);
 
             if ($isNumeric || (!$isString && is_numeric($value))) {
-                return $value >= $min && $value <= $max
-                    ? true
-                    : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.numeric']);
+                return ($value >= $min && $value <= $max) ? true : $this->messages['between.numeric'];
             }
 
-            $length = is_string($value) ? strlen($value) : strlen((string)$value);
-            return $length >= $min && $length <= $max
-                ? true
-                : str_replace([':attribute', ':min', ':max'], [$field, $min, $max], $this->messages['between.string']);
-        });
+            $length = strlen((string)$value);
+            return ($length >= $min && $length <= $max) ? true : $this->messages['between.string'];
+        };
 
-        $this->addValidationMethod('in', function ($value, $field, ...$list) {
-            return in_array($value, $list)
-                ? true
-                : str_replace([':attribute', ':values'], [$field, implode(', ', $list)], $this->messages['in']);
-        });
-
-        $this->addValidationMethod('boolean', function ($value, $field) {
-            // Check if the value is strictly true, false, 1, 0, '1', or '0'
-            if (is_bool($value) || in_array($value, [1, 0, '1', '0'], true)) {
-                return true;
-            }
-
-            // Return the error message if the value is not boolean
-            return str_replace(':attribute', $field, $this->messages['boolean']);
-        });
+        $this->validationMethods['in'] = function ($value, $field, $params, $data) {
+            return in_array($value, $params, true) ? true : $this->messages['in'];
+        };
     }
-
-    private function isNumericRule(string $field): bool
+    /**
+     * Checks if field has numeric rule
+     *
+     * @param string $field Field name
+     * @return bool
+     */
+    private function hasNumericRule(string $field): bool
     {
-        return $this->hasRule($field, 'numeric');
-    }
-
-    private function isStringRule(string $field): bool
-    {
-        return $this->hasRule($field, 'string');
-    }
-
-    private function hasRule(string $field, string $rule): bool
-    {
-        if (!isset($this->rules[$field])) {
-            return false;
-        }
-
-        $rules = is_string($this->rules[$field]) ? explode('|', $this->rules[$field]) : $this->rules[$field];
-        return in_array($rule, $rules, true);
+        $rules = $this->parseRules($this->rules[$field] ?? '');
+        return $this->hasRule($rules, 'numeric');
     }
 
     /**
-     * Retrieves the values of a field.
+     * Checks if field has string rule
      *
-     * @param string $field
-     * @return array
+     * @param string $field Field name
+     * @return bool
+     */
+    private function hasStringRule(string $field): bool
+    {
+        $rules = $this->parseRules($this->rules[$field] ?? '');
+        return $this->hasRule($rules, 'string');
+    }
+
+    /**
+     * Checks if rules contain specific rule name
+     *
+     * @param array<int, array{name: string, parameters: array<int, string>}> $rules
+     * @param string $ruleName
+     * @return bool
+     */
+    private function hasRule(array $rules, string $ruleName): bool
+    {
+        foreach ($rules as $rule) {
+            if ($rule['name'] === $ruleName) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets field values including array notation
+     *
+     * @param string $field Field name with possible wildcard notation
+     * @return array<string, mixed>
      */
     private function getFieldValues(string $field): array
     {
+        if (!str_contains($field, '.*.')) {
+            return [$field => $this->getNestedValue($this->data, $field)];
+        }
+
         $fieldValues = [];
+        $segments = explode('.*.', $field);
+        $baseField = array_shift($segments);
+        $remainingField = implode('.*.', $segments);
+        $baseArray = $this->getNestedValue($this->data, $baseField);
 
-        // Handle recursive nesting
-        if (str_contains($field, '.*.')) {
-            $segments = explode('.*.', $field);
-            $baseField = array_shift($segments);
-            $remainingField = implode('.*.', $segments);
+        if (!is_array($baseArray)) {
+            return [$field => null];
+        }
 
-            $baseArray = $this->getNestedValue($this->data, $baseField);
-
-            if (is_array($baseArray)) {
-                foreach ($baseArray as $key => $subArray) {
-                    $fieldKey = "{$baseField}.{$key}";
-                    if ($remainingField) {
-                        // Recursive call for deeper nesting
-                        $nestedFieldValues = $this->getFieldValues("{$fieldKey}.{$remainingField}");
-                        $fieldValues = array_merge($fieldValues, $nestedFieldValues);
-                    } else {
-                        $fieldValues[$fieldKey] = $subArray;
-                    }
-                }
+        foreach ($baseArray as $key => $subArray) {
+            $fieldKey = "{$baseField}.{$key}";
+            if ($remainingField) {
+                $nestedFieldValues = $this->getFieldValues("{$fieldKey}.{$remainingField}");
+                $fieldValues = array_merge($fieldValues, $nestedFieldValues);
+            } else {
+                $fieldValues[$fieldKey] = $subArray;
             }
-        } else {
-            // Handle the case where there's no wildcard in the field
-            $fieldValues[$field] = $this->getNestedValue($this->data, $field);
         }
 
         return $fieldValues;
     }
 
     /**
-     * Retrieves a nested value from an array.
+     * Gets value from nested array using dot notation
      *
-     * @param array $array
-     * @param string $field
-     * @return array|mixed|null
+     * @param array<string, mixed> $array
+     * @param string $field Dot notation field path
+     * @return mixed
      */
     private function getNestedValue(array $array, string $field): mixed
     {
-        $keys = explode('.', $field);
-        foreach ($keys as $key) {
-            if (isset($array[$key])) {
-                $array = $array[$key];
-            } else {
+        foreach (explode('.', $field) as $key) {
+            if (!isset($array[$key])) {
                 return null;
             }
+            $array = $array[$key];
         }
         return $array;
     }
 
     /**
-     * Check if a value is empty.
+     * Checks if value is empty
      *
-     * @param $value
+     * @param mixed $value
      * @return bool
      */
-    private function isEmpty($value): bool
+    private function isEmpty(mixed $value): bool
     {
         return is_null($value) || $value === '' || (is_array($value) && empty($value));
     }
 
     /**
-     * Adds an error message for a specific field.
+     * Formats error message with replacements
      *
-     * @param string $field The field name.
-     * @param string $message The error message.
-     * @return void
+     * @param string $message
+     * @param array{name: string, field: string, parameters: array<int, string>} $rule
+     * @return string
      */
-    private function addError(string $field, string $message): void
+    private function formatMessage(string $message, array $rule): string
     {
-        $this->errors[$field][] = $message;
+        $replacements = [
+            ':attribute' => $rule['field'],
+            ':min' => $rule['parameters'][0] ?? '',
+            ':max' => $rule['name'] === 'between' ? ($rule['parameters'][1] ?? '') : ($rule['parameters'][0] ?? ''),
+            ':values' => implode(', ', $rule['parameters']),
+            ':anotherField' => $rule['parameters'][0] ?? '',
+            ':anotherValue' => $rule['parameters'][1] ?? ''
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $message);
+    }
+
+    /**
+     * Adds custom validation rule
+     *
+     * @param string $name Rule name
+     * @param callable(mixed $value, string $field, array<int, string> $parameters, array<string, mixed> $data):bool|string $callback
+     *        Callback function that returns true if validation passes, or error message string if fails.
+     *        Parameters passed to callback:
+     *        - mixed $value: The value being validated
+     *        - string $field: Field name
+     *        - array $parameters: Rule parameters
+     *        - array $data: All data being validated
+     * @param string|null $message Custom error message
+     * @return static
+    */
+    public function addRule(string $name, callable $callback, ?string $message = null): self
+    {
+        $this->validationMethods[$name] = $callback;
+        if ($message !== null) {
+            $this->messages[$name] = $message;
+        }
+        return $this;
     }
 }

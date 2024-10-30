@@ -218,7 +218,7 @@ $validator = Validator::make($data, $rules, [
 Add your own validation rules:
 
 ```php
-$validator->addValidationMethod('phone', function ($value, $field) {
+$validator->addRule('phone', function ($value, $field, $parameters, $data) {
     return preg_match('/^[0-9]{10}$/', $value)
         ? true
         : "The {$field} must be a valid 10-digit phone number.";
