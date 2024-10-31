@@ -189,6 +189,7 @@ class Validator
                 continue;
             }
 
+            /** @var string|boolean $result */
             $result = $validationMethod($value, $key, $rule['parameters'], $this->data);
 
             if ($result !== true) {
