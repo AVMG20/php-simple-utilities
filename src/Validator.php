@@ -193,11 +193,7 @@ class Validator
             $result = $validationMethod($value, $key, $rule['parameters'], $this->data);
 
             if ($result !== true) {
-                $this->addError($key, $this->formatMessage($result, [
-                    'name' => $rule['name'],
-                    'field' => $key,
-                    'parameters' => $rule['parameters']
-                ]));
+                $this->addError($key, $result);
             }
         }
     }
@@ -240,7 +236,7 @@ class Validator
 
         $this->validationMethods['required'] = function ($value, $field, $params, $data) {
             if ($this->isEmpty($value)) {
-                return $this->messages['required'];
+                return str_replace(':attribute', $field, $this->messages['required']);
             }
             return true;
         };
@@ -248,7 +244,11 @@ class Validator
         $this->validationMethods['required_if'] = function ($value, $field, $params, $data) {
             [$anotherField, $anotherValue] = $params;
             if (isset($data[$anotherField]) && $data[$anotherField] == $anotherValue && $this->isEmpty($value)) {
-                return $this->messages['required_if'];
+                return str_replace(
+                    [':attribute', ':anotherField', ':anotherValue'],
+                    [$field, $anotherField, $anotherValue],
+                    $this->messages['required_if']
+                );
             }
             return true;
         };
@@ -256,35 +256,39 @@ class Validator
         $this->validationMethods['required_unless'] = function ($value, $field, $params, $data) {
             [$anotherField, $anotherValue] = $params;
             if ((!isset($data[$anotherField]) || $data[$anotherField] != $anotherValue) && $this->isEmpty($value)) {
-                return $this->messages['required_unless'];
+                return str_replace(
+                    [':attribute', ':anotherField', ':anotherValue'],
+                    [$field, $anotherField, $anotherValue],
+                    $this->messages['required_unless']
+                );
             }
             return true;
         };
 
         $this->validationMethods['string'] = function ($value, $field, $params, $data) {
             if (!is_string($value)) {
-                return $this->messages['string'];
+                return str_replace(':attribute', $field, $this->messages['string']);
             }
             return true;
         };
 
         $this->validationMethods['numeric'] = function ($value, $field, $params, $data) {
             if (!is_numeric($value)) {
-                return $this->messages['numeric'];
+                return str_replace(':attribute', $field, $this->messages['numeric']);
             }
             return true;
         };
 
         $this->validationMethods['array'] = function ($value, $field, $params, $data) {
             if (!is_array($value)) {
-                return $this->messages['array'];
+                return str_replace(':attribute', $field, $this->messages['array']);
             }
             return true;
         };
 
         $this->validationMethods['boolean'] = function ($value, $field, $params, $data) {
             if (!(is_bool($value) || in_array($value, [1, 0, '1', '0'], true))) {
-                return $this->messages['boolean'];
+                return str_replace(':attribute', $field, $this->messages['boolean']);
             }
             return true;
         };
@@ -297,11 +301,19 @@ class Validator
             $isString = $this->hasStringRule($field);
 
             if ($isNumeric || (!$isString && is_numeric($value))) {
-                return $value >= $min ? true : $this->messages['min.numeric'];
+                return $value >= $min ? true : str_replace(
+                    [':attribute', ':min'],
+                    [$field, $min],
+                    $this->messages['min.numeric']
+                );
             }
 
             $length = strlen((string)$value);
-            return $length >= $min ? true : $this->messages['min.string'];
+            return $length >= $min ? true : str_replace(
+                [':attribute', ':min'],
+                [$field, $min],
+                $this->messages['min.string']
+            );
         };
 
         $this->validationMethods['max'] = function ($value, $field, $params, $data) {
@@ -312,11 +324,19 @@ class Validator
             $isString = $this->hasStringRule($field);
 
             if ($isNumeric || (!$isString && is_numeric($value))) {
-                return $value <= $max ? true : $this->messages['max.numeric'];
+                return $value <= $max ? true : str_replace(
+                    [':attribute', ':max'],
+                    [$field, $max],
+                    $this->messages['max.numeric']
+                );
             }
 
             $length = strlen((string)$value);
-            return $length <= $max ? true : $this->messages['max.string'];
+            return $length <= $max ? true : str_replace(
+                [':attribute', ':max'],
+                [$field, $max],
+                $this->messages['max.string']
+            );
         };
 
         $this->validationMethods['between'] = function ($value, $field, $params, $data) {
@@ -327,15 +347,27 @@ class Validator
             $isString = $this->hasStringRule($field);
 
             if ($isNumeric || (!$isString && is_numeric($value))) {
-                return ($value >= $min && $value <= $max) ? true : $this->messages['between.numeric'];
+                return ($value >= $min && $value <= $max) ? true : str_replace(
+                    [':attribute', ':min', ':max'],
+                    [$field, $min, $max],
+                    $this->messages['between.numeric']
+                );
             }
 
             $length = strlen((string)$value);
-            return ($length >= $min && $length <= $max) ? true : $this->messages['between.string'];
+            return ($length >= $min && $length <= $max) ? true : str_replace(
+                [':attribute', ':min', ':max'],
+                [$field, $min, $max],
+                $this->messages['between.string']
+            );
         };
 
         $this->validationMethods['in'] = function ($value, $field, $params, $data) {
-            return in_array($value, $params, true) ? true : $this->messages['in'];
+            return in_array($value, $params, true) ? true : str_replace(
+                [':attribute', ':values'],
+                [$field, implode(', ', $params)],
+                $this->messages['in']
+            );
         };
     }
     /**
