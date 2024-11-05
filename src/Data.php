@@ -43,6 +43,18 @@ abstract class Data implements JsonSerializable
     }
 
     /**
+     * Create a new instance from a json string
+     *
+     * @param string $json The json string to create the data object from.
+     * @return static Returns an instance of the data object.
+     * @throws InvalidArgumentException|ReflectionException
+     */
+    public static function fromJson(string $json): static
+    {
+        return static::from(json_decode($json, true));
+    }
+
+    /**
      * Resolve constructor parameters from attributes array.
      *
      * @param array<ReflectionParameter> $parameters
@@ -192,6 +204,15 @@ abstract class Data implements JsonSerializable
         }
 
         return $result;
+    }
+
+    /**
+     * Convert the object to a json string.
+     * @return string
+     */
+    public function toJson(): string
+    {
+        return json_encode($this);
     }
 
     /**

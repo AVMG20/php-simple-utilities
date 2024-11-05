@@ -281,4 +281,20 @@ class DataTest extends TestCase
 
         $this->assertEquals($expectedArray, $array);
     }
+
+    public function testFromJson()
+    {
+        $json = '{"name":"Gadget","price":19.99,"tag":"electronics"}';
+        $productData = ProductData::fromJson($json);
+
+        $this->assertInstanceOf(ProductData::class, $productData);
+        $this->assertEquals('Gadget', $productData->name);
+        $this->assertEquals(19.99, $productData->price);
+        $this->assertEquals(TagEnum::electronics, $productData->tag);
+
+        //convert back and forward
+        $json = $productData->toJson();
+        $productData = ProductData::fromJson($json);
+        $this->assertEquals('Gadget', $productData->name);
+    }
 }

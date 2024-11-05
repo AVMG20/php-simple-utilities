@@ -129,6 +129,30 @@ $customerData = CustomerData::from([
 $customerData->toArray();
 ```
 
+### From Json
+The `Data` class includes a `fromJson` method that converts a JSON string to a `Data` object.
+```php
+$json = '{
+    "name": "Gadget",
+    "price": 19.99,
+    "tag": "electronics"
+}';
+$productData = ProductData::fromJson($json);
+```
+
+
+### To Json
+The `Data` class includes a `toJson` method that converts the `Data` object to a JSON string.
+```php
+$productData = new ProductData(
+    name: "Gadget",
+    price: 19.99,
+    tag: TagEnum::Electronics
+);
+
+$json = $productData->toJson();
+```
+
 ## Features
 
 - **Automatic Type Casting:** Converts input values to the specified types, supporting PHP's basic types (`int`, `float`, `string`, `bool`, `array`) and custom classes like Enums.
