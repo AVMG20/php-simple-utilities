@@ -4,7 +4,9 @@ declare(strict_types=1);
 namespace Avmg\PhpSimpleUtilities;
 
 use ArrayAccess;
+use ArrayIterator;
 use Closure;
+use Countable;
 use Iterator;
 use IteratorAggregate;
 use stdClass;
@@ -12,15 +14,16 @@ use UnexpectedValueException;
 
 /**
  * Collection Class
- *
- * This class provides a fluent, convenient wrapper for working with arrays of data.
- * It offers various methods for manipulating and extracting data from the arrays.
- *
- * @template TKey of array-key
- * @template TValue
- * @implements ArrayAccess<TKey, TValue>
+ * *
+ * * This class provides a fluent, convenient wrapper for working with arrays of data.
+ * * It offers various methods for manipulating and extracting data from the arrays.
+ * *
+ * * @template TKey of array-key
+ * * @template TValue
+ * * @implements ArrayAccess<TKey, TValue>
+ * * @implements IteratorAggregate<TKey, TValue>
  */
-class Collection implements ArrayAccess, \Countable
+class Collection implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
      * @var array<TKey, TValue> The items contained in the collection.
@@ -46,6 +49,16 @@ class Collection implements ArrayAccess, \Countable
     public static function collect(array $items = []): static
     {
         return new static($items);
+    }
+
+    /**
+     * Get an iterator for the items.
+     *
+     * @return ArrayIterator<TKey, TValue>
+     */
+    public function getIterator(): ArrayIterator
+    {
+        return new ArrayIterator($this->items);
     }
 
     /**

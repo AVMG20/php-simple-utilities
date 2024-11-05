@@ -628,4 +628,16 @@ class CollectionTest extends TestCase
 
         $this->assertEquals(['John' => 30, 'Jane' => 25], $mapped->toArray());
     }
+
+    public function testCollectionIsIterable()
+    {
+        $collection = Collection::collect([1, 2, 3]);
+        $result = [];
+
+        foreach ($collection as $item) {
+            $result[] = $item;
+        }
+
+        $this->assertEquals([1, 2, 3], $result);
+    }
 }
