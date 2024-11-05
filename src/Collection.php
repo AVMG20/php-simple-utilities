@@ -14,14 +14,14 @@ use UnexpectedValueException;
 
 /**
  * Collection Class
- * *
- * * This class provides a fluent, convenient wrapper for working with arrays of data.
- * * It offers various methods for manipulating and extracting data from the arrays.
- * *
- * * @template TKey of array-key
- * * @template TValue
- * * @implements ArrayAccess<TKey, TValue>
- * * @implements IteratorAggregate<TKey, TValue>
+ *
+ * This class provides a fluent, convenient wrapper for working with arrays of data.
+ * It offers various methods for manipulating and extracting data from the arrays.
+ *
+ * @template TKey of array-key
+ * @template TValue
+ * @implements ArrayAccess<TKey, TValue>
+ * @implements IteratorAggregate<TKey, TValue>
  */
 class Collection implements ArrayAccess, Countable, IteratorAggregate
 {
