@@ -281,25 +281,6 @@ class PlasticTest extends TestCase
         $this->assertEquals('1 hour and 5 minutes', $fiveMinutesAgo->diffForHumans($compare, absolute: true));
     }
 
-    public function testParseFromString()
-    {
-        $dateString = '2024-02-23 14:00:00';
-        $plastic = Plastic::parse($dateString);
-
-        $this->assertInstanceOf(Plastic::class, $plastic);
-        $this->assertEquals($dateString, $plastic->format('Y-m-d H:i:s'));
-    }
-
-    public function testParseFromDateTimeInterface()
-    {
-        $dateTime = new DateTime('2024-02-23 14:00:00', new DateTimeZone('UTC'));
-        $plastic = Plastic::parse($dateTime);
-
-        $this->assertInstanceOf(Plastic::class, $plastic);
-        $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $plastic->format('Y-m-d H:i:s'));
-        $this->assertEquals($dateTime->getTimezone()->getName(), $plastic->getTimezone()->getName());
-    }
-
     public function testParseWithTimezone()
     {
         $dateString = '2024-02-23 14:00:00';
@@ -356,5 +337,123 @@ class PlasticTest extends TestCase
         ]);
 
         $this->assertEquals('1 dag, 23 uur, 53 minuten en 25 seconden geleden', $twoDaysAgo->diffForHumans($compare, segments: 10));
+    }
+
+    public function testWeekdayChecks(): void
+    {
+        $monday = new Plastic('2024-02-19'); // Known Monday
+        $this->assertTrue($monday->isMonday());
+        $this->assertFalse($monday->isTuesday());
+        $this->assertFalse($monday->isWednesday());
+        $this->assertFalse($monday->isThursday());
+        $this->assertFalse($monday->isFriday());
+        $this->assertFalse($monday->isSaturday());
+        $this->assertFalse($monday->isSunday());
+
+        $friday = new Plastic('2024-02-23'); // Known Friday
+        $this->assertFalse($friday->isMonday());
+        $this->assertFalse($friday->isTuesday());
+        $this->assertFalse($friday->isWednesday());
+        $this->assertFalse($friday->isThursday());
+        $this->assertTrue($friday->isFriday());
+        $this->assertFalse($friday->isSaturday());
+        $this->assertFalse($friday->isSunday());
+    }
+
+    public function testDateStringFormatters(): void
+    {
+        $plastic = new Plastic('2024-02-23 14:30:45');
+
+        $this->assertEquals('2024-02-23 14:30:45', $plastic->toDateTimeString());
+        $this->assertEquals('2024-02-23', $plastic->toDateString());
+        $this->assertEquals('14:30:45', $plastic->toTimeString());
+        $this->assertEquals(1708698645, $plastic->toTimeStamp());
+    }
+
+    public function testDateStringFormattersWithDifferentTimes(): void
+    {
+        // Test with single-digit hours/minutes/seconds
+        $plastic = Plastic::parse('2024-02-23 09:05:02');
+
+        $this->assertEquals('2024-02-23 09:05:02', $plastic->toDateTimeString());
+        $this->assertEquals('2024-02-23', $plastic->toDateString());
+        $this->assertEquals('09:05:02', $plastic->toTimeString());
+
+        // Test with midnight
+        $plastic = new Plastic('2024-02-23 00:00:00');
+
+        $this->assertEquals('2024-02-23 00:00:00', $plastic->toDateTimeString());
+        $this->assertEquals('2024-02-23', $plastic->toDateString());
+        $this->assertEquals('00:00:00', $plastic->toTimeString());
+    }
+
+    public function testParseFromDateTime(): void
+    {
+        $original = new DateTime('2024-02-23 14:00:00', new DateTimeZone('Europe/Paris'));
+
+        // Test preserving original timezone
+        $plastic = Plastic::parse($original);
+        $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
+        $this->assertEquals($original->getTimestamp(), $plastic->getTimestamp());
+
+        // Test overriding timezone
+        $plastic = Plastic::parse($original, 'America/New_York');
+        $this->assertEquals('America/New_York', $plastic->getTimezone()->getName());
+        $this->assertEquals($original->getTimestamp(), $plastic->getTimestamp());
+    }
+
+    public function testParseFromTimestamp(): void
+    {
+        $timestamp = 1708675200; // 2024-02-23 12:00:00 UTC
+
+        // Test with default timezone
+        $plastic = Plastic::parse($timestamp);
+        $this->assertEquals('UTC', $plastic->getTimezone()->getName());
+        $this->assertEquals($timestamp, $plastic->getTimestamp());
+
+        // Test with specific timezone
+        $plastic = Plastic::parse($timestamp, 'Europe/Paris');
+        $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
+        $this->assertEquals($timestamp, $plastic->getTimestamp());
+    }
+
+    public function testParseFromIsoString(): void
+    {
+        // Test ISO 8601 format
+        $plastic = Plastic::parse('2024-02-23T14:00:00');
+        $this->assertEquals('UTC', $plastic->getTimezone()->getName());
+        $this->assertEquals('2024-02-23 14:00:00', $plastic->format('Y-m-d H:i:s'));
+
+        // Test with specific timezone
+        $plastic = Plastic::parse('2024-02-23T14:00:00', 'Europe/Paris');
+        $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
+    }
+
+    public function testParseFromSimpleString(): void
+    {
+        // Test simple datetime string
+        $plastic = Plastic::parse('2024-02-23 14:00:00');
+        $this->assertEquals('UTC', $plastic->getTimezone()->getName());
+        $this->assertEquals('2024-02-23 14:00:00', $plastic->format('Y-m-d H:i:s'));
+
+        // Test date only string
+        $plastic = Plastic::parse('2024-02-23');
+        $this->assertEquals('2024-02-23 00:00:00', $plastic->format('Y-m-d H:i:s'));
+
+        // Test with specific timezone
+        $plastic = Plastic::parse('2024-02-23 14:00:00', 'Europe/Paris');
+        $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
+    }
+
+    public function testParseInvalidInput(): void
+    {
+        $this->expectException(Exception::class);
+        Plastic::parse('invalid date string');
+    }
+
+    public function testParseInvalidTimezone(): void
+    {
+        $this->expectException(Exception::class);
+        Plastic::parse('2024-02-23', 'Invalid/Timezone');
     }
 }

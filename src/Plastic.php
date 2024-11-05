@@ -46,14 +46,54 @@ class Plastic extends DateTime
     /**
      * Create a new Plastic instance from a specific date and time.
      *
-     * @param string|DateTimeInterface $datetime The date and time to create the instance from.
-     * @param string|null $timezone Optional. The timezone in which to create the instance.
+     * @param string|int|DateTimeInterface $datetime The date and time to create the instance from.
+     *        Can be:
+     *        - A DateTimeInterface instance
+     *        - A Unix timestamp (integer)
+     *        - An ISO 8601 string (e.g. '2024-02-23T14:00:00')
+     *        - A datetime string (e.g. '2024-02-23 14:00:00')
+     * @param string|null $timezone Optional. The timezone for the resulting instance.
+     *        If null:
+     *        - For DateTimeInterface: uses its timezone
+     *        - For other formats: uses default timezone
      * @return static The new instance.
-     * @throws Exception If the timezone is invalid.
+     * @throws Exception If the timezone is invalid or the datetime format is invalid.
      */
-    public static function parse(string|DateTimeInterface $datetime, ?string $timezone = null): static
+    public static function parse(string|int|DateTimeInterface $datetime, ?string $timezone = null): static
     {
-        return $datetime instanceof DateTimeInterface ? new static($datetime->format('Y-m-d H:i:s'), $datetime->getTimezone()) : new static($datetime, new DateTimeZone($timezone ?: date_default_timezone_get()));
+        // Handle DateTimeInterface
+        if ($datetime instanceof DateTimeInterface) {
+            $targetTimezone = $timezone !== null
+                ? new DateTimeZone($timezone)
+                : $datetime->getTimezone();
+
+            $instance = new static('@' . $datetime->getTimestamp());
+            $instance->setTimezone($targetTimezone);
+            return $instance;
+        }
+
+        // Handle Unix timestamp
+        if (is_int($datetime)) {
+            $instance = new static('@' . $datetime);
+            $instance->setTimezone(new DateTimeZone($timezone ?? date_default_timezone_get()));
+            return $instance;
+        }
+
+        // Handle string datetime
+        try {
+            // Create with default timezone first
+            $defaultTz = new DateTimeZone(date_default_timezone_get());
+            $instance = new static($datetime, $defaultTz);
+
+            // Set requested timezone if provided
+            if ($timezone !== null) {
+                $instance->setTimezone(new DateTimeZone($timezone));
+            }
+
+            return $instance;
+        } catch (Exception $e) {
+            throw new Exception("Failed to parse datetime string: {$datetime}. " . $e->getMessage());
+        }
     }
 
     /**
@@ -413,6 +453,76 @@ class Plastic extends DateTime
     }
 
     /**
+     * Check if the current instance is a Monday
+     *
+     * @return bool True if this is a Monday, false otherwise.
+     */
+    public function isMonday(): bool
+    {
+        return $this->format('N') === '1';
+    }
+
+    /**
+     * Check if the current instance is a Tuesday
+     *
+     * @return bool True if this is a Tuesday, false otherwise.
+     */
+    public function isTuesday(): bool
+    {
+        return $this->format('N') === '2';
+    }
+
+    /**
+     * Check if the current instance is a Wednesday
+     *
+     * @return bool True if this is a Wednesday, false otherwise.
+     */
+    public function isWednesday(): bool
+    {
+        return $this->format('N') === '3';
+    }
+
+    /**
+     * Check if the current instance is a Thursday
+     *
+     * @return bool True if this is a Thursday, false otherwise.
+     */
+    public function isThursday(): bool
+    {
+        return $this->format('N') === '4';
+    }
+
+    /**
+     * Check if the current instance is a Friday
+     *
+     * @return bool True if this is a Friday, false otherwise.
+     */
+    public function isFriday(): bool
+    {
+        return $this->format('N') === '5';
+    }
+
+    /**
+     * Check if the current instance is a Saturday
+     *
+     * @return bool True if this is a Saturday, false otherwise.
+     */
+    public function isSaturday(): bool
+    {
+        return $this->format('N') === '6';
+    }
+
+    /**
+     * Check if the current instance is a Sunday
+     *
+     * @return bool True if this is a Sunday, false otherwise.
+     */
+    public function isSunday(): bool
+    {
+        return $this->format('N') === '7';
+    }
+
+    /**
      * Check if the current instance is in the past compared to now or another date.
      *
      * @param DateTimeInterface|null $date The date to compare with, or null to compare with now.
@@ -447,6 +557,50 @@ class Plastic extends DateTime
     public function isInBetween(DateTimeInterface $start, DateTimeInterface $end): bool
     {
         return $this->gt($start) && $this->lt($end);
+    }
+
+    /**
+     * Get the date and time as a string in Y-m-d H:i:s format
+     * Example: 2024-02-23 14:30:45
+     *
+     * @return string
+     */
+    public function toDateTimeString(): string
+    {
+        return $this->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Get the date as a string in Y-m-d format
+     * Example: 2024-02-23
+     *
+     * @return string
+     */
+    public function toDateString(): string
+    {
+        return $this->format('Y-m-d');
+    }
+
+    /**
+     * Get the time as a string in H:i:s format
+     * Example: 14:30:45
+     *
+     * @return string
+     */
+    public function toTimeString(): string
+    {
+        return $this->format('H:i:s');
+    }
+
+    /**
+     * Get the Unix timestamp
+     * Example: 1708694045
+     *
+     * @return int
+     */
+    public function toTimestamp(): int
+    {
+        return $this->getTimestamp();
     }
 
     /**
