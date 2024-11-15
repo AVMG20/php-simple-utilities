@@ -640,4 +640,95 @@ class CollectionTest extends TestCase
 
         $this->assertEquals([1, 2, 3], $result);
     }
+
+    public function testContainsWithValue()
+    {
+        $collection = Collection::collect([1, 2, 3, 4, 5]);
+        $this->assertTrue($collection->contains(3));
+        $this->assertFalse($collection->contains(6));
+    }
+
+    public function testContainsWithCallback()
+    {
+        $collection = Collection::collect([
+            ['name' => 'John', 'age' => 30],
+            ['name' => 'Jane', 'age' => 25],
+        ]);
+
+        $this->assertTrue($collection->contains(function ($value) {
+            return $value['name'] === 'John';
+        }));
+
+        $this->assertFalse($collection->contains(function ($value) {
+            return $value['name'] === 'Bob';
+        }));
+    }
+
+    public function testContainsWithKeyOperatorValue()
+    {
+        $collection = Collection::collect([
+            ['name' => 'John', 'age' => 30],
+            ['name' => 'Jane', 'age' => 25],
+        ]);
+
+        $this->assertTrue($collection->contains('age', '>=', 30));
+        $this->assertFalse($collection->contains('age', '>', 30));
+    }
+
+    public function testWhereWithCallback()
+    {
+        $collection = Collection::collect([
+            ['name' => 'John', 'age' => 30],
+            ['name' => 'Jane', 'age' => 25],
+            ['name' => 'Bob', 'age' => 35],
+        ]);
+
+        $filtered = $collection->where(function ($value) {
+            return $value['age'] >= 30;
+        });
+
+        $this->assertCount(2, $filtered);
+        $this->assertEquals(['name' => 'John', 'age' => 30], $filtered->first());
+    }
+
+    public function testWhereWithOperator()
+    {
+        $collection = Collection::collect([
+            ['name' => 'John', 'age' => 30],
+            ['name' => 'Jane', 'age' => 25],
+            ['name' => 'Bob', 'age' => 35],
+        ]);
+
+        $filtered = $collection->where('age', '>=', 30);
+
+        $this->assertCount(2, $filtered);
+        $this->assertEquals(['name' => 'John', 'age' => 30], $filtered->first());
+    }
+
+    public function testWhereWithTwoArguments()
+    {
+        $collection = Collection::collect([
+            ['name' => 'John', 'age' => 30],
+            ['name' => 'Jane', 'age' => 25],
+            ['name' => 'Bob', 'age' => 35],
+        ]);
+
+        $filtered = $collection->where('name', 'John');
+
+        $this->assertCount(1, $filtered);
+        $this->assertEquals(['name' => 'John', 'age' => 30], $filtered->first());
+    }
+
+    public function testWhereWithNestedKeys()
+    {
+        $collection = Collection::collect([
+            ['user' => ['name' => 'John', 'age' => 30]],
+            ['user' => ['name' => 'Jane', 'age' => 25]],
+        ]);
+
+        $filtered = $collection->where('user.age', '>=', 30);
+
+        $this->assertCount(1, $filtered);
+        $this->assertEquals(['user' => ['name' => 'John', 'age' => 30]], $filtered->first());
+    }
 }

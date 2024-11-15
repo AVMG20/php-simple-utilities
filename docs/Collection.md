@@ -35,6 +35,8 @@ This document provides examples for each method in the `Collection` class, illus
 - [reject()](#reject) filter the collection by removing items that pass the truth test.
 - [merge()](#merge) merge another array or collection with the original collection.
 - [ensure()](#ensure) verify that all elements of a collection are of a given type or list of types.
+- [contains()](#contains) determine if an item exists in the collection.
+- [where()](#where) filter items by key value pair or callback.
 - [toArray()](#toArray) convert the collection into a plain PHP array.
 - [toJson()](#toJson) convert the collection into a JSON string.
 
@@ -502,6 +504,59 @@ $collection = Collection::collect([1, 2, '3', 4]);
 $collection->ensure('int');
 
 $collection->ensure([Custom::class, AnotherCustom::class]);
+```
+
+### Contains()
+
+Determines if an item exists in the collection. Can check for a single value, use a callback, or compare using an operator.
+
+```php
+$collection = Collection::collect(['name' => 'John', 'age' => 30]);
+
+// Simple value check
+$hasJohn = $collection->contains('John'); // true
+
+// Using callback
+$hasAdult = $collection->contains(function ($value, $key) {
+    return $key === 'age' && $value >= 18;
+}); // true
+
+// Using operator syntax
+$collection = Collection::collect([
+    ['name' => 'John', 'age' => 30],
+    ['name' => 'Jane', 'age' => 25]
+]);
+
+$hasAdults = $collection->contains('age', '>=', 30); // true
+```
+
+### Where()
+
+Filter items by the given key value pair or callback. Returns a new collection with filtered results.
+
+```php
+$collection = Collection::collect([
+    ['name' => 'John', 'age' => 30],
+    ['name' => 'Jane', 'age' => 25],
+    ['name' => 'Bob', 'age' => 35]
+]);
+
+// Using key and value
+$johns = $collection->where('name', 'John');
+// Collection with: [['name' => 'John', 'age' => 30]]
+
+// Using operator
+$adults = $collection->where('age', '>=', 30);
+// Collection with: [
+//     ['name' => 'John', 'age' => 30],
+//     ['name' => 'Bob', 'age' => 35]
+// ]
+
+// Using callback
+$seniors = $collection->where(function ($value) {
+    return $value['age'] > 32;
+});
+// Collection with: [['name' => 'Bob', 'age' => 35]]
 ```
 
 

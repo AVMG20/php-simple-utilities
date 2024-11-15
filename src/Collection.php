@@ -639,6 +639,96 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
+     * Determine if an item exists in the collection.
+     *
+     * @param  (callable(TValue, TKey): bool)|TValue|string  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return bool
+     */
+    public function contains($key, $operator = null, $value = null): bool
+    {
+        if (func_num_args() === 1) {
+            if ($this->useAsCallable($key)) {
+                $placeholder = new stdClass;
+
+                return $this->first($key, $placeholder) !== $placeholder;
+            }
+
+            return in_array($key, $this->items);
+        }
+
+        return $this->contains($this->operatorForWhere(...func_get_args()));
+    }
+
+    /**
+     * Filter items by the given key value pair.
+     *
+     * @param  string|callable  $key
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @return static
+     */
+    public function where($key, $operator = null, $value = null): static
+    {
+        if ($this->useAsCallable($key)) {
+            return $this->filter($key);
+        }
+
+        return $this->filter($this->operatorForWhere(...func_get_args()));
+    }
+
+    /**
+     * Helper method to determine if a given value can be used as a callback.
+     *
+     * @param  mixed  $value
+     * @return bool
+     */
+    protected function useAsCallable($value): bool
+    {
+        return !is_string($value) && is_callable($value);
+    }
+
+    /**
+     * Get an operator checker callback.
+     *
+     * @param  string  $key
+     * @param  string|null  $operator
+     * @param  mixed  $value
+     * @return callable
+     */
+    protected function operatorForWhere($key, $operator = null, $value = null): callable
+    {
+        if (func_num_args() === 1) {
+            $value = true;
+            $operator = '=';
+        }
+
+        if (func_num_args() === 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        return function ($item) use ($key, $operator, $value) {
+            $retrieved = $this->dataGet($item, $key);
+
+            switch ($operator) {
+                default:
+                case '=':
+                case '==':  return $retrieved == $value;
+                case '!=':
+                case '<>':  return $retrieved != $value;
+                case '<':   return $retrieved < $value;
+                case '>':   return $retrieved > $value;
+                case '<=':  return $retrieved <= $value;
+                case '>=':  return $retrieved >= $value;
+                case '===': return $retrieved === $value;
+                case '!==': return $retrieved !== $value;
+            }
+        };
+    }
+
+    /**
      * Converts the collection into a plain PHP array.
      *
      * This method will recursively convert all objects that are instances of Collection
