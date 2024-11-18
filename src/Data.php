@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Avmg\PhpSimpleUtilities;
 
+use ArrayAccess;
 use BackedEnum;
 use InvalidArgumentException;
 use JsonSerializable;
@@ -19,7 +20,7 @@ use UnitEnum;
  * It includes functionality for creating instances from arrays, type casting,
  * and converting objects back to arrays.
  */
-abstract class Data implements JsonSerializable
+abstract class Data implements JsonSerializable, ArrayAccess
 {
     /**
      * Create a new instance from an array of attributes.
@@ -240,5 +241,64 @@ abstract class Data implements JsonSerializable
         }
 
         return $item;
+    }
+
+    /**
+     * ArrayAccess implementation
+     */
+
+    /**
+     * Whether an offset exists
+     *
+     * @param mixed $offset
+     * @return bool
+     */
+    public function offsetExists(mixed $offset): bool
+    {
+        return property_exists($this, $offset);
+    }
+
+    /**
+     * Get an offset
+     *
+     * @param mixed $offset
+     * @return mixed
+     */
+    public function offsetGet(mixed $offset): mixed
+    {
+        return property_exists($this, $offset) ? $this->{$offset} : null;
+    }
+
+    /**
+     * Set an offset
+     *
+     * @param mixed $offset
+     * @param mixed $value
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        if (!property_exists($this, $offset)) {
+            throw new InvalidArgumentException(
+                sprintf("Cannot set non-existent property '%s' in %s.", $offset, static::class)
+            );
+        }
+
+        $this->{$offset} = $value;
+    }
+
+    /**
+     * Unset an offset
+     *
+     * @param mixed $offset
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    public function offsetUnset(mixed $offset): void
+    {
+        throw new InvalidArgumentException(
+            sprintf("Cannot unset property '%s' in %s. Properties in Data objects are immutable.", $offset, static::class)
+        );
     }
 }

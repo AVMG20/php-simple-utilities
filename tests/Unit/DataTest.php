@@ -297,4 +297,30 @@ class DataTest extends TestCase
         $productData = ProductData::fromJson($json);
         $this->assertEquals('Gadget', $productData->name);
     }
+
+    /**
+     * Test array access functionality
+     */
+    public function testArrayAccess(): void
+    {
+        // Create a concrete implementation of the abstract Data class for testing
+        $testData = UserData::from(['name' => 'John', 'age' => 30]);
+
+        // Test array access functionality
+        $this->assertTrue(isset($testData['name']));
+        $this->assertFalse(isset($testData['nonexistent']));
+        $this->assertEquals('John', $testData['name']);
+        $this->assertEquals(30, $testData['age']);
+
+        // Test setting a value
+        $testData['name'] = 'Jane';
+        $this->assertEquals('Jane', $testData['name']);
+
+        // Test accessing non-existent property
+        $this->assertNull($testData['nonexistent']);
+
+        // Test unsetting a property (should throw exception)
+        $this->expectException(\InvalidArgumentException::class);
+        unset($testData['name']);
+    }
 }
