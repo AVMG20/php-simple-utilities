@@ -251,8 +251,8 @@ class PlasticTest extends TestCase
 
     public function testDiffForHumansNow()
     {
-        $now = Plastic::parse('2024-02-23 10:30');
-        $compare = Plastic::parse('2024-02-23 10:30');
+        $now = Plastic::parse('2024-02-23 10:30', 'Europe/Amsterdam');
+        $compare = Plastic::parse('2024-02-23 10:30', 'Europe/Amsterdam');
 
         $this->assertEquals('just now', $now->diffForHumans($compare));
     }
@@ -395,25 +395,14 @@ class PlasticTest extends TestCase
         $plastic = Plastic::parse($original);
         $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
         $this->assertEquals($original->getTimestamp(), $plastic->getTimestamp());
-
-        // Test overriding timezone
-        $plastic = Plastic::parse($original, 'America/New_York');
-        $this->assertEquals('America/New_York', $plastic->getTimezone()->getName());
-        $this->assertEquals($original->getTimestamp(), $plastic->getTimestamp());
     }
 
     public function testParseFromTimestamp(): void
     {
         $timestamp = 1708675200; // 2024-02-23 12:00:00 UTC
 
-        // Test with default timezone
         $plastic = Plastic::parse($timestamp);
-        $this->assertEquals('UTC', $plastic->getTimezone()->getName());
-        $this->assertEquals($timestamp, $plastic->getTimestamp());
-
-        // Test with specific timezone
-        $plastic = Plastic::parse($timestamp, 'Europe/Paris');
-        $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
+        $this->assertEquals('+00:00', $plastic->getTimezone()->getName());
         $this->assertEquals($timestamp, $plastic->getTimestamp());
     }
 

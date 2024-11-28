@@ -67,30 +67,21 @@ class Plastic extends DateTime
                 ? new DateTimeZone($timezone)
                 : $datetime->getTimezone();
 
-            $instance = new static('@' . $datetime->getTimestamp());
-            $instance->setTimezone($targetTimezone);
-            return $instance;
+            return new static($datetime->format('Y-m-d H:i:s.u'), $targetTimezone);
         }
 
         // Handle Unix timestamp
+        // Using @ with the timestamp creates a new DateTime object in +00:00 timezone
         if (is_int($datetime)) {
-            $instance = new static('@' . $datetime);
-            $instance->setTimezone(new DateTimeZone($timezone ?? date_default_timezone_get()));
-            return $instance;
+            $instance =  new static('@' . $datetime);
+            return $timezone !== null
+                ? $instance->setTimezone(new DateTimeZone($timezone))
+                : $instance;
         }
 
         // Handle string datetime
         try {
-            // Create with default timezone first
-            $defaultTz = new DateTimeZone(date_default_timezone_get());
-            $instance = new static($datetime, $defaultTz);
-
-            // Set requested timezone if provided
-            if ($timezone !== null) {
-                $instance->setTimezone(new DateTimeZone($timezone));
-            }
-
-            return $instance;
+            return new static($datetime, new DateTimeZone($timezone ?? date_default_timezone_get()));
         } catch (Exception $e) {
             throw new Exception("Failed to parse datetime string: {$datetime}. " . $e->getMessage());
         }
