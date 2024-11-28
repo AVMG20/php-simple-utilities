@@ -427,6 +427,11 @@ class PlasticTest extends TestCase
         // Test with specific timezone
         $plastic = Plastic::parse('2024-02-23T14:00:00', 'Europe/Paris');
         $this->assertEquals('Europe/Paris', $plastic->getTimezone()->getName());
+
+        // Test ISO 8601 with timezone offset
+        $plastic = Plastic::parse('2024-02-23T14:00:00+02:00');
+        $this->assertEquals('+02:00', $plastic->getTimezone()->getName());
+        $this->assertEquals('2024-02-23 14:00:00', $plastic->format('Y-m-d H:i:s'));
     }
 
     public function testParseFromSimpleString(): void
