@@ -572,7 +572,7 @@ class Plastic extends DateTime
 
     /**
      * Get the date as a string in Y-m-d format
-     * Example: 2024-02-23
+     * @Example: 2024-02-23
      *
      * @return string
      */
@@ -583,7 +583,7 @@ class Plastic extends DateTime
 
     /**
      * Get the time as a string in H:i:s format
-     * Example: 14:30:45
+     * @Example: 14:30:45
      *
      * @return string
      */
@@ -594,13 +594,23 @@ class Plastic extends DateTime
 
     /**
      * Get the Unix timestamp
-     * Example: 1708694045
+     * @Example: 1708694045
      *
      * @return int
      */
     public function toTimestamp(): int
     {
         return $this->getTimestamp();
+    }
+
+    /**
+     * Get the date as a string in ISO 8601 format
+     * @Example: 2024-02-23T14:30:45+00:00
+     * @return string
+     */
+    public function toIso8601(): string
+    {
+        return $this->format('c');
     }
 
     /**
