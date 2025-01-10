@@ -26,6 +26,25 @@ class Arr
     }
 
     /**
+     * Determine if an array contains a given key-value pair.
+     *
+     * @param array $array
+     * @param string $key
+     * @param mixed $value
+     * @return bool
+     */
+    public static function contains(array $array, string $key, mixed $value): bool
+    {
+        foreach ($array as $item) {
+            if (static::dataGet($item, $key) === $value) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Filter items by the given key value pairs.
      *
      * @param array $array

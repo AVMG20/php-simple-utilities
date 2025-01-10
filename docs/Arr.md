@@ -7,6 +7,7 @@ The `Arr` class provides a set of powerful utility methods for working with arra
 - [where()](#where) - Filter items by the given key value pair
 - [whereIn()](#wherein) - Filter items by the given key value pairs
 - [whereNot()](#wherenot) - Filter items by excluding the given key value pair
+- [contains()](#contains) - Check if an array contains a given key value pair
 - [first()](#first) - Get the first element from the array passing the given truth test
 - [last()](#last) - Get the last element from the array
 - [filter()](#filter) - Filter the array using the given callback
@@ -69,6 +70,21 @@ $array = [
 
 $result = Arr::whereNot($array, 'role', 'admin');
 // Returns: [['name' => 'Jane', 'role' => 'user']]
+```
+
+### contains()
+
+Check if an array contains a given key-value pair.
+
+```php
+$array = [
+    ['name' => 'John', 'age' => 25],
+    ['name' => 'Jane', 'age' => 30],
+    ['name' => 'Bob', 'age' => 25]
+];
+
+$result = Arr::contains($array, 'age', 25);
+// Returns: true
 ```
 
 ### first()

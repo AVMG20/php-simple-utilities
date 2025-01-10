@@ -141,4 +141,10 @@ class ArrTest extends TestCase
         $result = Arr::map([], fn($item) => $item);
         $this->assertEmpty($result);
     }
+
+    public function testContains()
+    {
+        $this->assertTrue(Arr::contains($this->testArray, 'name', 'John'));
+        $this->assertFalse(Arr::contains($this->testArray, 'name', 'Non-existent'));
+    }
 }
