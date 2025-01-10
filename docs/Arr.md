@@ -12,6 +12,7 @@ The `Arr` class provides a set of powerful utility methods for working with arra
 - [last()](#last) - Get the last element from the array
 - [filter()](#filter) - Filter the array using the given callback
 - [map()](#map) - Map over each of the items in the array
+- [each()](#each) - Iterate over each item in the array and apply a callback
 
 ### where()
 
@@ -164,6 +165,23 @@ $result = Arr::map($array, function($value, $key) {
     return $value * 2;
 });
 // Returns: ['a' => 2, 'b' => 4, 'c' => 6]
+```
+
+### each()
+
+Iterate over each item in the array and apply a callback function.
+
+```php
+$array = ['a' => 1, 'b' => 2, 'c' => 3];
+
+Arr::each($array, function($value, $key) {
+    echo "$key: $value\n";
+});
+
+// Outputs:
+// a: 1
+// b: 2
+// c: 3
 ```
 
 ## Advanced Features

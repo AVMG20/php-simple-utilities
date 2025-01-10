@@ -142,6 +142,15 @@ class ArrTest extends TestCase
         $this->assertEmpty($result);
     }
 
+    public function testEach()
+    {
+        $result = [];
+        Arr::each($this->testArray, function($item) use (&$result) {
+            $result[] = $item['name'];
+        });
+        $this->assertEquals(['John', 'Jane', 'Bob', 'Alice'], $result);
+    }
+
     public function testContains()
     {
         $this->assertTrue(Arr::contains($this->testArray, 'name', 'John'));

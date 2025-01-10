@@ -154,6 +154,20 @@ class Arr
     }
 
     /**
+     * Iterate over each of the items in the array.
+     *
+     * @param array $array
+     * @param callable $callback
+     * @return void
+     */
+    public static function each(array $array, callable $callback): void
+    {
+        foreach ($array as $key => $value) {
+            $callback($value, $key);
+        }
+    }
+
+    /**
      * Determine if the given value is callable, but not a string.
      *
      * @param mixed $value
