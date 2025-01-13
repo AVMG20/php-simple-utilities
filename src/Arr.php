@@ -26,22 +26,41 @@ class Arr
     }
 
     /**
-     * Determine if an array contains a given key-value pair.
+     * Determine if an array contains a given item or key-value pair,
+     * or if a callback returns true for any item.
      *
      * @param array $array
-     * @param string $key
-     * @param mixed $value
+     * @param mixed|callable|string $key
+     * @param mixed $operator
      * @return bool
      */
-    public static function contains(array $array, string $key, mixed $value): bool
+    public static function contains(array $array, mixed $key, mixed $operator = null): bool
     {
-        foreach ($array as $item) {
-            if (static::dataGet($item, $key) === $value) {
-                return true;
+        if (is_callable($key) && !is_string($key)) {
+            foreach ($array as $k => $value) {
+                if ($key($value, $k)) {
+                    return true;
+                }
             }
+            return false;
         }
 
-        return false;
+        if (func_num_args() === 2) {
+            foreach ($array as $item) {
+                if (is_array($item)) {
+                    if (in_array($key, $item, true)) {
+                        return true;
+                    }
+                } else {
+                    if ($item === $key) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        return count(static::where($array, $key, '=', $operator)) > 0;
     }
 
     /**

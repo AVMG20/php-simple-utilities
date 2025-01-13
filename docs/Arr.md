@@ -76,16 +76,28 @@ $result = Arr::whereNot($array, 'role', 'admin');
 
 ### contains()
 
-Check if an array contains a given key-value pair.
+Check if an array contains a value, key-value pair, or matches a callback condition.
 
 ```php
+// Array of items
 $array = [
     ['name' => 'John', 'age' => 25],
     ['name' => 'Jane', 'age' => 30],
     ['name' => 'Bob', 'age' => 25]
 ];
 
+// Check for key-value pair
 $result = Arr::contains($array, 'age', 25);
+// Returns: true
+
+// Check with callback
+$result = Arr::contains($array, function($value) {
+    return $value['age'] > 30;
+});
+// Returns: false
+
+// Check for simple value
+$result = Arr::contains($array, 'Bob');
 // Returns: true
 ```
 

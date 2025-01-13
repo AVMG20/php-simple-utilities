@@ -186,9 +186,35 @@ class ArrTest extends TestCase
         $this->assertEquals(['John', 'Jane', 'Bob', 'Alice'], $result);
     }
 
-    public function testContains()
+    public function testContainsWithCallback()
+    {
+        $result = Arr::contains($this->testArray, function ($value) {
+            return $value['age'] > 30;
+        });
+        $this->assertTrue($result);
+
+        $result = Arr::contains($this->testArray, function ($value) {
+            return $value['age'] > 40;
+        });
+        $this->assertFalse($result);
+    }
+
+    public function testContainsSimpleValue()
+    {
+        $simpleArray = ['name' => 'Desk', 'price' => 100];
+        $this->assertTrue(Arr::contains($simpleArray, 'Desk'));
+        $this->assertFalse(Arr::contains($simpleArray, 'Chair'));
+    }
+
+    public function testContainsKeyValuePair()
     {
         $this->assertTrue(Arr::contains($this->testArray, 'name', 'John'));
-        $this->assertFalse(Arr::contains($this->testArray, 'name', 'Non-existent'));
+        $this->assertFalse(Arr::contains($this->testArray, 'name', 'Mark'));
+    }
+
+    public function testContainsNestedValue()
+    {
+        $this->assertTrue(Arr::contains($this->testArray, 'info.active', true));
+        $this->assertTrue(Arr::contains($this->testArray, 'info.active', false));
     }
 }
