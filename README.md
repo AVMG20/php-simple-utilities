@@ -5,7 +5,7 @@ This package, `avmg/php-simple-utilities`, provides a set of simple utility clas
 ### Features
 
 This package includes the following utilities:
-
+- **[Arr Class](docs/Arr.md)**: A set of powerful utility methods for working with arrays in PHP, offering a clean and expressive API for common array operations, inspired by Laravel's collection methods.
 - **[Collection Class](docs/Collection.md)**: Offers a fluent interface for array manipulation, providing methods for filtering, mapping, reducing, and more, all while maintaining type safety.
 - **[Data Class](docs/Data.md)**: An abstract class aimed at creating type-safe DTOs, ensuring data integrity throughout your application.
 - **[FileCache Class](docs/FileCache.md)**: A simple interface for storing, retrieving, and managing cache data in the filesystem.

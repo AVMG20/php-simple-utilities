@@ -9,6 +9,7 @@ The `Arr` class provides a set of powerful utility methods for working with arra
 - [whereNot()](#wherenot) - Filter items by excluding the given key value pair
 - [contains()](#contains) - Check if an array contains a given key value pair
 - [first()](#first) - Get the first element from the array passing the given truth test
+- [firstWhere()](#firstwhere) - Get the first element from the array matching the given key value pair
 - [last()](#last) - Get the last element from the array
 - [filter()](#filter) - Filter the array using the given callback
 - [map()](#map) - Map over each of the items in the array
@@ -110,6 +111,34 @@ $result = Arr::first($array, function($value) {
     return $value > 10;
 }, 'default');
 // Returns: 'default'
+```
+
+### firstWhere()
+
+Get the first element from the array that matches the given key-value pair.
+
+```php
+$array = [
+    ['name' => 'John', 'age' => 25],
+    ['name' => 'Jane', 'age' => 30],
+    ['name' => 'Bob', 'age' => 25]
+];
+
+// Using key/value pair
+$result = Arr::firstWhere($array, 'name', 'Bob');
+// Returns: ['name' => 'Bob', 'age' => 25]
+
+// Using comparison operator
+$result = Arr::firstWhere($array, 'age', '>=', 18);
+// Returns: ['name' => 'John', 'age' => 25]
+
+// Using truthy check
+$result = Arr::firstWhere($array, 'age');
+// Returns: ['name' => 'John', 'age' => 25]
+
+// Using callback, You can use the normal first method for this instead :) 
+$result = Arr::firstWhere($array, fn($item) => $item['age'] > 18);
+// Returns: ['name' => 'John', 'age' => 25]
 ```
 
 ### last()

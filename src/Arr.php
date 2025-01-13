@@ -104,6 +104,49 @@ class Arr
     }
 
     /**
+     * Get the first element in the array matching the given key/value pair.
+     *
+     * @param array $array
+     * @param string|callable $key
+     * @param mixed $operator
+     * @param mixed $value
+     * @return mixed
+     */
+    public static function firstWhere(array $array, string|callable $key, mixed $operator = null, mixed $value = null): mixed
+    {
+        if (static::useAsCallable($key)) {
+            foreach ($array as $k => $item) {
+                if ($key($item, $k)) {
+                    return $item;
+                }
+            }
+            return null;
+        }
+
+        // Handle the case where only key is provided (truthy check)
+        if (func_num_args() === 2) {
+            foreach ($array as $item) {
+                $result = static::dataGet($item, $key);
+                if ($result) {
+                    return $item;
+                }
+            }
+            return null;
+        }
+
+        // Use the existing where logic to get the operator closure
+        $callback = static::operatorForWhere($key, $operator, $value);
+
+        foreach ($array as $k => $item) {
+            if ($callback($item, $k)) {
+                return $item;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Get the last element from the array.
      *
      * @param array $array

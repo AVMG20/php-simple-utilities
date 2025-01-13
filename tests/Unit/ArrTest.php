@@ -89,6 +89,40 @@ class ArrTest extends TestCase
         $this->assertEquals('John', $result['name']);
     }
 
+    public function testFirstWhereWithKeyValue(): void
+    {
+        // Test basic key-value match
+        $result = Arr::firstWhere($this->testArray, 'name', 'Jane');
+        $this->assertEquals(2, $result['id']);
+        $this->assertEquals('Jane', $result['name']);
+
+        // Test with non-existent value
+        $result = Arr::firstWhere($this->testArray, 'name', 'NonExistent');
+        $this->assertNull($result);
+    }
+
+    public function testFirstWhereWithOperator(): void
+    {
+        // Test with operator
+        $result = Arr::firstWhere($this->testArray, 'age', '>=', 30);
+        $this->assertEquals('Jane', $result['name']);
+
+        // Test with dot notation
+        $result = Arr::firstWhere($this->testArray, 'info.active');
+        $this->assertEquals('John', $result['name']);
+    }
+
+    public function testFirstWhereWithCallback(): void
+    {
+        // Test with callback
+        $result = Arr::firstWhere($this->testArray, fn($item) => $item['age'] > 30);
+        $this->assertEquals('Bob', $result['name']);
+
+        // Test with callback that returns false for all items
+        $result = Arr::firstWhere($this->testArray, fn($item) => $item['age'] > 100);
+        $this->assertEquals(null, $result);
+    }
+
     public function testLast(): void
     {
         // Test with callback
@@ -141,6 +175,7 @@ class ArrTest extends TestCase
         $result = Arr::map([], fn($item) => $item);
         $this->assertEmpty($result);
     }
+
 
     public function testEach()
     {
