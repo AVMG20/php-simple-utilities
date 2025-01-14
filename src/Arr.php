@@ -10,11 +10,12 @@ class Arr
     /**
      * Filter items by the given key value pair.
      *
-     * @param array $array
-     * @param string|callable $key
+     * @template T
+     * @param array<mixed, T> $array
+     * @param string|callable(T, mixed): bool $key
      * @param mixed $operator
      * @param mixed $value
-     * @return array
+     * @return array<mixed, T>
      */
     public static function where(array $array, string|callable $key, mixed $operator = null, mixed $value = null): array
     {
@@ -29,8 +30,9 @@ class Arr
      * Determine if an array contains a given item or key-value pair,
      * or if a callback returns true for any item.
      *
-     * @param array $array
-     * @param mixed|callable|string $key
+     * @template T
+     * @param array<mixed, T> $array
+     * @param mixed|callable(T, mixed): bool|string $key
      * @param mixed $operator
      * @return bool
      */
@@ -66,25 +68,27 @@ class Arr
     /**
      * Filter items by the given key value pairs.
      *
-     * @param array $array
+     * @template T
+     * @param array<mixed, T> $array
      * @param string $key
-     * @param array $values
-     * @return array
+     * @param array<mixed> $values
+     * @return array<mixed, T>
      */
     public static function whereIn(array $array, string $key, array $values): array
     {
         return static::where($array, fn($item) =>
-            in_array(static::dataGet($item, $key), $values, true)
+        in_array(static::dataGet($item, $key), $values, true)
         );
     }
 
     /**
      * Filter items by the given key value pair.
      *
-     * @param array $array
+     * @template T
+     * @param array<mixed, T> $array
      * @param string $key
      * @param mixed $value
-     * @return array
+     * @return array<mixed, T>
      */
     public static function whereNot(array $array, string $key, mixed $value): array
     {
@@ -96,10 +100,11 @@ class Arr
     /**
      * Get the first element from the array passing the given truth test.
      *
-     * @param array $array
-     * @param callable|null $callback
-     * @param mixed $default
-     * @return mixed
+     * @template T
+     * @param array<mixed, T> $array
+     * @param (callable(T, mixed): bool)|null $callback
+     * @param T|null $default
+     * @return T|null
      */
     public static function first(array $array, ?callable $callback = null, mixed $default = null): mixed
     {
@@ -125,11 +130,12 @@ class Arr
     /**
      * Get the first element in the array matching the given key/value pair.
      *
-     * @param array $array
-     * @param string|callable $key
+     * @template T
+     * @param array<mixed, T> $array
+     * @param string|callable(T, mixed): bool $key
      * @param mixed $operator
      * @param mixed $value
-     * @return mixed
+     * @return T|null
      */
     public static function firstWhere(array $array, string|callable $key, mixed $operator = null, mixed $value = null): mixed
     {
@@ -142,7 +148,6 @@ class Arr
             return null;
         }
 
-        // Handle the case where only key is provided (truthy check)
         if (func_num_args() === 2) {
             foreach ($array as $item) {
                 $result = static::dataGet($item, $key);
@@ -153,7 +158,6 @@ class Arr
             return null;
         }
 
-        // Use the existing where logic to get the operator closure
         $callback = static::operatorForWhere($key, $operator, $value);
 
         foreach ($array as $k => $item) {
@@ -168,10 +172,11 @@ class Arr
     /**
      * Get the last element from the array.
      *
-     * @param array $array
-     * @param callable|null $callback
-     * @param mixed $default
-     * @return mixed
+     * @template T
+     * @param array<mixed, T> $array
+     * @param (callable(T, mixed): bool)|null $callback
+     * @param T|null $default
+     * @return T|null
      */
     public static function last(array $array, ?callable $callback = null, mixed $default = null): mixed
     {
@@ -191,9 +196,10 @@ class Arr
     /**
      * Filter the array using the given callback.
      *
-     * @param array $array
-     * @param callable|null $callback
-     * @return array
+     * @template T
+     * @param array<mixed, T> $array
+     * @param (callable(T, mixed): bool)|null $callback
+     * @return array<mixed, T>
      */
     public static function filter(array $array, ?callable $callback = null): array
     {
@@ -203,9 +209,11 @@ class Arr
     /**
      * Map over each of the items in the array.
      *
-     * @param array $array
-     * @param callable $callback
-     * @return array
+     * @template TIn
+     * @template TOut
+     * @param array<mixed, TIn> $array
+     * @param callable(TIn, mixed): TOut $callback
+     * @return array<mixed, TOut>
      */
     public static function map(array $array, callable $callback): array
     {
@@ -218,8 +226,9 @@ class Arr
     /**
      * Iterate over each of the items in the array.
      *
-     * @param array $array
-     * @param callable $callback
+     * @template T
+     * @param array<mixed, T> $array
+     * @param callable(T, mixed): void $callback
      * @return void
      */
     public static function each(array $array, callable $callback): void
@@ -243,10 +252,11 @@ class Arr
     /**
      * Get a callback for filtering using an operator.
      *
+     * @template T
      * @param string $key
      * @param mixed $operator
      * @param mixed $value
-     * @return Closure
+     * @return Closure(T, mixed): bool
      */
     protected static function operatorForWhere(string $key, mixed $operator = null, mixed $value = null): Closure
     {
@@ -258,7 +268,6 @@ class Arr
         return function ($item) use ($key, $operator, $value) {
             $retrieved = static::dataGet($item, $key, null);
 
-            // Handle null values
             if (is_null($retrieved)) {
                 return false;
             }
@@ -280,7 +289,8 @@ class Arr
     /**
      * Get an item from an array or object using "dot" notation.
      *
-     * @param mixed $target
+     * @template T
+     * @param T $target
      * @param string $key
      * @param mixed $default
      * @return mixed
@@ -307,8 +317,9 @@ class Arr
     /**
      * Return the default value of the given value.
      *
-     * @param mixed $value
-     * @return mixed
+     * @template T
+     * @param T|Closure(): T $value
+     * @return T
      */
     protected static function value(mixed $value): mixed
     {
