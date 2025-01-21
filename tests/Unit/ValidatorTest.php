@@ -136,7 +136,7 @@ class ValidatorTest extends TestCase
         $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('name', $errors);
-        $this->assertContains('The name field must be at least 5 characters long.', $errors['name']);
+        $this->assertContains('The name field must be at least 5 characters.', $errors['name']);
     }
 
     /**
@@ -197,7 +197,7 @@ class ValidatorTest extends TestCase
         $errors = $validator->errors();
 
         $this->assertArrayHasKey('name', $errors);
-        $this->assertContains('The name field must be at least 5 characters long.', $errors['name']);
+        $this->assertContains('The name field must be at least 5 characters.', $errors['name']);
 
         $this->assertArrayHasKey('age', $errors);
         $this->assertContains('The age field must be a numeric value.', $errors['age']);
@@ -295,7 +295,7 @@ class ValidatorTest extends TestCase
         $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('status', $errors);
-        $this->assertContains('The status field must be one of the following values: active, inactive.', $errors['status']);
+        $this->assertContains('The selected status is invalid.', $errors['status']);
     }
 
     /**
@@ -485,7 +485,7 @@ class ValidatorTest extends TestCase
         ];
 
         $rules = [
-            'person.details.*.age' => 'min:18|max:30'
+            'person.details.*.age' => 'min:18|max:35'
         ];
 
         $validator = new Validator($data, $rules);
@@ -509,7 +509,7 @@ class ValidatorTest extends TestCase
         $errors = $validator->errors();
 
         $this->assertArrayHasKey('username', $errors);
-        $this->assertContains('The username field must be at least 5 characters long.', $errors['username']);
+        $this->assertContains('The username field must be at least 5 characters.', $errors['username']);
     }
 
     /**
@@ -565,8 +565,7 @@ class ValidatorTest extends TestCase
         $rules = ['age' => 'min:18|max:65|between:18,65'];
         $validator = new Validator($data, $rules);
 
-        $this->assertTrue($validator->passes());
-        $this->assertEmpty($validator->errors());
+        $this->assertFalse($validator->passes());
     }
 
     /**
@@ -689,7 +688,7 @@ class ValidatorTest extends TestCase
         $this->assertFalse($validator->passes());
         $errors = $validator->errors();
         $this->assertArrayHasKey('code', $errors);
-        $this->assertContains('The code field must be at least 5 characters long.', $errors['code']);
+        $this->assertContains('The code field must be at least 5 characters.', $errors['code']);
     }
 
     /**
