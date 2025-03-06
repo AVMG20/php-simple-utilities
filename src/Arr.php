@@ -10,12 +10,15 @@ class Arr
     /**
      * Filter items by the given key value pair.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param string|callable(T, mixed): bool $key
-     * @param mixed $operator
-     * @param mixed $value
-     * @return array<mixed, T>
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The input array to filter
+     * @param string|callable(TValue, TKey): bool $key Either a dot-notation key string or a callback function
+     * @param mixed $operator Comparison operator (=, ==, !=, <>, etc.) or the value when using 2 arguments
+     * @param mixed $value The value to compare against when using 3 arguments
+     *
+     * @return array<TKey, TValue> Filtered array containing only matching elements
      */
     public static function where(array $array, string|callable $key, mixed $operator = null, mixed $value = null): array
     {
@@ -30,11 +33,17 @@ class Arr
      * Determine if an array contains a given item or key-value pair,
      * or if a callback returns true for any item.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param mixed|callable(T, mixed): bool|string $key
-     * @param mixed $operator
-     * @return bool
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The array to search in
+     * @param mixed|callable(TValue, TKey): bool|string $key
+     *        When a callback: Function that returns true when item is found
+     *        When a value: The value to search for
+     *        When a string with $operator: Dot-notation key to check
+     * @param mixed $operator When present with string $key: Value to compare against
+     *
+     * @return bool True if the array contains the given value or key-value pair, or if callback returns true
      */
     public static function contains(array $array, mixed $key, mixed $operator = null): bool
     {
@@ -68,27 +77,33 @@ class Arr
     /**
      * Filter items by the given key value pairs.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param string $key
-     * @param array<mixed> $values
-     * @return array<mixed, T>
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The input array to filter
+     * @param string $key Dot-notation key to compare against values
+     * @param array<int|string, mixed> $values Array of values to match against
+     *
+     * @return array<TKey, TValue> Filtered array containing only elements where key value is in $values
      */
     public static function whereIn(array $array, string $key, array $values): array
     {
         return static::where($array, fn($item) =>
-        in_array(static::dataGet($item, $key), $values, true)
+            in_array(static::dataGet($item, $key), $values, true)
         );
     }
 
     /**
-     * Filter items by the given key value pair.
+     * Filter items by the given key value pair, excluding matching items.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param string $key
-     * @param mixed $value
-     * @return array<mixed, T>
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The input array to filter
+     * @param string $key Dot-notation key to compare against value
+     * @param mixed $value Value to exclude from results
+     *
+     * @return array<TKey, TValue> Filtered array containing only elements where key value is not equal to $value
      */
     public static function whereNot(array $array, string $key, mixed $value): array
     {
@@ -100,11 +115,15 @@ class Arr
     /**
      * Get the first element from the array passing the given truth test.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param (callable(T, mixed): bool)|null $callback
-     * @param T|null $default
-     * @return T|null
+     * @template TKey
+     * @template TValue
+     * @template TDefault
+     *
+     * @param array<TKey, TValue> $array The input array to search
+     * @param (callable(TValue, TKey): bool)|null $callback Optional callback function to test elements
+     * @param TDefault|callable(): TDefault $default Default value to return if no item passes the test
+     *
+     * @return TValue|TDefault The first matching item or the default value
      */
     public static function first(array $array, ?callable $callback = null, mixed $default = null): mixed
     {
@@ -130,12 +149,17 @@ class Arr
     /**
      * Get the first element in the array matching the given key/value pair.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param string|callable(T, mixed): bool $key
-     * @param mixed $operator
-     * @param mixed $value
-     * @return T|null
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The input array to search
+     * @param string|callable(TValue, TKey): bool $key
+     *        When a string: Dot-notation key to compare
+     *        When a callback: Function that returns true when item is found
+     * @param mixed $operator Comparison operator or value when used as 2nd argument
+     * @param mixed $value Value to compare against when using operator
+     *
+     * @return TValue|null The first matching item or null if not found
      */
     public static function firstWhere(array $array, string|callable $key, mixed $operator = null, mixed $value = null): mixed
     {
@@ -172,11 +196,15 @@ class Arr
     /**
      * Get the last element from the array.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param (callable(T, mixed): bool)|null $callback
-     * @param T|null $default
-     * @return T|null
+     * @template TKey
+     * @template TValue
+     * @template TDefault
+     *
+     * @param array<TKey, TValue> $array The input array
+     * @param (callable(TValue, TKey): bool)|null $callback Optional callback function to test elements
+     * @param TDefault|callable(): TDefault $default Default value to return if no item passes the test
+     *
+     * @return TValue|TDefault The last matching item or the default value
      */
     public static function last(array $array, ?callable $callback = null, mixed $default = null): mixed
     {
@@ -196,10 +224,13 @@ class Arr
     /**
      * Filter the array using the given callback.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param (callable(T, mixed): bool)|null $callback
-     * @return array<mixed, T>
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The input array to filter
+     * @param (callable(TValue, TKey): bool)|null $callback Optional callback function to test elements
+     *
+     * @return array<TKey, TValue> Filtered array containing only elements that pass the test
      */
     public static function filter(array $array, ?callable $callback = null): array
     {
@@ -209,11 +240,14 @@ class Arr
     /**
      * Map over each of the items in the array.
      *
+     * @template TKey
      * @template TIn
      * @template TOut
-     * @param array<mixed, TIn> $array
-     * @param callable(TIn, mixed): TOut $callback
-     * @return array<mixed, TOut>
+     *
+     * @param array<TKey, TIn> $array The input array to map
+     * @param callable(TIn, TKey): TOut $callback Function to transform each element
+     *
+     * @return array<TKey, TOut> New array with transformed values but original keys
      */
     public static function map(array $array, callable $callback): array
     {
@@ -226,9 +260,12 @@ class Arr
     /**
      * Iterate over each of the items in the array.
      *
-     * @template T
-     * @param array<mixed, T> $array
-     * @param callable(T, mixed): void $callback
+     * @template TKey
+     * @template TValue
+     *
+     * @param array<TKey, TValue> $array The input array to iterate over
+     * @param callable(TValue, TKey): void $callback Function to execute on each element
+     *
      * @return void
      */
     public static function each(array $array, callable $callback): void
@@ -241,8 +278,9 @@ class Arr
     /**
      * Determine if the given value is callable, but not a string.
      *
-     * @param mixed $value
-     * @return bool
+     * @param mixed $value The value to check
+     *
+     * @return bool True if value is callable but not a string
      */
     protected static function useAsCallable(mixed $value): bool
     {
@@ -252,11 +290,14 @@ class Arr
     /**
      * Get a callback for filtering using an operator.
      *
-     * @template T
-     * @param string $key
-     * @param mixed $operator
-     * @param mixed $value
-     * @return Closure(T, mixed): bool
+     * @template TKey
+     * @template TValue
+     *
+     * @param string $key Dot-notation key to compare
+     * @param mixed $operator Comparison operator or value when operator is defaulted to =
+     * @param mixed $value Value to compare against or null when using 2 arguments
+     *
+     * @return Closure(TValue, TKey): bool Callback function that implements the comparison
      */
     protected static function operatorForWhere(string $key, mixed $operator = null, mixed $value = null): Closure
     {
@@ -289,16 +330,20 @@ class Arr
     /**
      * Get an item from an array or object using "dot" notation.
      *
-     * @template T
-     * @param T $target
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * @template TTarget of array<string, mixed>|object
+     * @template TReturn
+     * @template TDefault
+     *
+     * @param TTarget|null $target The target array or object to retrieve the value from
+     * @param string $key The "dot" notation key used to fetch the desired value
+     * @param TDefault|callable(): TDefault $default The default value to return if the key does not exist
+     *
+     * @return TReturn|TDefault The value retrieved from the target or the default value if not found
      */
-    protected static function dataGet(mixed $target, string $key, mixed $default = null): mixed
+    public static function dataGet(mixed $target, string $key, mixed $default = null): mixed
     {
         if (is_null($target)) {
-            return $default;
+            return self::value($default);
         }
 
         foreach (explode('.', $key) as $segment) {
@@ -307,7 +352,7 @@ class Arr
             } elseif (is_object($target) && property_exists($target, $segment)) {
                 $target = $target->$segment;
             } else {
-                return $default;
+                return self::value($default);
             }
         }
 
@@ -318,8 +363,10 @@ class Arr
      * Return the default value of the given value.
      *
      * @template T
-     * @param T|Closure(): T $value
-     * @return T
+     *
+     * @param T|Closure(): T $value The value or closure to evaluate
+     *
+     * @return T The value or the result of the closure
      */
     protected static function value(mixed $value): mixed
     {
