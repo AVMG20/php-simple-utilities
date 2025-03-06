@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Avmg\PhpSimpleUtilities;
@@ -7,7 +8,6 @@ use ArrayAccess;
 use ArrayIterator;
 use Closure;
 use Countable;
-use Iterator;
 use IteratorAggregate;
 use stdClass;
 use UnexpectedValueException;
@@ -15,11 +15,12 @@ use UnexpectedValueException;
 /**
  * Collection Class
  *
- * This class provides a fluent, convenient wrapper for working with arrays of data.
- * It offers various methods for manipulating and extracting data from the arrays.
+ * A fluent, convenient wrapper for working with arrays of data that offers
+ * various methods for manipulating and extracting data from arrays.
  *
  * @template TKey of array-key
  * @template TValue
+ *
  * @implements ArrayAccess<TKey, TValue>
  * @implements IteratorAggregate<TKey, TValue>
  */
@@ -31,9 +32,9 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     protected array $items = [];
 
     /**
-     * Constructor.
+     * Creates a new collection instance.
      *
-     * @param array<TKey, TValue> $items An array of items to initialize the collection with. Default is an empty array.
+     * @param array<TKey, TValue> $items
      */
     public function __construct(array $items = [])
     {
@@ -41,14 +42,24 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Static factory method to create a new collection instance.
+     * Creates a new collection instance.
      *
-     * @param array<TKey, TValue> $items An array of items to initialize the collection with. Default is an empty array.
-     * @return static<TKey, TValue> Returns a new instance of the Collection class.
+     * @param array<TKey, TValue> $items
+     * @return static<TKey, TValue>
      */
     public static function collect(array $items = []): static
     {
         return new static($items);
+    }
+
+    /**
+     * Get all items in the collection.
+     *
+     * @return array<TKey, TValue>
+     */
+    public function all(): array
+    {
+        return $this->items;
     }
 
     /**
@@ -62,12 +73,128 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Applies a callback function to each item in the collection.
+     * Count the number of items in the collection.
+     */
+    public function count(): int
+    {
+        return count($this->items);
+    }
+
+    /**
+     * Check if the collection is empty.
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->items);
+    }
+
+    /**
+     * Check if the collection is not empty.
+     */
+    public function isNotEmpty(): bool
+    {
+        return !$this->isEmpty();
+    }
+
+    /**
+     * Get the first item from the collection.
      *
-     * Iterates over each item in the collection, applying the callback function. If the callback returns false, iteration stops.
+     * @template TFirstDefault
      *
-     * @param (callable(TValue, TKey): mixed) $callback The callback function to apply. The callback should accept two arguments: the item and its key.
-     * @return static Returns the collection instance for method chaining.
+     * @param (callable(TValue, TKey): bool)|null $callback
+     * @param TFirstDefault|callable(): TFirstDefault $default
+     *
+     * @return TValue|TFirstDefault
+     */
+    public function first(?callable $callback = null, mixed $default = null): mixed
+    {
+        if (is_null($callback)) {
+            if (empty($this->items)) {
+                return $this->value($default);
+            }
+
+            foreach ($this->items as $item) {
+                return $item;
+            }
+        }
+
+        foreach ($this->items as $key => $value) {
+            if ($callback($value, $key)) {
+                return $value;
+            }
+        }
+
+        return $this->value($default);
+    }
+
+    /**
+     * Get the last item from the collection.
+     *
+     * @template TLastDefault
+     *
+     * @param (callable(TValue, TKey): bool)|null $callback
+     * @param TLastDefault|callable(): TLastDefault $default
+     *
+     * @return TValue|TLastDefault
+     */
+    public function last(?callable $callback = null, mixed $default = null): mixed
+    {
+        if (is_null($callback)) {
+            return empty($this->items) ? $this->value($default) : end($this->items);
+        }
+
+        $filtered = array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH);
+
+        return empty($filtered) ? $this->value($default) : end($filtered);
+    }
+
+    /**
+     * Push an item onto the end of the collection.
+     *
+     * @param TValue $item
+     * @return $this<TKey, TValue>
+     */
+    public function push(mixed $item): static
+    {
+        $this->items[] = $item;
+        return $this;
+    }
+
+    /**
+     * Put an item in the collection by key.
+     *
+     * @param TKey $key
+     * @param TValue $value
+     * @return $this<TKey, TValue>
+     */
+    public function put(mixed $key, mixed $value): static
+    {
+        $this->offsetSet($key, $value);
+        return $this;
+    }
+
+    /**
+     * Get a value from the collection.
+     *
+     * @template TGetDefault
+     *
+     * @param TKey $key
+     * @param TGetDefault|callable(): TGetDefault $default
+     *
+     * @return TValue|TGetDefault
+     */
+    public function get(mixed $key, mixed $default = null): mixed
+    {
+        return array_key_exists($key, $this->items)
+            ? $this->items[$key]
+            : $this->value($default);
+    }
+
+    /**
+     * Applies a callback to each item in the collection.
+     *
+     * @param callable(TValue, TKey): mixed $callback
+     * @return $this<TKey, TValue>
      */
     public function each(callable $callback): static
     {
@@ -81,165 +208,55 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Counts the number of items in the collection.
+     * Filter the collection using the given callback.
      *
-     * @return int Returns the count of items in the collection, or null if the count is not applicable.
+     * @param (callable(TValue, TKey): bool)|null $callback
+     * @return static<TKey, TValue>
      */
-    public function count(): int
+    public function filter(?callable $callback = null): static
     {
-        return count($this->items);
+        return new static(array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH));
     }
 
     /**
-     * Adds an item to the end of the collection.
+     * Filter items by the given key value pair.
      *
-     * @param TValue $item The item to add to the collection.
-     * @return static<TKey, TValue> Returns the collection instance for method chaining.
+     * @param string|callable(TValue, TKey): bool $key
+     * @param mixed $operator
+     * @param mixed $value
+     * @return static<TKey, TValue>
      */
-    public function push(mixed $item): static
+    public function where(string|callable $key, mixed $operator = null, mixed $value = null): static
     {
-        $this->items[] = $item;
-        return $this;
-    }
-
-    /**
-     * Get the first item from the collection passing the given truth test.
-     *
-     * @template TFirstDefault
-     *
-     * @param  (callable(TValue, TKey): bool)|null  $callback
-     * @param  TFirstDefault|(Closure(): TFirstDefault)  $default
-     * @return TValue|TFirstDefault
-     */
-    public function first(callable $callback = null, $default = null)
-    {
-        foreach ($this->items as $key => $item) {
-            if ($callback === null || $callback($item, $key)) {
-                return $item;
-            }
+        if ($this->useAsCallable($key)) {
+            return $this->filter($key);
         }
 
-        return $this->value($default);
+        return $this->filter($this->operatorForWhere($key, $operator, $value));
     }
 
     /**
-     * Check if the collection is empty.
+     * Filter the collection using the given callback, removing items that pass the truth test.
      *
-     * @return bool
+     * @param callable(TValue, TKey): bool|mixed $callback
+     * @return static<TKey, TValue>
      */
-    public function isEmpty(): bool
+    public function reject(mixed $callback): static
     {
-        return empty($this->items);
-    }
-
-    /**
-     * Check if the collection is not empty.
-     *
-     * @return bool
-     */
-    public function isNotEmpty(): bool
-    {
-        return !$this->isEmpty();
-    }
-
-    /**
-     * Reset the keys on the collection and return only the values.
-     *
-     * @return static<int, TValue> A new collection instance with reindexed values.
-     */
-    public function values(): static
-    {
-        return new static(array_values($this->items));
-    }
-
-    /**
-     * Get the last item from the collection.
-     *
-     * @template TLastDefault
-     *
-     * @param  (callable(TValue, TKey): bool)|null  $callback
-     * @param  TLastDefault|(Closure(): TLastDefault)  $default
-     * @return TValue|TLastDefault
-     */
-    public function last(callable $callback = null, $default = null)
-    {
-        if (is_null($callback)) {
-            if (empty($this->items)) {
-                return $this->value($default);
-            }
-
-            return end($this->items);
+        if (is_callable($callback)) {
+            return $this->filter(fn ($value, $key) => !$callback($value, $key));
         }
 
-        $filtered = array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH);
-
-        if (empty($filtered)) {
-            return $this->value($default);
-        }
-
-        return end($filtered);
+        return $this->filter(fn ($item) => $item != $callback);
     }
 
     /**
-     * Get the sum of the given values.
-     *
-     * @param (callable(TValue): mixed)|string|null  $callback
-     * @return mixed
-     */
-    public function sum($callback = null): mixed
-    {
-        if (is_null($callback)) {
-            return array_sum($this->items);
-        }
-
-        return $this->reduce(function ($result, $item) use ($callback) {
-            return $result + $callback($item);
-        }, 0);
-    }
-
-    /**
-     * Creates a new collection with a specified number of items from the start or end of the current collection.
-     * If the number is positive, it takes from the start. If negative, it takes from the end.
-     *
-     * @param int $count The number of items to include in the new collection.
-     *                   Positive numbers take from the start, negative numbers from the end.
-     * @return static Returns a new collection instance containing the specified number of items.
-     */
-    public function take(int $count): static
-    {
-        if ($count < 0) {
-            // Taking from the end of the collection
-            return new static(array_slice($this->items, $count));
-        }
-
-        // Taking from the start of the collection
-        return new static(array_slice($this->items, 0, $count));
-    }
-
-    /**
-     * Retrieves the item at the specified key from the collection.
-     * If the key does not exist, a default value is returned, which can be a static value or the result of a callback.
-     *
-     * @param TKey $key The key of the item to retrieve.
-     * @param mixed $default Optional. The default value to return if the key does not exist.
-     *                       Can be a value or a callback.
-     * @return TValue Returns the item at the specified key, the default value, or the result of the default callback.
-     */
-    public function get(mixed $key, mixed $default = null): mixed
-    {
-        if (array_key_exists($key, $this->items)) {
-            return $this->items[$key];
-        }
-
-        return $this->value($default);
-    }
-
-    /**
-     * Applies a callback function to each item in the collection and returns a new collection of the results.
+     * Map the values into a new collection.
      *
      * @template TMapValue
-     * @param (callable(TValue, TKey): TMapValue) $callback The callback function to apply...
-     * @return static<int, TMapValue> Returns a new collection instance containing the results...
+     *
+     * @param callable(TValue, TKey): TMapValue $callback
+     * @return static<int, TMapValue>
      */
     public function map(callable $callback): static
     {
@@ -254,86 +271,23 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     /**
      * Run an associative map over each of the items.
      *
-     * The callback should return an associative array with a single key/value pair.
-     *
      * @template TMapWithKeysKey of array-key
      * @template TMapWithKeysValue
      *
-     * @param  callable(TValue, TKey): array<TMapWithKeysKey, TMapWithKeysValue>  $callback
+     * @param callable(TValue, TKey): array<TMapWithKeysKey, TMapWithKeysValue> $callback
      * @return static<TMapWithKeysKey, TMapWithKeysValue>
      */
-    public function mapWithKeys(callable $callback)
+    public function mapWithKeys(callable $callback): static
     {
         $result = [];
         foreach ($this->items as $key => $value) {
             $assoc = $callback($value, $key);
             foreach ($assoc as $assocKey => $assocValue) {
-                $result[$assocKey] = $assocValue; // Assigning each key-value pair to the result array
-            }
-        }
-        return new static($result); // Assuming static constructor can take an array to re-create an instance
-    }
-
-    /**
-     * Flattens a multi-dimensional collection into a single level collection using 'dot' notation for keys.
-     *
-     * @return static Returns a new flattened collection instance.
-     */
-    public function dot(): static
-    {
-        $results = $this->flattenDot($this->items);
-
-        return new static($results);
-    }
-
-    /**
-     * A helper method to recursively flatten an array using 'dot' notation for keys.
-     *
-     * @param array $array The array to flatten.
-     * @param string $prepend A string to prepend to keys during recursion.
-     * @return array Returns the flattened array.
-     */
-    protected function flattenDot(array $array, string $prepend = ''): array
-    {
-        $results = [];
-
-        foreach ($array as $key => $value) {
-            if (is_array($value) && !empty($value)) {
-                $results = array_merge($results, $this->flattenDot($value, $prepend . $key . '.'));
-            } else {
-                $results[$prepend . $key] = $value;
+                $result[$assocKey] = $assocValue;
             }
         }
 
-        return $results;
-    }
-
-    /**
-     * Passes the collection to the given closure and returns the result.
-     *
-     * This method allows for transforming the collection using a closure, which can return anything,
-     * not necessarily a collection. The original collection remains unchanged.
-     *
-     * @param (callable(self): mixed) $callback The closure that performs the transformation. It should accept the collection as its argument.
-     * @return mixed The result of the closure.
-     */
-    public function pipe(callable $callback): mixed
-    {
-        return $callback($this);
-    }
-
-    /**
-     * Pass the collection through a series of callable pipes and return the result.
-     *
-     * @param  array<(callable(mixed): mixed)>  $callbacks
-     * @return mixed
-     */
-    public function pipeThrough($callbacks): mixed
-    {
-        return static::collect($callbacks)->reduce(
-            fn ($carry, $callback) => $callback($carry),
-            $this,
-        );
+        return new static($result);
     }
 
     /**
@@ -342,11 +296,12 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
      * @template TReduceInitial
      * @template TReduceReturnType
      *
-     * @param  callable(TReduceInitial|TReduceReturnType, TValue, TKey): TReduceReturnType  $callback
-     * @param  TReduceInitial  $initial
+     * @param callable(TReduceInitial|TReduceReturnType, TValue, TKey): TReduceReturnType $callback
+     * @param TReduceInitial $initial
+     *
      * @return TReduceReturnType
      */
-    public function reduce(callable $callback, $initial = null)
+    public function reduce(callable $callback, mixed $initial = null): mixed
     {
         $carry = $initial;
 
@@ -358,28 +313,66 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Put an item in the collection by key.
+     * Get the sum of the given values.
      *
-     * @param  TKey  $key
-     * @param  TValue  $value
-     * @return static
+     * @param callable(TValue): mixed|string|null $callback
+     * @return mixed
      */
-    public function put($key, $value): static
+    public function sum(callable|string|null $callback = null): mixed
     {
-        $this->offsetSet($key, $value);
+        if (is_null($callback)) {
+            return array_sum($this->items);
+        }
 
+        $callback = $this->valueRetriever($callback);
+
+        return $this->reduce(function ($result, $item) use ($callback) {
+            return $result + $callback($item);
+        }, 0);
+    }
+
+    /**
+     * Transform each item in the collection.
+     *
+     * @param callable(TValue, TKey): TValue $callback
+     * @return $this<TKey, TValue>
+     */
+    public function transform(callable $callback): static
+    {
+        $this->items = array_map($callback, $this->items);
         return $this;
     }
 
     /**
-     * Applies the given callback to the collection without affecting the collection itself.
+     * Pass the collection to the given callback and return the result.
      *
-     * This method allows you to "tap" into the collection at a specific point, perform operations
-     * or logging with the collection, and then continue processing without modifying the original collection.
-     * The collection is returned by the tap method, allowing for method chaining.
+     * @param callable(static<TKey, TValue>): mixed $callback
+     * @return mixed
+     */
+    public function pipe(callable $callback): mixed
+    {
+        return $callback($this);
+    }
+
+    /**
+     * Pass the collection through a series of callable pipes and return the result.
      *
-     * @param (callable(self): void) $callback The callback function to apply. The callback should accept the collection as its argument.
-     * @return static Returns the collection instance for method chaining.
+     * @param array<callable(mixed): mixed> $callbacks
+     * @return mixed
+     */
+    public function pipeThrough(array $callbacks): mixed
+    {
+        return static::collect($callbacks)->reduce(
+            fn ($carry, $callback) => $callback($carry),
+            $this,
+        );
+    }
+
+    /**
+     * Apply a callback without affecting the collection.
+     *
+     * @param callable(static<TKey, TValue>): void $callback
+     * @return $this<TKey, TValue>
      */
     public function tap(callable $callback): static
     {
@@ -388,41 +381,57 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Retrieves all items in the collection.
+     * Create a collection with a specified number of items.
      *
-     * @return array<TKey, TValue> Returns an array of all the items in the collection.
-     */
-    public function all(): array
-    {
-        return $this->items;
-    }
-
-    /**
-     * Filters the collection using a callback function and returns a new collection with the filtered items.
-     *
-     * @param (callable(TValue, TKey): bool)|null $callback The callback function for filtering. The callback should accept two arguments: the item and its key.
-     * @return static Returns a new collection instance containing only the items that pass the callback function filter.
-     */
-    public function filter(?callable $callback = null): static
-    {
-        return new static(array_filter($this->items, $callback, ARRAY_FILTER_USE_BOTH));
-    }
-
-    /**
-     * Transform each item in the collection using a callback.
-     *
-     * @param (callable(TValue, TKey): TValue) $callback
+     * @param int $count
      * @return static<TKey, TValue>
      */
-    public function transform(callable $callback): static
+    public function take(int $count): static
     {
-        $this->items = array_map($callback, $this->items);
+        if ($count < 0) {
+            return new static(array_slice($this->items, $count));
+        }
 
-        return $this;
+        return new static(array_slice($this->items, 0, $count));
     }
 
     /**
-     * Split the collection into chunks of the given size.
+     * Reset the keys and return the values.
+     *
+     * @return static<int, TValue>
+     */
+    public function values(): static
+    {
+        return new static(array_values($this->items));
+    }
+
+    /**
+     * Get the values of a specified key.
+     *
+     * @param string $value
+     * @param string|null $key
+     * @return static
+     */
+    public function pluck(string $value, ?string $key = null): static
+    {
+        $results = [];
+
+        foreach ($this->items as $item) {
+            $itemValue = $this->dataGet($item, $value);
+
+            if (is_null($key)) {
+                $results[] = $itemValue;
+            } else {
+                $itemKey = $this->dataGet($item, $key);
+                $results[$itemKey] = $itemValue;
+            }
+        }
+
+        return new static($results);
+    }
+
+    /**
+     * Chunk the collection into arrays of the given size.
      *
      * @param int $size
      * @return static<int, static<TKey, TValue>>
@@ -442,62 +451,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Return only unique items from the collection array.
-     *
-     * @param  (callable(TValue, TKey): mixed)|string|null  $key
-     * @param  bool  $strict
-     * @return static
-     */
-    public function unique($key = null, $strict = false): static
-    {
-        if (is_null($key) && $strict === false) {
-            return new static(array_unique($this->items, SORT_REGULAR));
-        }
-
-        $callback = $this->valueRetriever($key);
-
-        $exists = [];
-
-        return $this->reject(function ($item, $key) use ($callback, $strict, &$exists) {
-            if (in_array($id = $callback($item, $key), $exists, $strict)) {
-                return true;
-            }
-
-            $exists[] = $id;
-            return false;
-        });
-    }
-
-    /**
-     * Get the values of a specified key from the collection.
-     * The method allows using "dot" notation for accessing nested array elements.
-     * If a key is provided, the method returns an associative array with keys from the collection
-     * and the corresponding values from the nested arrays or objects.
-     *
-     * @param  string  $value  The key to pluck from the collection items. Supports dot notation for nested arrays.
-     * @param  string|null  $key  Optional. The key to serve as the resulting array's keys. Also supports dot notation.
-     * @return static  A new collection instance containing the plucked values.
-     */
-    public function pluck(string $value, string|null $key = null): static
-    {
-        $results = [];
-
-        foreach ($this->items as $item) {
-            $itemValue = $this->dataGet($item, $value);
-
-            if (is_null($key)) {
-                $results[] = $itemValue;
-            } else {
-                $itemKey = $this->dataGet($item, $key);
-                $results[$itemKey] = $itemValue;
-            }
-        }
-
-        return new static($results);
-    }
-
-    /**
-     * Flatten a multi-dimensional collection into a single level collection.
+     * Flatten a multi-dimensional collection into a single level.
      *
      * @param int $depth
      * @return static<int, mixed>
@@ -508,13 +462,13 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * A helper method to recursively flatten an array.
+     * Helper method to recursively flatten an array.
      *
-     * @param  array  $array
+     * @param array $array
      * @param int $depth
      * @return array
      */
-    protected function doFlatten(array $array, int $depth = 256): array
+    protected function doFlatten(array $array, int $depth): array
     {
         $result = [];
 
@@ -532,98 +486,68 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Filter the collection using the given callback, removing items that pass the truth test.
+     * Flatten a multi-dimensional collection into a single level with 'dot' notation for keys.
      *
-     * @param  (callable(TValue, TKey): bool)|mixed  $callback
      * @return static
      */
-    public function reject(mixed $callback): static
+    public function dot(): static
     {
-        if (is_callable($callback)) {
-            return $this->filter(function ($value, $key) use ($callback) {
-                return !$callback($value, $key);
-            });
+        return new static($this->flattenDot($this->items));
+    }
+
+    /**
+     * Helper method to recursively flatten an array using 'dot' notation for keys.
+     *
+     * @param array $array
+     * @param string $prepend
+     * @return array
+     */
+    protected function flattenDot(array $array, string $prepend = ''): array
+    {
+        $results = [];
+
+        foreach ($array as $key => $value) {
+            if (is_array($value) && !empty($value)) {
+                $results = array_merge($results, $this->flattenDot($value, $prepend . $key . '.'));
+            } else {
+                $results[$prepend . $key] = $value;
+            }
         }
 
-        return $this->filter(function ($item) use ($callback) {
-            return $item != $callback;
+        return $results;
+    }
+
+    /**
+     * Return only unique items.
+     *
+     * @param callable(TValue, TKey): mixed|string|null $key
+     * @param bool $strict
+     * @return static<TKey, TValue>
+     */
+    public function unique(callable|string|null $key = null, bool $strict = false): static
+    {
+        if (is_null($key) && $strict === false) {
+            return new static(array_unique($this->items, SORT_REGULAR));
+        }
+
+        $callback = $this->valueRetriever($key);
+        $exists = [];
+
+        return $this->reject(function ($item, $key) use ($callback, $strict, &$exists) {
+            $id = $callback($item, $key);
+            if (in_array($id, $exists, $strict)) {
+                return true;
+            }
+
+            $exists[] = $id;
+            return false;
         });
     }
 
     /**
-     * Retrieve an item from an array or object using "dot" notation.
-     * This method allows for traversing nested arrays or objects to access deep values.
-     * If the specified key is not found, the method returns the default value.
+     * Merge the given items into the collection.
      *
-     * @param  mixed   $target  The array or object to search in.
-     * @param  string  $key  The key to search for, using dot notation for nested elements.
-     * @param  mixed   $default  Optional. The default value to return if the specified key does not exist.
-     *                          This value is returned when the final segment of the key is not found in the target.
-     * @return mixed  The value of the specified key in the target, or the default value if the key is not found.
-     */
-    protected function dataGet(mixed $target, string $key, mixed $default = null): mixed
-    {
-        $key = explode('.', $key);
-
-        foreach ($key as $segment) {
-            if (is_array($target)) {
-                if (!array_key_exists($segment, $target)) {
-                    return $default;
-                }
-
-                $target = $target[$segment];
-            } elseif ($target instanceof ArrayAccess) {
-                if (!isset($target[$segment])) {
-                    return $default;
-                }
-
-                $target = $target[$segment];
-            } else {
-                return $default;
-            }
-        }
-
-        return $target;
-    }
-
-    /**
-     * Return the default value of the given value or callback.
-     *
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function value(mixed $value): mixed
-    {
-        return $value instanceof Closure ? $value() : $value;
-    }
-
-    /**
-     * Get the values of a specified key from the collection.
-     *
-     * @param callable|string|null $key The key to pluck from the collection items. Supports dot notation for nested arrays.
-     * @return callable|Closure|string|null The value retriever.
-     */
-    protected function valueRetriever($key)
-    {
-        if (is_null($key)) {
-            return fn ($item) => $item;
-        }
-
-        if (is_string($key)) {
-            return fn ($item) => $this->dataGet($item, $key);
-        }
-
-        return $key;
-    }
-
-    /**
-     * Merges the given array or collection with the original collection.
-     *
-     * If a string key in the given items matches a string key in the original collection,
-     * the value from the given items will overwrite the original value.
-     * If the keys are numeric, the values will be appended to the end of the collection.
-     *
-     * @param Collection<TKey, TValue>|array<TKey, TValue> $items The items to be merged into the collection.
+     * @param Collection<TKey, TValue>|array<TKey, TValue> $items
      * @return static<TKey, TValue>
      */
     public function merge(Collection|array $items): static
@@ -632,171 +556,41 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
             $items = $items->all();
         }
 
-        // Merging associative arrays
-        $merged = array_merge($this->items, $items);
-
-        return new static($merged);
+        return new static(array_merge($this->items, $items));
     }
 
     /**
      * Determine if an item exists in the collection.
      *
-     * @param  (callable(TValue, TKey): bool)|TValue|string  $key
-     * @param  mixed  $operator
-     * @param  mixed  $value
+     * @param callable(TValue, TKey): bool|TValue|string $key
+     * @param mixed $operator
+     * @param mixed $value
      * @return bool
      */
-    public function contains($key, $operator = null, $value = null): bool
+    public function contains(mixed $key, mixed $operator = null, mixed $value = null): bool
     {
         if (func_num_args() === 1) {
             if ($this->useAsCallable($key)) {
                 $placeholder = new stdClass;
-
                 return $this->first($key, $placeholder) !== $placeholder;
             }
 
             return in_array($key, $this->items);
         }
 
-        return $this->contains($this->operatorForWhere(...func_get_args()));
+        return $this->contains($this->operatorForWhere($key, $operator, $value));
     }
 
     /**
-     * Filter items by the given key value pair.
+     * Ensure all elements are of the given type(s).
      *
-     * @param  string|callable  $key
-     * @param  mixed  $operator
-     * @param  mixed  $value
-     * @return static
-     */
-    public function where($key, $operator = null, $value = null): static
-    {
-        if ($this->useAsCallable($key)) {
-            return $this->filter($key);
-        }
-
-        return $this->filter($this->operatorForWhere(...func_get_args()));
-    }
-
-    /**
-     * Helper method to determine if a given value can be used as a callback.
-     *
-     * @param  mixed  $value
-     * @return bool
-     */
-    protected function useAsCallable($value): bool
-    {
-        return !is_string($value) && is_callable($value);
-    }
-
-    /**
-     * Get an operator checker callback.
-     *
-     * @param  string  $key
-     * @param  string|null  $operator
-     * @param  mixed  $value
-     * @return callable
-     */
-    protected function operatorForWhere($key, $operator = null, $value = null): callable
-    {
-        if (func_num_args() === 1) {
-            $value = true;
-            $operator = '=';
-        }
-
-        if (func_num_args() === 2) {
-            $value = $operator;
-            $operator = '=';
-        }
-
-        return function ($item) use ($key, $operator, $value) {
-            $retrieved = $this->dataGet($item, $key);
-
-            switch ($operator) {
-                default:
-                case '=':
-                case '==':  return $retrieved == $value;
-                case '!=':
-                case '<>':  return $retrieved != $value;
-                case '<':   return $retrieved < $value;
-                case '>':   return $retrieved > $value;
-                case '<=':  return $retrieved <= $value;
-                case '>=':  return $retrieved >= $value;
-                case '===': return $retrieved === $value;
-                case '!==': return $retrieved !== $value;
-            }
-        };
-    }
-
-    /**
-     * Converts the collection into a plain PHP array.
-     *
-     * This method will recursively convert all objects that are instances of Collection
-     * into arrays as well. If an item in the collection is an object that implements
-     * the toArray method, that method will be called to convert the object.
-     *
-     * @return array A plain PHP array containing the collection's elements.
-     */
-    public function toArray(): array
-    {
-        return $this->recursiveToArray($this->items);
-    }
-
-    /**
-     * Recursively convert items to an array.
-     *
-     * @param mixed $value The item to be converted.
-     * @return mixed The converted item.
-     */
-    protected function recursiveToArray($value): mixed
-    {
-        if (is_array($value)) {
-            return array_map([$this, 'recursiveToArray'], $value);
-        } elseif ($value instanceof Collection) {
-            return $this->recursiveToArray($value->all());
-        } elseif ($value instanceof ArrayAccess || $value instanceof Iterator || $value instanceof IteratorAggregate) {
-            return $this->recursiveToArray(iterator_to_array($value));
-        } elseif ($value instanceof stdClass) {
-            return $this->recursiveToArray((array) $value);
-        } elseif (is_object($value) && method_exists($value, 'toArray')) {
-            return $this->recursiveToArray($value->toArray());
-        }
-
-        return $value;
-    }
-
-    /**
-     * Converts the collection into a JSON string.
-     *
-     * This method first converts the collection to an array using the toArray method,
-     * and then encodes this array into a JSON string. It uses PHP's json_encode function,
-     * and you can pass options and a depth parameter to customize the JSON encoding behavior.
-     *
-     * @param int $options Optional. Options for json_encode. Default is 0.
-     * @param int $depth Optional. Maximum depth for JSON encoding. Default is 512.
-     * @return string A JSON encoded string representing the collection.
-     */
-    public function toJson(int $options = 0, int $depth = 512): string
-    {
-        return json_encode($this->toArray(), $options, $depth);
-    }
-
-    /**
-     * Ensures that all elements of the collection are of a given type or list of types.
-     *
-     * This method checks each item in the collection against the specified type(s).
-     * The type can be a class name or a primitive type (e.g., 'string', 'int').
-     * If any item is not of the specified type(s), an UnexpectedValueException is thrown.
-     *
-     * @param array|string $types The type or array of types to check against.
-     * @return static Returns the collection instance if all items match the type(s).
-     * @throws UnexpectedValueException if any item does not match the type(s).
+     * @param array|string $types
+     * @return $this<TKey, TValue>
+     * @throws UnexpectedValueException
      */
     public function ensure(array|string $types): static
     {
-        if (!is_array($types)) {
-            $types = [$types];
-        }
+        $types = is_array($types) ? $types : [$types];
 
         foreach ($this->items as $item) {
             if (!$this->checkType($item, $types)) {
@@ -808,18 +602,16 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Checks if a value is of one of the specified types.
+     * Check if a value is of one of the specified types.
      *
-     * @param mixed $value The value to check.
-     * @param array $types Array of types to check against.
-     * @return bool True if the value matches one of the types, false otherwise.
+     * @param mixed $value
+     * @param array $types
+     * @return bool
      */
     protected function checkType(mixed $value, array $types): bool
     {
         foreach ($types as $type) {
-            if ($type === gettype($value)) {
-                return true;
-            } elseif (is_object($value) && is_a($value, $type)) {
+            if ($type === gettype($value) || (is_object($value) && is_a($value, $type))) {
                 return true;
             }
         }
@@ -828,30 +620,86 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Whether an offset exists
+     * Convert the collection to an array.
+     *
+     * @return array
      */
-    public function offsetExists($offset): bool
+    public function toArray(): array
+    {
+        return $this->recursiveToArray($this->items);
+    }
+
+    /**
+     * Recursively convert an item to an array.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function recursiveToArray(mixed $value): mixed
+    {
+        if (is_array($value)) {
+            return array_map([$this, 'recursiveToArray'], $value);
+        }
+
+        if ($value instanceof Collection) {
+            return $this->recursiveToArray($value->all());
+        }
+
+        if ($value instanceof ArrayAccess || $value instanceof IteratorAggregate) {
+            return $this->recursiveToArray(iterator_to_array($value));
+        }
+
+        if ($value instanceof stdClass) {
+            return $this->recursiveToArray((array) $value);
+        }
+
+        if (is_object($value) && method_exists($value, 'toArray')) {
+            return $this->recursiveToArray($value->toArray());
+        }
+
+        return $value;
+    }
+
+    /**
+     * Convert the collection to JSON.
+     *
+     * @param int $options
+     * @param int $depth
+     * @return string
+     */
+    public function toJson(int $options = 0, int $depth = 512): string
+    {
+        return json_encode($this->toArray(), $options, $depth);
+    }
+
+    /**
+     * Determine if a key exists.
+     *
+     * @param mixed $offset
+     */
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->items[$offset]);
     }
 
     /**
-     * Offset to retrieve
+     * Get an item at a given offset.
      *
+     * @param mixed $offset
      * @return TValue|null
      */
-    public function offsetGet($offset): mixed
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->items[$offset] ?? null;
     }
 
     /**
-     * Offset to set
+     * Set the item at a given offset.
      *
-     * @param TKey $offset
-     * @param TValue $value
+     * @param mixed $offset
+     * @param mixed $value
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if (is_null($offset)) {
             $this->items[] = $value;
@@ -861,10 +709,118 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate
     }
 
     /**
-     * Offset to unset
+     * Unset the item at a given offset.
+     *
+     * @param mixed $offset
      */
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->items[$offset]);
+    }
+
+    /**
+     * Return the default value of the given value.
+     *
+     * @template T
+     *
+     * @param T|Closure(): T $value
+     * @return T
+     */
+    protected function value(mixed $value): mixed
+    {
+        return $value instanceof Closure ? $value() : $value;
+    }
+
+    /**
+     * Get a value retriever callback.
+     *
+     * @param callable|string|null $value
+     * @return callable(TValue, TKey): mixed
+     */
+    protected function valueRetriever(callable|string|null $value): callable
+    {
+        if (is_null($value)) {
+            return fn ($item) => $item;
+        }
+
+        if (is_string($value)) {
+            return fn ($item) => $this->dataGet($item, $value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Determine if the given value is callable, but not a string.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    protected function useAsCallable(mixed $value): bool
+    {
+        return !is_string($value) && is_callable($value);
+    }
+
+    /**
+     * Get a callback for filtering using an operator.
+     *
+     * @param string $key
+     * @param mixed $operator
+     * @param mixed $value
+     * @return Closure(TValue, TKey): bool
+     */
+    protected function operatorForWhere(string $key, mixed $operator = null, mixed $value = null): Closure
+    {
+        // The number of arguments passed to the calling function (where)
+        // is different from the number of arguments passed to this method,
+        // so we need to handle this manually
+
+        if ($value === null) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        return function ($item, $itemKey) use ($key, $operator, $value) {
+            $retrieved = $this->dataGet($item, $key);
+
+            return match($operator) {
+                '=', '==' => $retrieved == $value,
+                '!=', '<>' => $retrieved != $value,
+                '<' => $retrieved < $value,
+                '>' => $retrieved > $value,
+                '<=' => $retrieved <= $value,
+                '>=' => $retrieved >= $value,
+                '===' => $retrieved === $value,
+                '!==' => $retrieved !== $value,
+                default => false,
+            };
+        };
+    }
+
+    /**
+     * Get an item from an array or object using "dot" notation.
+     *
+     * @param mixed $target
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    protected function dataGet(mixed $target, string $key, mixed $default = null): mixed
+    {
+        if (is_null($target)) {
+            return $this->value($default);
+        }
+
+        foreach (explode('.', $key) as $segment) {
+            if (is_array($target) && array_key_exists($segment, $target)) {
+                $target = $target[$segment];
+            } elseif (is_object($target) && property_exists($target, $segment)) {
+                $target = $target->$segment;
+            } else {
+                return $this->value($default);
+            }
+        }
+
+        return $target;
     }
 }
