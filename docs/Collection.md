@@ -16,7 +16,42 @@ $collection = new Collection(['apple', 'banana', 'orange']);
 $collection = Collection::collect(['apple', 'banana', 'orange']);
 ```
 
-## Available Methods
+## All methods available in the Collection class:
+- [constructor()](#constructor) - make a new collection instance with an array of items.
+- [collect()](#collect) - make a new collection instance statically.
+- [each()](#each) - apply a callback function to each item in the collection.
+- [count()](#count) - count the number of items in the collection.
+- [push()](#push) - add an item to the end of the collection.
+- [first()](#first) - retrieve the first item.
+- [last()](#last) - retrieve the last item.
+- [take()](#take) - create a new collection with a specified number of items from the start.
+- [get()](#get) - retrieve the item at a given key.
+- [put()](#put) - set the item at a given key.
+- [sum()](#sum) - Get the sum of the given values.
+- [unique()](#unique) - retrieve all unique items in the collection.
+- [isEmpty()](#isEmpty) - determine if the collection is empty.
+- [isNotEmpty()](#isNotEmpty) - determine if the collection is not empty.
+- [values()](#values) - get the values of the collection.
+- [reduce()](#reduce) - reduce the collection to a single value.
+- [map()](#map) - apply a callback to each item in the collection and return a new collection of the results.
+- [mapWithKeys()](#mapWithKeys) - apply a callback to each item in the collection and return a new collection with the keys and values swapped.
+- [dot()](#dot) - flatten a multi-dimensional collection into a single level using 'dot' notation for keys.
+- [pipe()](#pipe) - pass the collection to a given closure and return the result.
+- [pipeThrough()](#pipeThrough) - pass the collection to a given callback and return the result.
+- [tap()](#tap) - apply a given callback to the collection without affecting the collection itself.
+- [all()](#all) - retrieve all items in the collection.
+- [filter()](#filter) - filter the collection using a callback function.
+- [transform()](#transform) - transform each item in the collection using a callback.
+- [chunk()](#chunk) - split the collection into chunks of the given size.
+- [pluck()](#pluck) - get the values of a specified key from the collection.
+- [flatten()](#flatten) - flatten a multi-dimensional collection into a single level.
+- [reject()](#reject) - filter the collection by removing items that pass the truth test.
+- [merge()](#merge) - merge another array or collection with the original collection.
+- [ensure()](#ensure) - verify that all elements of a collection are of a given type or list of types.
+- [contains()](#contains) - determine if an item exists in the collection.
+- [where()](#where) - filter items by key value pair or callback.
+- [toArray()](#toArray) - convert the collection into a plain PHP array.
+- [toJson()](#toJson) - convert the collection into a JSON string.
 
 ### Basic Methods
 
