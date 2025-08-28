@@ -14,7 +14,7 @@ The `Arr` class provides a set of powerful utility methods for working with arra
 - [filter()](#filter) - Filter the array using the given callback
 - [map()](#map) - Map over each of the items in the array
 - [each()](#each) - Iterate over each item in the array and apply a callback
-- [dataGet()](#dataGet) - Get an item from an array using "dot" notation
+- [get()](#get) - Get an item from an array using "dot" notation
 
 ### where()
 
@@ -226,7 +226,7 @@ Arr::each($array, function($value, $key) {
 // c: 3
 ```
 
-### dataGet()
+### get()
 
 Retrieve a value from a deeply nested array or object using dot notation.
 
@@ -241,15 +241,15 @@ $array = [
 ];
 
 // Retrieve a value using dot notation
-$result = Arr::dataGet($array, 'user.profile.name');
+$result = Arr::get($array, 'user.profile.name');
 // Returns: 'John'
 
 // Retrieve a value with a default if not found
-$result = Arr::dataGet($array, 'user.profile.age', 30);
+$result = Arr::get($array, 'user.profile.age', 30);
 // Returns: 30
 
 // Retrieve a value where the key path does not exist
-$result = Arr::dataGet($array, 'user.settings.language', 'English');
+$result = Arr::get($array, 'user.settings.language', 'English');
 // Returns: 'English'
 ```
 

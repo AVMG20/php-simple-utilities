@@ -89,7 +89,7 @@ class Arr
     public static function whereIn(array $array, string $key, array $values): array
     {
         return static::where($array, fn($item) =>
-            in_array(static::dataGet($item, $key), $values, true)
+            in_array(static::get($item, $key), $values, true)
         );
     }
 
@@ -108,7 +108,7 @@ class Arr
     public static function whereNot(array $array, string $key, mixed $value): array
     {
         return static::where($array, fn($item) =>
-            static::dataGet($item, $key) !== $value
+            static::get($item, $key) !== $value
         );
     }
 
@@ -174,7 +174,7 @@ class Arr
 
         if (func_num_args() === 2) {
             foreach ($array as $item) {
-                $result = static::dataGet($item, $key);
+                $result = static::get($item, $key);
                 if ($result) {
                     return $item;
                 }
@@ -276,6 +276,57 @@ class Arr
     }
 
     /**
+     * Get an item from an array or object using "dot" notation.
+     *
+     * @template TTarget of array<string, mixed>|object
+     * @template TReturn
+     * @template TDefault
+     *
+     * @param TTarget|null $target The target array or object to retrieve the value from
+     * @param string $key The "dot" notation key used to fetch the desired value
+     * @param TDefault|callable(): TDefault $default The default value to return if the key does not exist
+     *
+     * @return TReturn|TDefault The value retrieved from the target or the default value if not found
+     * @deprecated use Arr::get instead
+     */
+    public static function dataGet(mixed $target, string $key, mixed $default = null)
+    {
+        return static::get($target, $key, $default);
+    }
+
+    /**
+     * Get an item from an array or object using "dot" notation.
+     *
+     * @template TTarget of array<string, mixed>|object
+     * @template TReturn
+     * @template TDefault
+     *
+     * @param TTarget|null $target The target array or object to retrieve the value from
+     * @param string $key The "dot" notation key used to fetch the desired value
+     * @param TDefault|callable(): TDefault $default The default value to return if the key does not exist
+     *
+     * @return TReturn|TDefault The value retrieved from the target or the default value if not found
+     */
+    public static function get(mixed $target, string $key, mixed $default = null): mixed
+    {
+        if (is_null($target)) {
+            return self::value($default);
+        }
+
+        foreach (explode('.', $key) as $segment) {
+            if (is_array($target) && array_key_exists($segment, $target)) {
+                $target = $target[$segment];
+            } elseif (is_object($target) && property_exists($target, $segment)) {
+                $target = $target->$segment;
+            } else {
+                return self::value($default);
+            }
+        }
+
+        return $target;
+    }
+
+    /**
      * Determine if the given value is callable, but not a string.
      *
      * @param mixed $value The value to check
@@ -307,13 +358,13 @@ class Arr
         }
 
         return function ($item) use ($key, $operator, $value) {
-            $retrieved = static::dataGet($item, $key, null);
+            $retrieved = static::get($item, $key, null);
 
             if (is_null($retrieved)) {
                 return false;
             }
 
-            return match($operator) {
+            return match ($operator) {
                 '=', '==' => $retrieved == $value,
                 '!=', '<>' => $retrieved != $value,
                 '<' => $retrieved < $value,
@@ -325,38 +376,6 @@ class Arr
                 default => false,
             };
         };
-    }
-
-    /**
-     * Get an item from an array or object using "dot" notation.
-     *
-     * @template TTarget of array<string, mixed>|object
-     * @template TReturn
-     * @template TDefault
-     *
-     * @param TTarget|null $target The target array or object to retrieve the value from
-     * @param string $key The "dot" notation key used to fetch the desired value
-     * @param TDefault|callable(): TDefault $default The default value to return if the key does not exist
-     *
-     * @return TReturn|TDefault The value retrieved from the target or the default value if not found
-     */
-    public static function dataGet(mixed $target, string $key, mixed $default = null): mixed
-    {
-        if (is_null($target)) {
-            return self::value($default);
-        }
-
-        foreach (explode('.', $key) as $segment) {
-            if (is_array($target) && array_key_exists($segment, $target)) {
-                $target = $target[$segment];
-            } elseif (is_object($target) && property_exists($target, $segment)) {
-                $target = $target->$segment;
-            } else {
-                return self::value($default);
-            }
-        }
-
-        return $target;
     }
 
     /**

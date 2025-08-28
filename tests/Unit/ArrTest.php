@@ -250,65 +250,65 @@ class ArrTest extends TestCase
 
     public function testBasicArrayAccess(): void
     {
-        $this->assertEquals('John Doe', Arr::dataGet($this->testArray2, 'name'));
-        $this->assertEquals(30, Arr::dataGet($this->testArray2, 'age'));
-        $this->assertEquals(['admin', 'user', 'editor'], Arr::dataGet($this->testArray2, 'roles'));
+        $this->assertEquals('John Doe', Arr::get($this->testArray2, 'name'));
+        $this->assertEquals(30, Arr::get($this->testArray2, 'age'));
+        $this->assertEquals(['admin', 'user', 'editor'], Arr::get($this->testArray2, 'roles'));
     }
 
     public function testNestedArrayAccess(): void
     {
-        $this->assertEquals('123 Main St', Arr::dataGet($this->testArray2, 'address.street'));
-        $this->assertEquals('Anytown', Arr::dataGet($this->testArray2, 'address.city'));
-        $this->assertEquals('USA', Arr::dataGet($this->testArray2, 'address.country'));
-        $this->assertEquals(true, Arr::dataGet($this->testArray2, 'settings.notifications.email'));
-        $this->assertEquals(false, Arr::dataGet($this->testArray2, 'settings.notifications.sms'));
+        $this->assertEquals('123 Main St', Arr::get($this->testArray2, 'address.street'));
+        $this->assertEquals('Anytown', Arr::get($this->testArray2, 'address.city'));
+        $this->assertEquals('USA', Arr::get($this->testArray2, 'address.country'));
+        $this->assertEquals(true, Arr::get($this->testArray2, 'settings.notifications.email'));
+        $this->assertEquals(false, Arr::get($this->testArray2, 'settings.notifications.sms'));
     }
 
     public function testArray2IndexAccess(): void
     {
-        $this->assertEquals('admin', Arr::dataGet($this->testArray2, 'roles.0'));
-        $this->assertEquals('user', Arr::dataGet($this->testArray2, 'roles.1'));
-        $this->assertEquals('editor', Arr::dataGet($this->testArray2, 'roles.2'));
+        $this->assertEquals('admin', Arr::get($this->testArray2, 'roles.0'));
+        $this->assertEquals('user', Arr::get($this->testArray2, 'roles.1'));
+        $this->assertEquals('editor', Arr::get($this->testArray2, 'roles.2'));
     }
 
     public function testObjectAccess(): void
     {
-        $this->assertEquals('Jane Smith', Arr::dataGet($this->testObject, 'name'));
-        $this->assertEquals(28, Arr::dataGet($this->testObject, 'age'));
+        $this->assertEquals('Jane Smith', Arr::get($this->testObject, 'name'));
+        $this->assertEquals(28, Arr::get($this->testObject, 'age'));
     }
 
     public function testNestedObjectAccess(): void
     {
-        $this->assertEquals('456 Oak Ave', Arr::dataGet($this->testObject, 'address.street'));
-        $this->assertEquals('Somewhere', Arr::dataGet($this->testObject, 'address.city'));
-        $this->assertEquals('Canada', Arr::dataGet($this->testObject, 'address.country'));
+        $this->assertEquals('456 Oak Ave', Arr::get($this->testObject, 'address.street'));
+        $this->assertEquals('Somewhere', Arr::get($this->testObject, 'address.city'));
+        $this->assertEquals('Canada', Arr::get($this->testObject, 'address.country'));
     }
 
     public function testNonExistentKey(): void
     {
-        $this->assertNull(Arr::dataGet($this->testArray2, 'nonexistent'));
-        $this->assertNull(Arr::dataGet($this->testArray2, 'address.nonexistent'));
+        $this->assertNull(Arr::get($this->testArray2, 'nonexistent'));
+        $this->assertNull(Arr::get($this->testArray2, 'address.nonexistent'));
     }
 
     public function testDefaultValue(): void
     {
-        $this->assertEquals('default', Arr::dataGet($this->testArray2, 'nonexistent', 'default'));
-        $this->assertEquals('default', Arr::dataGet($this->testArray2, 'address.nonexistent', 'default'));
-        $this->assertEquals('default', Arr::dataGet($this->testArray2, 'nonexistent.key', 'default'));
+        $this->assertEquals('default', Arr::get($this->testArray2, 'nonexistent', 'default'));
+        $this->assertEquals('default', Arr::get($this->testArray2, 'address.nonexistent', 'default'));
+        $this->assertEquals('default', Arr::get($this->testArray2, 'nonexistent.key', 'default'));
     }
 
     public function testCallableDefault(): void
     {
         $default = fn() => 'calculated default';
-        $this->assertEquals('calculated default', Arr::dataGet($this->testArray2, 'nonexistent', $default));
+        $this->assertEquals('calculated default', Arr::get($this->testArray2, 'nonexistent', $default));
     }
 
     public function testNullValues(): void
     {
-        $this->assertNull(Arr::dataGet($this->testArray2, 'profile'));
-        $this->assertEquals('default', Arr::dataGet($this->testArray2, 'profile.image', 'default'));
-        $this->assertNull(Arr::dataGet(null, 'any.key'));
+        $this->assertNull(Arr::get($this->testArray2, 'profile'));
+        $this->assertEquals('default', Arr::get($this->testArray2, 'profile.image', 'default'));
+        $this->assertNull(Arr::get(null, 'any.key'));
 
-        $value = Arr::dataGet($this->testArray2, 'profile.image', fn() => 'default');
+        $value = Arr::get($this->testArray2, 'profile.image', fn() => 'default');
     }
 }
