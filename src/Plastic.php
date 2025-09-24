@@ -106,7 +106,7 @@ class Plastic extends DateTime
      */
     public function addSeconds(int $seconds): static
     {
-        return self::parse($this)->add(new DateInterval("PT{$seconds}S"));
+        return (clone $this)->add(new DateInterval("PT{$seconds}S"));
     }
 
     /**
@@ -118,7 +118,7 @@ class Plastic extends DateTime
      */
     public function subSeconds(int $seconds): static
     {
-        return self::parse($this)->sub(new DateInterval("PT{$seconds}S"));
+        return (clone $this)->sub(new DateInterval("PT{$seconds}S"));
     }
 
     /**
@@ -130,7 +130,7 @@ class Plastic extends DateTime
      */
     public function addMinutes(int $minutes): static
     {
-        return self::parse($this)->add(new DateInterval("PT{$minutes}M"));
+        return (clone $this)->add(new DateInterval("PT{$minutes}M"));
     }
 
     /**
@@ -142,7 +142,7 @@ class Plastic extends DateTime
      */
     public function subMinutes(int $minutes): static
     {
-        return self::parse($this)->sub(new DateInterval("PT{$minutes}M"));
+        return (clone $this)->sub(new DateInterval("PT{$minutes}M"));
     }
 
     /**
@@ -154,7 +154,7 @@ class Plastic extends DateTime
      */
     public function addHours(int $hours): static
     {
-        return self::parse($this)->add(new DateInterval("PT{$hours}H"));
+        return (clone $this)->add(new DateInterval("PT{$hours}H"));
     }
 
     /**
@@ -166,7 +166,7 @@ class Plastic extends DateTime
      */
     public function subHours(int $hours): static
     {
-        return self::parse($this)->sub(new DateInterval("PT{$hours}H"));
+        return (clone $this)->sub(new DateInterval("PT{$hours}H"));
     }
 
     /**
@@ -178,7 +178,7 @@ class Plastic extends DateTime
      */
     public function addDays(int $days): static
     {
-        return self::parse($this)->add(new DateInterval("P{$days}D"));
+        return (clone $this)->add(new DateInterval("P{$days}D"));
     }
 
     /**
@@ -190,7 +190,7 @@ class Plastic extends DateTime
      */
     public function subDays(int $days): static
     {
-        return self::parse($this)->sub(new DateInterval("P{$days}D"));
+        return (clone $this)->sub(new DateInterval("P{$days}D"));
     }
 
     /**
@@ -202,7 +202,7 @@ class Plastic extends DateTime
      */
     public function addMonths(int $months): static
     {
-        return self::parse($this)->add(new DateInterval("P{$months}M"));
+        return (clone $this)->add(new DateInterval("P{$months}M"));
     }
 
     /**
@@ -214,7 +214,7 @@ class Plastic extends DateTime
      */
     public function subMonths(int $months): static
     {
-        return self::parse($this)->sub(new DateInterval("P{$months}M"));
+        return (clone $this)->sub(new DateInterval("P{$months}M"));
     }
 
     /**
@@ -226,7 +226,7 @@ class Plastic extends DateTime
      */
     public function addYears(int $years): static
     {
-        return self::parse($this)->add(new DateInterval("P{$years}Y"));
+        return (clone $this)->add(new DateInterval("P{$years}Y"));
     }
 
     /**
@@ -238,7 +238,7 @@ class Plastic extends DateTime
      */
     public function subYears(int $years): static
     {
-        return self::parse($this)->sub(new DateInterval("P{$years}Y"));
+        return (clone $this)->sub(new DateInterval("P{$years}Y"));
     }
 
     /**
@@ -297,7 +297,7 @@ class Plastic extends DateTime
      */
     public function startOfDay(): static
     {
-        return self::parse($this)->setTime(0, 0, 0);
+        return (clone $this)->setTime(0, 0, 0);
     }
 
     /**
@@ -308,7 +308,7 @@ class Plastic extends DateTime
      */
     public function endOfDay(): static
     {
-        return self::parse($this)->setTime(23, 59, 59);
+        return (clone $this)->setTime(23, 59, 59);
     }
 
     /**
@@ -319,7 +319,7 @@ class Plastic extends DateTime
      */
     public function startOfWeek(): static
     {
-        return self::parse($this)->modify('monday this week')->startOfDay();
+        return (clone $this)->modify('monday this week')->startOfDay();
     }
 
     /**
@@ -330,7 +330,7 @@ class Plastic extends DateTime
      */
     public function endOfWeek(): static
     {
-        return self::parse($this)->modify('sunday this week')->endOfDay();
+        return (clone $this)->modify('sunday this week')->endOfDay();
     }
 
     /**
@@ -341,7 +341,7 @@ class Plastic extends DateTime
      */
     public function startOfMonth(): static
     {
-        return self::parse($this)->modify('first day of this month')->startOfDay();
+        return (clone $this)->modify('first day of this month')->startOfDay();
     }
 
     /**
@@ -352,7 +352,7 @@ class Plastic extends DateTime
      */
     public function endOfMonth(): static
     {
-        return self::parse($this)->modify('last day of this month')->endOfDay();
+        return (clone $this)->modify('last day of this month')->endOfDay();
     }
 
     /**
@@ -363,7 +363,7 @@ class Plastic extends DateTime
      */
     public function startOfYear(): static
     {
-        return self::parse($this)->modify('first day of january this year')->startOfDay();
+        return (clone $this)->modify('first day of january this year')->startOfDay();
     }
 
     /**
@@ -374,7 +374,7 @@ class Plastic extends DateTime
      */
     public function endOfYear(): static
     {
-        return self::parse($this)->modify('last day of december this year')->endOfDay();
+        return (clone $this)->modify('last day of december this year')->endOfDay();
     }
 
     /**
